@@ -77,7 +77,7 @@ scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassLis
 * serializer: api版本化对象的序列化编解码实现（json\/yaml\/protobuf）
 * types.go: \(TypeMeta\/Unknown\/VersionedObjects\) the types provided in this file are not versioned and are intended to be safe to use from within all versions of every API object
 * scheme.go: 对象类型注册中心，gvkToType\(gvk 到对象go类型的映射\)， typeToGVK\(go对象类型到gvk列表的映射\)，unversionedTypes， unverionedKinds\(公共对象类型到go对象类型映射\)，versionPriority\(apigroup的版本优先级映射\)，fieldLabelConversionFuncs\(gvk到资源字段convert到内部版本是的转化方法映射\)，defaulterFuncs, converter\(存储所有注册的convertion方法\)
-* interfaces.go: GroupVersioner, Encoder, Decoder, Serializer, Codec\( Serializer \), ParameterCodec\(序列化编解码url.Values和API对象\)
+* interfaces.go: GroupVersioner, Encoder, Decoder, Serializer（序列化编解码）, Codec\( Serializer \), ParameterCodec\(序列化编解码url.Values和API对象\)，NegotiatedSerializer（NegotiatedSerializer is an interface used for obtaining encoders, decoders, and serializers for multiple supported media types），Object（返回一个no-op ObjectKindAccessor）, Unstructured\(Unstructured objects store values as map\[string\]interface{}, with only values that can be serialized to JSON allowed\)，ObjectCreater（实例化一个api对象by gvk的接口），ResourceVersioner（设置或返回资源版本信息的接口），SelfLinker（设置或返回API对象SelfLink字段的接口），ObjectTyper（包含提取对象中gvk信息方法的接口），ObjectDefaulter（为对象设置默认值的接口），ObjectConvertor（转换一个对象到不同版本的接口）
 
 ### -apiextensions-apiserver:
 
