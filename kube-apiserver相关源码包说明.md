@@ -6,5 +6,19 @@
 
 ## k8s.io
 
+-api:
 
+-apiextensions-apiserver:
+
+-apimachinery:
+
+-apiserver:
+
+-client-go:
+
+-kube-aggregator:
+
+-kube-openapi:
+
+-metrics:
 
