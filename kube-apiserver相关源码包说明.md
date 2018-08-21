@@ -28,6 +28,21 @@
 
 -core: ""\/v1
 
+```go
+scheme.AddKnownTypes(SchemeGroupVersion,   &Pod{},   &PodList{},   &PodStatusResult{}, 
+  &PodTemplate{},   &PodTemplateList{},   &ReplicationController{},   &ReplicationControllerList{},
+   &Service{},   &ServiceProxyOptions{},   &ServiceList{},   &Endpoints{},   &EndpointsList{},  
+ &Node{},   &NodeList{},   &NodeProxyOptions{},   &Binding{},   &Event{},   &EventList{},   &List{},  
+ &LimitRange{},   &LimitRangeList{},   &ResourceQuota{},   &ResourceQuotaList{},   &Namespace{},   &NamespaceList{},
+   &Secret{},   &SecretList{},   &ServiceAccount{},   &ServiceAccountList{},   &PersistentVolume{}, 
+  &PersistentVolumeList{},   &PersistentVolumeClaim{},   &PersistentVolumeClaimList{},   &PodAttachOptions{}, 
+  &PodLogOptions{},   &PodExecOptions{},   &PodPortForwardOptions{},   &PodProxyOptions{},  
+ &ComponentStatus{},   &ComponentStatusList{},   &SerializedReference{},   &RangeAllocation{},   
+&ConfigMap{},   &ConfigMapList{},)
+// Add common types
+scheme.AddKnownTypes(SchemeGroupVersion, &metav1.Status{})
+```
+
 -events: events.k8s.io\/v1beta1
 
 -extensions: extensions\/v1beta1
@@ -42,13 +57,13 @@
 
 -scheduling: scheduling.k8s.io\/v1alpha1, scheduling.k8s.io\/v1beta1
 
-
+```
+scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassList{},)
+```
 
 -settings:
 
 -storage:
-
-
 
 ### -apiextensions-apiserver:
 
