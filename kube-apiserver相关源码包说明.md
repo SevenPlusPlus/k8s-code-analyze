@@ -28,6 +28,8 @@
 
 -core: ""\/v1
 
+eg:
+
 ```go
 scheme.AddKnownTypes(SchemeGroupVersion,   &Pod{},   &PodList{},   &PodStatusResult{}, 
   &PodTemplate{},   &PodTemplateList{},   &ReplicationController{},   &ReplicationControllerList{},
