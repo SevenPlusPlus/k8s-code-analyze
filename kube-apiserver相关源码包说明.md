@@ -76,6 +76,8 @@ scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassLis
 * schema: gv, gvk, gvr, gr, gk \(group, version, kind, resource\) 类型定义, ObjectKind接口定义（这个接口用于序列化时设置Schema的gvk信息到反序列化的API版本对象中）
 * serializer: api版本化对象的序列化编解码实现（json\/yaml\/protobuf）
 * types.go: \(TypeMeta\/Unknown\/VersionedObjects\) the types provided in this file are not versioned and are intended to be safe to use from within all versions of every API object
+* scheme.go: 对象类型注册中心，gvkToType\(gvk 到对象go类型的映射\)， typeToGVK\(go对象类型到gvk列表的映射\)，unversionedTypes， unverionedKinds\(公共对象类型到go对象类型映射\)，versionPriority\(apigroup的版本优先级映射\)，fieldLabelConversionFuncs\(gvk到资源字段convert到内部版本是的转化方法映射\)，defaulterFuncs, converter\(存储所有注册的convertion方法\)
+* interfaces.go: GroupVersioner, Encoder, Decoder, Serializer, Codec\( Serializer \), ParameterCodec\(序列化编解码url.Values和API对象\)
 
 ### -apiextensions-apiserver:
 
