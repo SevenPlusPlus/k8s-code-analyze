@@ -63,9 +63,9 @@ scheme.AddKnownTypes(SchemeGroupVersion, &metav1.Status{})
 scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassList{},)
 ```
 
--settings:
+-settings: settings.k8s.io\/v1alpha1
 
--storage:
+-storage: storage.k8s.io\/v1, storage.k8s.io\/v1alpha1, storage.k8s.io\/v1beta1
 
 ### -apiextensions-apiserver:
 
