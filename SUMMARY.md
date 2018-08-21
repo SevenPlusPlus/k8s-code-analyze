@@ -4,6 +4,6 @@
 * [go预备知识](prepare.md)
     * [ETCD clientv3](etcd-clientv3.md)
     * [go-restful](go-restful.md)
-    * cobra.Command
+    * [cobra.Command](cobracommand.md)
 * [kube-apiserver组件源码分析](kube-apiserver组件源码分析.md)
 
