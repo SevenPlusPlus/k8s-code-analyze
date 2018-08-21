@@ -67,9 +67,13 @@ scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassLis
 
 -storage: storage.k8s.io\/v1, storage.k8s.io\/v1alpha1, storage.k8s.io\/v1beta1
 
-### -apiextensions-apiserver:
+### -apimachinery: k8s API对象的typing, encoding, decoding, and conversion相关
 
--apimachinery:
+官方文档中关于该包的作用的描述：This library is a shared dependency for servers and clients to work with Kubernetes API infrastructure without direct type dependencies.  Its first consumers are \`k8s.io\/kubernetes\`, \`k8s.io\/client-go\`, and \`k8s.io\/apiserver\`.
+
+
+
+### -apiextensions-apiserver:
 
 -apiserver:
 
