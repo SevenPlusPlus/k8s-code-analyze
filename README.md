@@ -1,3 +1,4 @@
-# My Awesome Book
+# Kubernetes源码详解
 
-This file file serves as your book's preface, a great place to describe your book's content and ideas.
+为了深入了解k8s底层技术设计实现细节，为以后基于k8s的二次开发和运维过程中疑难故障排查打基础，故本书基于 Kubernetes 最新版1.13对源码进行分析整理，希望可以对K8s管中窥豹，有所增益。
+
