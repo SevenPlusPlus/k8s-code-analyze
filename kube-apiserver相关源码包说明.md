@@ -98,6 +98,12 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 -fields: implements a simple field system, parsing and matching selectors with sets of fields.
 
+-conversion: provides go object versioning.
+
+-api:
+
+-apis:
+
 ### -apiextensions-apiserver:
 
 -apiserver:
