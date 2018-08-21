@@ -73,7 +73,8 @@ scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassLis
 
 -runtime：
 
-* schema: 
+* schema: gv, gvk, gvr, gr, gk \(group, version, kind, resource\) 类型定义, ObjectKind接口定义（这个接口用于序列化时设置Schema的gvk信息到反序列化的API版本对象中）
+* serializer: 
 
 ### -apiextensions-apiserver:
 
