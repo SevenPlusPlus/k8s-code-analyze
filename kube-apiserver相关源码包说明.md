@@ -114,7 +114,9 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 -plugin\/pkg\/audit: implementations for pkg\/audit\/AuditBackend interface, eg:log\/fake\/buffered\/truncate\/webhook
 
+-plugin\/pkg\/authenticator: implementations for pkg\/auth\/authenticator interfaces, eg:password\/request\/token
 
+-plugin\/pkg\/authorizer: 
 
 ### -apiextensions-apiserver:
 
