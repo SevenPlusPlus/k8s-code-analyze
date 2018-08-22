@@ -57,5 +57,7 @@ return ""
 }
 
 ```
+运行结果为：
+![run result](/assets/context-eg.png)
 
 ### Context定义
