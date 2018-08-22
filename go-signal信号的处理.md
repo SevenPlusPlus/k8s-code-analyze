@@ -65,7 +65,9 @@ func sysSignalHandleDemo() {
          sigs = append(sigs, sig)
       }
       signal.Notify(c)
+      // Block until a signal is received. 
       sig := <-c
+      //处理接收到的信号
       err := ss.handle(sig, nil)
       if err != nil {
          fmt.Printf("unknown signal received: %v\n", sig)
@@ -93,5 +95,5 @@ $&gt; kill 25271
 
 $&gt; signal
 
-handle signal: interrupt 
+handle signal: interrupt
 
