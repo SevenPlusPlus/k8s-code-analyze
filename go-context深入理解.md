@@ -84,6 +84,7 @@ Value(key interface{}) interface{}
 4. Value方法获取该Context上绑定的值，是一个键值对，所以要通过一个Key才可以获取对应的值，这个值一般是线程安全的。
 ### Context的实现方法
 Context 虽然是个接口，但是并不需要使用方实现，golang内置的context 包，已经帮我们实现了2个方法，一般在代码中，开始上下文的时候都是以这两个作为最顶层的parent context，然后再衍生出子context。这些 Context 对象形成一棵树：当一个 Context 对象被取消时，继承自它的所有 Context 都会被取消。两个实现如下：  
+
 ```
 var (
 
