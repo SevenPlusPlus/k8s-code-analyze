@@ -12,111 +12,111 @@ signal.Notify\(c, syscall.SIGINT, syscall.SIGUSR1, syscall.SIGUSR2\)
 
 下面是一个signal处理实例：
 
-package main
+`package main`
 
-import "fmt"
+`import "fmt"`
 
-import "time"
+`import "time"`
 
-import "os"
+`import "os"`
 
-import "os\/signal"
+`import "os/signal"`
 
-import "syscall"
+`import "syscall"`
 
-type signalHandler func\(s os.Signal, arg interface{}\)
+`type signalHandler func(s os.Signal, arg interface{})`
 
-type signalSet struct {
+`type signalSet struct {`
 
- m map\[os.Signal\]signalHandler
+`m map[os.Signal]signalHandler`
 
-}
+`}`
 
-func signalSetNew\(\)\(\*signalSet\){
+`func signalSetNew()(*signalSet){`
 
- ss := new\(signalSet\)
+`ss := new(signalSet)`
 
- ss.m = make\(map\[os.Signal\]signalHandler\)
+`ss.m = make(map[os.Signal]signalHandler)`
 
- return ss
+`return ss`
 
-}
+`}`
 
-func \(set \*signalSet\) register\(s os.Signal, handler signalHandler\) {
+`func (set *signalSet) register(s os.Signal, handler signalHandler) {`
 
- if \_, found := set.m\[s\]; !found {
+`if _, found := set.m[s]; !found {`
 
- set.m\[s\] = handler
+`set.m[s] = handler`
 
- }
+`}`
 
-}
+`}`
 
-func \(set \*signalSet\) handle\(sig os.Signal, arg interface{}\)\(err error\) {
+`func (set *signalSet) handle(sig os.Signal, arg interface{})(err error) {`
 
- if \_, found := set.m\[sig\]; found {
+`if _, found := set.m[sig]; found {`
 
- set.m\[sig\]\(sig, arg\)
+`set.m[sig](sig, arg)`
 
- return nil
+`return nil`
 
- } else {
+`} else {`
 
- return fmt.Errorf\("No handler available for signal %v", sig\)
+`return fmt.Errorf("No handler available for signal %v", sig)`
 
- }
+`}`
 
- panic\("won't reach here"\)
+`panic("won't reach here")`
 
-}
+`}`
 
-func main\(\) {
+`func main() {`
 
- go sysSignalHandleDemo\(\)
+`go sysSignalHandleDemo()`
 
- time.Sleep\(time.Hour\) \/\/ make the main goroutine wait!
+`time.Sleep(time.Hour) // make the main goroutine wait!`
 
-}
+`}`
 
-func sysSignalHandleDemo\(\) {
+`func sysSignalHandleDemo() {`
 
- ss := signalSetNew\(\)
+`ss := signalSetNew()`
 
- handler := func\(s os.Signal, arg interface{}\) {
+`handler := func(s os.Signal, arg interface{}) {`
 
- fmt.Printf\("handle signal: %v\n", s\)
+`fmt.Printf("handle signal: %v\n", s)`
 
- }
+`}`
 
- ss.register\(syscall.SIGINT, handler\)
+`ss.register(syscall.SIGINT, handler)`
 
- for {
+`for {`
 
- c := make\(chan os.Signal\)
+`c := make(chan os.Signal)`
 
- var sigs \[\]os.Signal
+`var sigs []os.Signal`
 
- for sig := range ss.m {
+`for sig := range ss.m {`
 
- sigs = append\(sigs, sig\)
+`sigs = append(sigs, sig)`
 
- }
+`}`
 
- signal.Notify\(c\)
+`signal.Notify(c)`
 
- sig := &lt;-c
+`sig := <-c`
 
- err := ss.handle\(sig, nil\)
+`err := ss.handle(sig, nil)`
 
- if err != nil {
+`if err != nil {`
 
- fmt.Printf\("unknown signal received: %v\n", sig\)
+`fmt.Printf("unknown signal received: %v\n", sig)`
 
- os.Exit\(1\)
+`os.Exit(1)`
 
- }
+`}`
 
- }
+`}`
 
-}
+`}`
 
