@@ -124,7 +124,7 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 ----apis:
 
-----audit:  
+----audit:
 
 ----authentication:
 
@@ -144,11 +144,11 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 ### -apiextensions-apiserver:
 
--client-go:
+### -client-go:
 
--kube-aggregator:
+### -kube-aggregator:
 
--kube-openapi:
+### -kube-openapi:
 
--metrics:
+### -metrics:
 
