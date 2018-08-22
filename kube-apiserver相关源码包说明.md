@@ -100,7 +100,11 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 -conversion: provides go object versioning.
 
--api: meta\(提供从对象获取API元数据的方法\)，error\(api字段验证的错误类型定义\)
+-api: 
+
+----meta：提供从对象获取API元数据的方法
+
+----erro：api字段验证的错误类型定义
 
 -apis:
 
