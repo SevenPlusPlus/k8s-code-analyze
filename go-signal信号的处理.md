@@ -12,111 +12,145 @@ signal.Notify\(c, syscall.SIGINT, syscall.SIGUSR1, syscall.SIGUSR2\)
 
 下面是一个signal处理实例：
 
-`package main`
+**package **main
 
-`import "fmt"`
 
-`import "time"`
 
-`import "os"`
+**import **"fmt"
 
-`import "os/signal"`
+**import **"time"
 
-`import "syscall"`
+**import **"os"
 
-`type signalHandler func(s os.Signal, arg interface{})`
+**import **"os\/signal"
 
-`type signalSet struct {`
+**import **"syscall"
 
-`m map[os.Signal]signalHandler`
 
-`}`
 
-`func signalSetNew()(*signalSet){`
+**type **signalHandler **func**\(s os.Signal, arg **interface**{}\) \/\/信号处理句柄
 
-`ss := new(signalSet)`
 
-`ss.m = make(map[os.Signal]signalHandler)`
 
-`return ss`
+**type **signalSet **struct **{
 
-`}`
+   m **map**\[os.Signal\]signalHandler
 
-`func (set *signalSet) register(s os.Signal, handler signalHandler) {`
+}
 
-`if _, found := set.m[s]; !found {`
 
-`set.m[s] = handler`
 
-`}`
+**func **signalSetNew\(\)\(\*signalSet\){
 
-`}`
+   ss := new\(signalSet\)
 
-`func (set *signalSet) handle(sig os.Signal, arg interface{})(err error) {`
+   ss.m = make\(**map**\[os.Signal\]signalHandler\)
 
-`if _, found := set.m[sig]; found {`
+   **return **ss
 
-`set.m[sig](sig, arg)`
+}
 
-`return nil`
 
-`} else {`
 
-`return fmt.Errorf("No handler available for signal %v", sig)`
+**func **\(set \*signalSet\) register\(s os.Signal, handler signalHandler\) {
 
-`}`
+   **if **\_, found := set.m\[s\]; !found {
 
-`panic("won't reach here")`
+      set.m\[s\] =  handler
 
-`}`
+   }
 
-`func main() {`
+}
 
-`go sysSignalHandleDemo()`
 
-`time.Sleep(time.Hour) // make the main goroutine wait!`
 
-`}`
+**func **\(set \*signalSet\) handle\(sig os.Signal, arg **interface**{}\)\(err error\) {
 
-`func sysSignalHandleDemo() {`
+   **if **\_, found := set.m\[sig\]; found {
 
-`ss := signalSetNew()`
+      set.m\[sig\]\(sig, arg\)
 
-`handler := func(s os.Signal, arg interface{}) {`
+      **return **nil
 
-`fmt.Printf("handle signal: %v\n", s)`
+   } **else **{
 
-`}`
+      **return **fmt.Errorf\("No handler available for signal %v", sig\)
 
-`ss.register(syscall.SIGINT, handler)`
+   }
 
-`for {`
 
-`c := make(chan os.Signal)`
 
-`var sigs []os.Signal`
+   panic\("won't reach here"\)
 
-`for sig := range ss.m {`
+}
 
-`sigs = append(sigs, sig)`
 
-`}`
 
-`signal.Notify(c)`
+**func **main\(\) {
 
-`sig := <-c`
+   **go **sysSignalHandleDemo\(\)
 
-`err := ss.handle(sig, nil)`
+   time.Sleep\(time._Hour_\) \/\/ make the main goroutine wait!
 
-`if err != nil {`
+}
 
-`fmt.Printf("unknown signal received: %v\n", sig)`
 
-`os.Exit(1)`
 
-`}`
+**func **sysSignalHandleDemo\(\) {
 
-`}`
+   ss := signalSetNew\(\)
 
-`}`
+   handler := **func**\(s os.Signal, arg **interface**{}\) {
+
+      fmt.Printf\("handle signal: %v\n", s\)
+
+   }
+
+
+
+   ss.register\(syscall._SIGINT_, handler\)
+
+
+
+   **for **{
+
+      c := make\(**chan **os.Signal\)
+
+      **var **sigs \[\]os.Signal
+
+      **for **sig := **range **ss.m {
+
+         sigs = append\(sigs, sig\)
+
+      }
+
+      signal.Notify\(c\)
+
+      sig := &lt;-c
+
+
+
+      err := ss.handle\(sig, nil\)
+
+      **if **err != nil {
+
+         fmt.Printf\("unknown signal received: %v\n", sig\)
+
+         os.Exit\(1\)
+
+      }
+
+   }
+
+}
+
+```
+
+```
+
+
+
+
+
+
 
