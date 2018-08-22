@@ -106,7 +106,9 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 
 ----erro：api字段验证的错误类型定义
 
--apis:
+-apis: unstructured\/unstructured\_list, 元数据获取相关接口   Object\/ObjectMetaAccessor\/ListMetaAccessor\/Common\/ListInterface\/Type,元数据相关类型TypeMeta\/ListMeta\/ObjectMeta\/OwnerReference\/ListOptions\/ExportOptions\/GetOptions\/DeleteOptions\/CreateOptions\/Status
+
+-watch: contains a generic watchable interface
 
 ### -apiextensions-apiserver:
 
