@@ -36,4 +36,15 @@ func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
  }
 }
 ```
-根据后端存储类型创建对应的后端存储健康检查方法实现
+根据后端存储类型创建对应的后端存储健康检查方法实现, 传入后端存储配置Config，返回后端存储健康检查方法实现func()error, 关键实现代码为：
+```
+func CreateHealthCheck(c storagebackend.Config) (func() error, error) {
+ switch c.Type {
+ case storagebackend.StorageTypeETCD2:
+ return newETCD2HealthCheck(c)
+ case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
+ return newETCD3HealthCheck(c)
+ default:
+ return nil, fmt.Errorf("unknown storage type: %s", c.Type)
+ }}
+```
