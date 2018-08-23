@@ -23,8 +23,7 @@ type Config struct {
 }
 ```
 ###存储后端创建工厂方法实现(storagebackend/factory/)
-根据后端存储配置类型调用对应的存储接口实现构建方法，如newETCD2Storage/newETCD3Storage
-实现代码如下:
+根据后端存储配置类型调用对应的存储接口实现构建方法，传入参数为后端存储配置Config，返回存储接口对象storage.Interface, 实现代码如下:
 ```
 func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
  switch c.Type {
@@ -37,3 +36,4 @@ func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
  }
 }
 ```
+根据后端存储类型创建对应的后端存储健康检查方法实现
