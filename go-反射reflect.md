@@ -310,8 +310,94 @@ settability of pointer: true
 
 new value of pointer: 77
 ```
+**说明**
+
+* 需要传入的参数是* float64这个指针，然后可以通过pointer.Elem()去获取所指向的Value，注意一定要是指针。
+* 如果传入的参数不是指针，而是变量，那么 通过Elem获取原始值对应的对象则直接panic 通过CanSet方法查询是否可以设置返回false
+* newValue.CantSet()表示是否可以重新设置其值，如果输出的是true则可修改，否则不能修改，修改完之后再进行打印发现真的已经修改了。
+* reflect.Value.Elem() 表示获取原始值对应的反射对象，只有原始对象才能修改，当前反射对象是不能修改的
+* 也就是说如果要修改反射类型对象，其值必须是“addressable”【对应的要传入的是指针，同时要通过Elem方法获取原始值对应的反射对象】
+* struct 或者 struct 的嵌套都是一样的判断处理方式
+#####通过reflect.ValueOf来进行方法的调用
+这算是一个高级用法了，前面我们只说到对类型、变量的几种反射的用法，包括如何获取其值、其类型、如果重新设置新值。但是在工程应用中，另外一个常用并且属于高级的用法，就是通过reflect来进行方法【函数】的调用。比如我们要做框架工程的时候，需要可以随意扩展方法，或者说用户可以自定义方法，那么我们通过什么手段来扩展让用户能够自定义呢？关键点在于用户的自定义方法是未可知的，因此我们可以通过reflect来搞定
+
+示例如下：
+```
+package main
+
+import (
+
+ "fmt"
+
+ "reflect"
+
+)
+
+type User struct {
+
+ Id int
+
+ Name string
+
+ Age int
+
+}
+
+func (u User) ReflectCallFuncHasArgs(name string, age int) {
+
+ fmt.Println("ReflectCallFuncHasArgs name: ", name, ", age:", age, "and origal User.Name:", u.Name)
+
+}
+
+func (u User) ReflectCallFuncNoArgs() {
+
+ fmt.Println("ReflectCallFuncNoArgs")
+
+}
+
+// 如何通过反射来进行方法的调用？
+
+// 本来可以用u.ReflectCallFuncXXX直接调用的，但是如果要通过反射，那么首先要将方法注册，也就是MethodByName，然后通过反射调动mv.Call
+
+func main() {
+
+ user := User{1, "Allen.Wu", 25}
 
 
+
+ // 1. 要通过反射来调用起对应的方法，必须要先通过reflect.ValueOf(interface)来获取到reflect.Value，得到“反射类型对象”后才能做下一步处理
+
+ getValue := reflect.ValueOf(user)
+
+ // 一定要指定参数为正确的方法名
+
+ // 2. 先看看带有参数的调用方法
+
+ methodValue := getValue.MethodByName("ReflectCallFuncHasArgs")
+
+ args := []reflect.Value{reflect.ValueOf("wudebao"), reflect.ValueOf(30)}
+
+ methodValue.Call(args)
+
+ // 一定要指定参数为正确的方法名
+
+ // 3. 再看看无参数的调用方法
+
+ methodValue = getValue.MethodByName("ReflectCallFuncNoArgs")
+
+ args = make([]reflect.Value, 0)
+
+ methodValue.Call(args)
+
+}
+
+运行结果：
+
+ReflectCallFuncHasArgs name: wudebao , age: 30 and origal User.Name: Allen.Wu
+
+ReflectCallFuncNoArgs
+
+```
 
 
 
