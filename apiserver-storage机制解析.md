@@ -141,3 +141,19 @@ type store struct {
  leaseManager *leaseManager
 }
 ```
+store对象实现了storage.Interface接口，首先解析一下存储接口中Get方法的实现过程,根据对象key从ETCD存储中获取并解析得到API对象实例：
+```
+func (s *store) Get(ctx context.Context, key string, resourceVersion string, out runtime.Object, ignoreNotFound bool) error {
+ key = path.Join(s.pathPrefix, key)
+ getResp, err := s.client.KV.Get(ctx, key, s.getOps...)
+ if len(getResp.Kvs) == 0 {
+ if ignoreNotFound {
+ return runtime.SetZeroValue(out)
+ }
+ return storage.NewKeyNotFoundError(key, 0)
+ }
+ kv := getResp.Kvs[0] data, _, err := s.transformer.TransformFromStorage(kv.Value, authenticatedDataString(key)) return decode(s.codec, s.versioner, data, out, kv.ModRevision)
+}
+```
+
+
