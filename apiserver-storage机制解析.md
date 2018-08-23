@@ -61,6 +61,7 @@ func CreateHealthCheck(c storagebackend.Config) (func() error, error) {
  return newETCD3HealthCheck(c)
  default:
  return nil, fmt.Errorf("unknown storage type: %s", c.Type)
- }}
+ }
+}
 ```
 
