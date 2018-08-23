@@ -52,4 +52,94 @@ func TypeOf(i interface{}) Type {...}
 
 翻译一下：TypeOf用来动态获取输入参数接口中的值的类型，如果接口为空则返回nil
 ```
+reflect.TypeOf()是获取pair中的type，reflect.ValueOf()获取pair中的value，示例如下： 
+```
+package main
+
+import (
+
+ "fmt"
+
+ "reflect"
+
+)
+
+func main() {
+
+ var num float64 = 1.2345
+
+ fmt.Println("type: ", reflect.TypeOf(num))
+
+ fmt.Println("value: ", reflect.ValueOf(num))
+
+}
+
+运行结果:
+
+type: float64
+
+value: 1.2345
+```
+**说明**
+
+1. reflect.TypeOf： 直接给到了我们想要的type类型，如float64、int、各种pointer、struct 等等真实的类型
+2. reflect.ValueOf：直接给到了我们想要的具体的值，如1.2345这个具体数值，或者类似&{1 "Allen.Wu" 25} 这样的结构体struct的值
+3. 也就是说明反射可以将“接口类型变量”转换为“反射类型对象”，反射类型指的是reflect.Type和reflect.Value这两种
+
+####从relfect.Value中获取接口interface的信息
+当执行reflect.ValueOf(interface)之后，就得到了一个类型为”relfect.Value”变量，可以通过它本身的Interface()方法获得接口变量的真实内容，然后可以通过类型判断进行转换，转换为原有真实类型。不过，我们可能是已知原有类型，也有可能是未知原有类型，因此，下面分两种情况进行说明。
+
+**已知原有类型【进行“强制转换”】**
+
+已知类型后转换为其对应的类型的做法如下，直接通过Interface方法然后强制转换，如下： 
+```
+realValue := value.Interface().(已知的类型)
+```
+示例如下:
+```
+package main
+
+import (
+
+ "fmt"
+
+ "reflect"
+
+)
+
+func main() {
+
+ var num float64 = 1.2345
+
+ pointer := reflect.ValueOf(&num)
+
+ value := reflect.ValueOf(num)
+
+ // 可以理解为“强制转换”，但是需要注意的时候，转换的时候，如果转换的类型不完全符合，则直接panic
+
+ // Golang 对类型要求非常严格，类型一定要完全符合
+
+ // 如下两个，一个是*float64，一个是float64，如果弄混，则会panic
+
+ convertPointer := pointer.Interface().(*float64)
+
+ convertValue := value.Interface().(float64)
+
+ fmt.Println(convertPointer)
+
+ fmt.Println(convertValue)
+
+}
+
+运行结果：
+
+0xc42000e238
+
+1.2345
+```
+
+
+
+
+
 
