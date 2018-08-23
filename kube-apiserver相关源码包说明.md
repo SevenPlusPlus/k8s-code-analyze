@@ -9,7 +9,7 @@
 ## k8s.io: k8s API服务的注册相关
 ---
 
-### -api: 各API Group的资源类型定义及注册
+### api: 各API Group的资源类型定义及注册
 
 -admission:  admission.k8s.io\/v1beta1
 
