@@ -119,3 +119,20 @@ func newStore(c *clientv3.Client, quorumRead, pagingEnabled bool, codec runtime.
 return result
 }
 ```
+我们重点了解下store对象结构及其关键接口方法实现，store结构实现如下:
+```
+type store struct {
+ client *clientv3.Client
+ // getOpts contains additional options that should be passed
+ // to all Get() calls.
+ getOps []clientv3.OpOption
+ codec runtime.Codec
+ versioner storage.Versioner
+ transformer value.Transformer
+ pathPrefix string
+ watcher *watcher
+ pagingEnabled bool
+ leaseManager *leaseManager
+}
+
+```
