@@ -144,16 +144,33 @@ type store struct {
 store对象实现了storage.Interface接口，首先解析一下存储接口中Get方法的实现过程,根据对象key从ETCD存储中获取并解析得到API对象实例：
 ```
 func (s *store) Get(ctx context.Context, key string, resourceVersion string, out runtime.Object, ignoreNotFound bool) error {
+ //得到对象存储path
  key = path.Join(s.pathPrefix, key)
+ //调用etcd client获取对象path，获取存储数据返回包
  getResp, err := s.client.KV.Get(ctx, key, s.getOps...)
+ //对象键值对不存在情况的处理
  if len(getResp.Kvs) == 0 {
  if ignoreNotFound {
  return runtime.SetZeroValue(out)
  }
  return storage.NewKeyNotFoundError(key, 0)
  }
- kv := getResp.Kvs[0] data, _, err := s.transformer.TransformFromStorage(kv.Value, authenticatedDataString(key)) return decode(s.codec, s.versioner, data, out, kv.ModRevision)
+ //获取对象键值对
+ kv := getResp.Kvs[0] 
+ //对象值解码前数据转换
+ data, _, err := s.transformer.TransformFromStorage(kv.Value, authenticatedDataString(key)) 
+ //对象值解码到输出API对象中
+ return decode(s.codec, s.versioner, data, out, kv.ModRevision)
 }
+
+func decode(codec runtime.Codec, versioner storage.Versioner, value []byte, objPtr runtime.Object, rev int64) error {
+ if _, err := conversion.EnforcePtr(objPtr); err != nil { panic("unable to convert output object to pointer") }
+ _, _, err := codec.Decode(value, nil, objPtr)
+ // being unable to set the version does not prevent the object from being extracted
+ versioner.UpdateObject(objPtr, uint64(rev))
+ return nil
+}
+
 ```
 
 
