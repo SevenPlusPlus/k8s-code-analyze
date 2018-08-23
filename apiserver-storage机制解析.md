@@ -22,7 +22,33 @@ type Config struct {
  Transformer value.Transformer
 }
 ```
-###存储后端创建工厂方法实现(storagebackend/factory/)
+####存储后端创建工厂方法实现(storagebackend/factory/)
+根据后端存储类型创建对应的后端存储健康检查方法实现, 传入后端存储配置Config，返回后端存储健康检查方法实现func()error, 关键实现代码为：
+
+```
+
+func CreateHealthCheck(c storagebackend.Config) (func() error, error) {
+
+ switch c.Type {
+
+ case storagebackend.StorageTypeETCD2:
+
+ return newETCD2HealthCheck(c)
+
+ case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
+
+ return newETCD3HealthCheck(c)
+
+ default:
+
+ return nil, fmt.Errorf("unknown storage type: %s", c.Type)
+
+ }
+
+}
+
+```
+
 根据后端存储配置类型调用对应的存储接口实现构建方法，传入参数为后端存储配置Config，返回存储接口对象storage.Interface, 实现代码如下:
 ```
 func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
@@ -79,18 +105,15 @@ func newETCD3Client(c storagebackend.Config) (*clientv3.Client, error) {
  return client, err
 }
 ```
-
-根据后端存储类型创建对应的后端存储健康检查方法实现, 传入后端存储配置Config，返回后端存储健康检查方法实现func()error, 关键实现代码为：
+下一节继续深入分析ETCD3存储接口对象的相关实现
+###ETCD3 存储接口对象实现(etcd3/)
+接上文etcd3.NewWithNoQuorumRead来创建基于etcd3的后端存储接口实现，本质上为构建了一个etcd3.store对象，而该对象实现了storage.Interface存储接口，实现代码如下：
 ```
-func CreateHealthCheck(c storagebackend.Config) (func() error, error) {
- switch c.Type {
- case storagebackend.StorageTypeETCD2:
- return newETCD2HealthCheck(c)
- case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
- return newETCD3HealthCheck(c)
- default:
- return nil, fmt.Errorf("unknown storage type: %s", c.Type)
- }
+func NewWithNoQuorumRead(c *clientv3.Client, codec runtime.Codec, prefix string, transformer value.Transformer, pagingEnabled bool) storage.Interface {
+ return newStore(c, false, pagingEnabled, codec, prefix, transformer)
+}
+func newStore(c *clientv3.Client, quorumRead, pagingEnabled bool, codec runtime.Codec, prefix string, transformer value.Transformer) *store {
+ versioner := etcd.APIObjectVersioner{}
+ result := &store{ client: c, codec: codec, versioner: versioner, transformer: transformer, pagingEnabled: pagingEnabled, pathPrefix: path.Join("/", prefix), watcher: newWatcher(c, codec, versioner, transformer), leaseManager: newDefaultLeaseManager(c), } return result
 }
 ```
-
