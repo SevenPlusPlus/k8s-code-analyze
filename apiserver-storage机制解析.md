@@ -122,17 +122,22 @@ return result
 我们重点了解下store对象结构及其关键接口方法实现，store结构实现如下:
 ```
 type store struct {
+ //etcd3访问客户端
  client *clientv3.Client
  // getOpts contains additional options that should be passed
  // to all Get() calls.
  getOps []clientv3.OpOption
+ //数据编解码接口对象
  codec runtime.Codec
+ //获取或设置对象元数据字段的接口对象
  versioner storage.Versioner
  transformer value.Transformer
+ //前缀路径
  pathPrefix string
+ //用于创建watch接口对象(watchChan)
  watcher *watcher
  pagingEnabled bool
+ //管理etcd请求的leases
  leaseManager *leaseManager
 }
-
 ```
