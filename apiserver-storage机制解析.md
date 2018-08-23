@@ -39,8 +39,16 @@ func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
 我们接着以ETCD3后端存储创建实现为例分析newETCD3Storage方法，传入后端存储配置信息，返回创建的后端存储接口对象，以及存储对象销毁方法，关键实现代码如下：
 ```
 func newETCD3Storage(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
-  client, err := newETCD3Client(c)
- ctx, cancel := context.WithCancel(context.Background()) etcd3.StartCompactor(ctx, client, c.CompactionInterval) destroyFunc := func() { cancel() client.Close() } transformer := c.Transformer if transformer == nil { transformer = value.IdentityTransformer } if c.Quorum { return etcd3.New(client, c.Codec, c.Prefix, transformer, c.Paging), destroyFunc, nil } return etcd3.NewWithNoQuorumRead(client, c.Codec, c.Prefix, transformer, c.Paging), destroyFunc, nil}
+ client, err := newETCD3Client(c)
+ ctx, cancel := context.WithCancel(context.Background())
+ destroyFunc := func() {
+ cancel()
+ client.Close()
+ }
+ transformer := c.Transformer
+ return etcd3.NewWithNoQuorumRead(client, c.Codec, c.Prefix, transformer, c.Paging), destroyFunc, nil
+}
+
 ```
 
 根据后端存储类型创建对应的后端存储健康检查方法实现, 传入后端存储配置Config，返回后端存储健康检查方法实现func()error, 关键实现代码为：
