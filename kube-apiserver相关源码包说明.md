@@ -1,10 +1,13 @@
 ## cmd\/kube-apiserver: kube-apiserver启动命令相关
+---
 
 ### -apiserver.go:启动命令入口
 
 ### -app:启动命令及其执行参数选项
 
+
 ## k8s.io: k8s API服务的注册相关
+---
 
 ### -api: 各API Group的资源类型定义及注册
 
@@ -68,6 +71,7 @@ scheme.AddKnownTypes(SchemeGroupVersion,   &PriorityClass{},   &PriorityClassLis
 -storage: storage.k8s.io\/v1, storage.k8s.io\/v1alpha1, storage.k8s.io\/v1beta1
 
 ### -apimachinery: k8s API对象的typing, encoding, decoding, and conversion相关
+---
 
 官方文档中关于该包的作用的描述：This library is a shared dependency for servers and clients to work with Kubernetes API infrastructure without direct type dependencies.  Its first consumers are \`k8s.io\/kubernetes\`, \`k8s.io\/client-go\`, and \`k8s.io\/apiserver\`.
 
@@ -111,6 +115,7 @@ runtime包主要包含了一些处理API对象辅助方法，主要有以下几�
 -watch: contains a generic watchable interface
 
 ### -apiserver:
+---
 
 -plugin\/pkg\/audit: implementations for pkg\/audit\/AuditBackend interface, eg:log\/fake\/buffered\/truncate\/webhook
 
