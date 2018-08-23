@@ -398,6 +398,56 @@ ReflectCallFuncHasArgs name: wudebao , age: 30 and origal User.Name: Allen.Wu
 ReflectCallFuncNoArgs
 
 ```
+**说明**
+
+* 要通过反射来调用起对应的方法，必须要先通过reflect.ValueOf(interface)来获取到reflect.Value，得到“反射类型对象”后才能做下一步处理
+* reflect.Value.MethodByName这.MethodByName，需要指定准确真实的方法名字，如果错误将直接panic，MethodByName返回一个函数值对应的reflect.Value方法的名字。
+* []reflect.Value，这个是最终需要调用的方法的参数，可以没有或者一个或者多个，根据实际参数来定。
+* reflect.Value的 Call 这个方法，这个方法将最终调用真实的方法，参数务必保持一致，如果reflect.Value'Kind不是一个方法，那么将直接panic。
+* 本来可以用u.ReflectCallFuncXXX直接调用的，但是如果要通过反射，那么首先要将方法注册，也就是MethodByName，然后通过反射调用methodValue.Call
+
+#####Golang反射与Java反射区别
+Golang的反射很慢，这个和它的API设计有关。在 java 里面，我们一般使用反射都是这样来弄的。 
+```
+Field field = clazz.getField("hello");
+
+field.get(obj1);
+
+field.get(obj2);
+```
+这个取得的反射对象类型是 java.lang.reflect.Field。它是可以复用的。只要传入不同的obj，就可以取得这个obj上对应的 field。 
+
+但是Golang的反射不是这样设计的: 
+```
+type_ := reflect.TypeOf(obj)
+
+field, _ := type_.FieldByName("hello")
+```
+这里取出来的 field 对象是 reflect.StructField 类型，但是它没有办法用来取得对应对象上的值。如果要取值，得用另外一套对object，而不是type的反射 
+```
+type_ := reflect.ValueOf(obj)
+
+fieldValue := type_.FieldByName("hello")
+```
+这里取出来的 fieldValue 类型是 reflect.Value，它是一个具体的值，而不是一个可复用的反射对象了，每次反射都需要malloc这个reflect.Value结构体，并且还涉及到GC。 
+
+####总结
+
+* 反射可以大大提高程序的灵活性，使得interface{}有更大的发挥余地
+ * 反射必须结合interface才玩得转
+ * 变量的type要是concrete type的（也就是interface变量）才有反射一说
+* 反射可以将“接口类型变量”转换为“反射类型对象”
+ * 反射使用 TypeOf 和 ValueOf 函数从接口中获取目标对象信息
+* 反射可以将“反射类型对象”转换为“接口类型变量
+ * reflect.value.Interface().(已知的类型)
+ * 遍历reflect.Type的Field获取其Field
+* 反射可以修改反射类型对象，但是其值必须是“addressable”
+ * 想要利用反射修改对象状态，前提是 interface.data 是 settable,即 pointer-interface
+* 通过反射可以“动态”调用方法
+
+
+
+
 
 
 
