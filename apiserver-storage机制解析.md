@@ -164,8 +164,8 @@ func (s *store) Get(ctx context.Context, key string, resourceVersion string, out
 }
 
 func decode(codec runtime.Codec, versioner storage.Versioner, value []byte, objPtr runtime.Object, rev int64) error {
-
  if _, err := conversion.EnforcePtr(objPtr); err != nil { panic("unable to convert output object to pointer") }
+ //对象值解码
  _, _, err := codec.Decode(value, nil, objPtr)
  // being unable to set the version does not prevent the object from being extracted
  versioner.UpdateObject(objPtr, uint64(rev))
