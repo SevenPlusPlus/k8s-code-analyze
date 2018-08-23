@@ -62,6 +62,7 @@ func newETCD3Client(c storagebackend.Config) (*clientv3.Client, error) {
  CAFile: c.CAFile,
  }
  tlsConfig, err := tlsInfo.ClientConfig()
+//构建clientv3配置对象
  cfg := clientv3.Config{
  DialTimeout: dialTimeout,
  DialKeepAliveTime: keepaliveTime,
@@ -73,6 +74,7 @@ func newETCD3Client(c storagebackend.Config) (*clientv3.Client, error) {
  Endpoints: c.ServerList,
  TLS: tlsConfig,
  }
+ //创建clientv3对象
  client, err := clientv3.New(cfg)
  return client, err
 }
