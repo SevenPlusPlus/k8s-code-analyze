@@ -22,3 +22,18 @@ type Config struct {
  Transformer value.Transformer
 }
 ```
+###存储后端创建工厂方法实现(storagebackend/factory/)
+根据后端存储配置类型调用对应的存储接口实现构建方法，如newETCD2Storage/newETCD3Storage
+实现代码如下:
+```
+func Create(c storagebackend.Config) (storage.Interface, DestroyFunc, error) {
+ switch c.Type {
+ case storagebackend.StorageTypeETCD2:
+ return newETCD2Storage(c)
+ case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
+ return newETCD3Storage(c)
+ default:
+ return nil, nil, fmt.Errorf("unknown storage type: %s", c.Type)
+ }
+}
+```
