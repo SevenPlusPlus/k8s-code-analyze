@@ -114,6 +114,8 @@ func NewWithNoQuorumRead(c *clientv3.Client, codec runtime.Codec, prefix string,
 }
 func newStore(c *clientv3.Client, quorumRead, pagingEnabled bool, codec runtime.Codec, prefix string, transformer value.Transformer) *store {
  versioner := etcd.APIObjectVersioner{}
- result := &store{ client: c, codec: codec, versioner: versioner, transformer: transformer, pagingEnabled: pagingEnabled, pathPrefix: path.Join("/", prefix), watcher: newWatcher(c, codec, versioner, transformer), leaseManager: newDefaultLeaseManager(c), } return result
+ result := &store{ client: c, codec: codec, versioner: versioner, transformer: transformer, pagingEnabled: pagingEnabled, pathPrefix: path.Join("/", prefix), watcher: newWatcher(c, codec, versioner, transformer), leaseManager: newDefaultLeaseManager(c), 
+} 
+return result
 }
 ```
