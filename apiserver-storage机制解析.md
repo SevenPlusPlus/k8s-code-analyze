@@ -52,7 +52,30 @@ func newETCD3Storage(c storagebackend.Config) (storage.Interface, DestroyFunc, e
 //返回Etcd3存储接口实现
  return etcd3.NewWithNoQuorumRead(client, c.Codec, c.Prefix, transformer, c.Paging), destroyFunc, nil
 }
-
+```
+通过etcd/clientv3创建ETCD3访问客户端对象，实现代码如下：
+```
+func newETCD3Client(c storagebackend.Config) (*clientv3.Client, error) {
+ tlsInfo := transport.TLSInfo{
+ CertFile: c.CertFile,
+ KeyFile: c.KeyFile,
+ CAFile: c.CAFile,
+ }
+ tlsConfig, err := tlsInfo.ClientConfig()
+ cfg := clientv3.Config{
+ DialTimeout: dialTimeout,
+ DialKeepAliveTime: keepaliveTime,
+ DialKeepAliveTimeout: keepaliveTimeout,
+ DialOptions: []grpc.DialOption{
+ grpc.WithUnaryInterceptor(grpcprom.UnaryClientInterceptor),
+ grpc.WithStreamInterceptor(grpcprom.StreamClientInterceptor),
+ },
+ Endpoints: c.ServerList,
+ TLS: tlsConfig,
+ }
+ client, err := clientv3.New(cfg)
+ return client, err
+}
 ```
 
 根据后端存储类型创建对应的后端存储健康检查方法实现, 传入后端存储配置Config，返回后端存储健康检查方法实现func()error, 关键实现代码为：
