@@ -239,6 +239,81 @@ Age: int = 25
 
 ReflectCallFunc: func(main.User)
 ```
+**说明**
+
+通过运行结果可以得知获取未知类型的interface的具体变量及其类型的步骤为：
+* 先获取interface的reflect.Type，然后通过NumField进行遍历
+* 再通过reflect.Type的Field获取其Field
+* 最后通过Field的Interface()得到对应的value
+
+通过运行结果可以得知获取未知类型的interface的所属方法（函数）的步骤为： 
+* 先获取interface的reflect.Type，然后通过NumMethod进行遍历
+* 再分别通过reflect.Type的Method获取对应的真实的方法（函数）
+* 最后对结果取其Name和Type得知具体的方法名
+* 也就是说反射可以将“反射类型对象”再重新转换为“接口类型变量”
+* struct 或者 struct 的嵌套都是一样的判断处理方式
+
+#####通过reflect.Value设置实际变量的值
+reflect.Value是通过reflect.ValueOf(X)获得的，只有当X是指针的时候，才可以通过reflec.Value修改实际变量X的值，即：要修改反射类型的对象就一定要保证其值是“addressable”的。
+
+示例如下：
+```
+package main
+
+import (
+
+ "fmt"
+
+ "reflect"
+
+)
+
+func main() {
+
+ var num float64 = 1.2345
+
+ fmt.Println("old value of pointer:", num)
+
+ // 通过reflect.ValueOf获取num中的reflect.Value，注意，参数必须是指针才能修改其值
+
+ pointer := reflect.ValueOf(&num)
+
+ newValue := pointer.Elem()
+
+ fmt.Println("type of pointer:", newValue.Type())
+
+ fmt.Println("settability of pointer:", newValue.CanSet())
+
+ // 重新赋值
+
+ newValue.SetFloat(77)
+
+ fmt.Println("new value of pointer:", num)
+
+ ////////////////////
+
+ // 如果reflect.ValueOf的参数不是指针，会如何？
+
+ pointer = reflect.ValueOf(num)
+
+ //newValue = pointer.Elem() // 如果非指针，这里直接panic，“panic: reflect: call of reflect.Value.Elem on float64 Value”
+
+}
+
+运行结果：
+
+old value of pointer: 1.2345
+
+type of pointer: float64
+
+settability of pointer: true
+
+new value of pointer: 77
+```
+
+
+
+
 
 
 
