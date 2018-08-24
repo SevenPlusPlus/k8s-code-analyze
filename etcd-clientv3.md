@@ -164,6 +164,18 @@ type KeyValue struct {
 rangeResp, err := kv.Get(context.TODO(), "/test/", clientv3.WithPrefix())
 ```
 WithPrefix()是指查找以/test/为前缀的所有key，因此可以模拟出查找子目录的效果。
+我们知道etcd是一个有序的k-v存储，因此/test/为前缀的key总是顺序排列在一起。
+
+withPrefix实际上会转化为范围查询，它根据前缀/test/生成了一个key range，[“/test/”, “/test0”)，为什么呢？因为比/大的字符是’0’，所以以/test0作为范围的末尾，就可以扫描到所有的/test/打头的key了。
+
+在之前，我Put了一个/testxxx干扰项，因为不符合/test/前缀（注意末尾的/），所以就不会被这次Get获取到。但是，如果我查询的前缀是/test，那么/testxxx也会被扫描到，这就是etcd k-v模型导致的，编程时一定要特别注意。
+
+##### 获取Lease对象
+通过下面的代码获取Lease对象
+```
+lease := clientv3.NewLease(cli)
+```
+
 
 
 
