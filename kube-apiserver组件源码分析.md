@@ -37,116 +37,11 @@ etcd中存储的是带版本的，这也是Apiserver实现多版本转换的核�
 
 多个external version版本之间的资源进行相互转换，都是需要通过internal version进行中转。
 
-对于core Group而言，internal version的对象定义在`/kubernetes-1.5.2/pkg/api/types.go`。
-
-v1是其中一个external version，其对象定义在`/kubernetes-1.5.2/pkg/api/v1/types.go`。
-
 一个对象在internal version和external version中的定义可以一样，也可以不一样。
 
-## Apiserver启动时初始化流程
-
-1. initial.go中的初始化主要用internal version和external versions填充了Scheme，完成了 APIRegistrationManager中GroupMeta的初始化。GroupMeta的主要用于后面的初始化APIGroupVersion。
-
-2. GroupMeta包含成员其中就有Groupversion、RESTMapper。初始化groupMeta的时候会根据Scheme和externalVersions新建一个RESTMapper。
-
-3. /pkg/registry/core/rest/storage_core.go中的NewLegacyRESTStorage基于上面的Scheme和GroupMeta生成了一个APIGroupInfo。初始化时候的GroupMeta是通过type APIRegistrationManager struct的函数来获取的。
-
-4. 然后基于APIGroupInfo生成一个APIGroupVersion。
-
-5. 最后`apiGroupVersion.InstallREST(s.HandlerContainer.Container)`，完成从API资源到restful API的注册。
-
-6. 在InstallREST的过程中会用到RESTMapper生成的RESTMapping
-
-```go
-
-重要结构体:
-
-一：
-
- APIGroupVersion===>定义在pkg/apiserver/apiserver.go==>type APIGroupVersion struct
-
- 创建APIGroupVersion的地方在/pkg/genericapiserver/genericapiserver.go中的
-
- --->func (s *GenericAPIServer) newAPIGroupVersion
-
- *************************
-
- *************************
-
- -->可以从/pkg/master/master.go中的-->func (c completedConfig) New() (*Master, error)中的
-
- -->m.InstallLegacyAPI(c.Config, restOptionsFactory.NewFor, legacyRESTStorageProvider) 和
-
- m.InstallAPIs(c.Config.GenericConfig.APIResourceConfigSource, restOptionsFactory.NewFor, restStorageProviders...)
-
- 开始分析
-
-二：
-
- APIRegistrationManager===>/pkg/apimachinery/registered/registered.go==>type APIRegistrationManager struct
-
- 创建APIRegistrationManager的地方在/pkg/apimachinery/registered/registered.go中
-
-总结：
-
- 综合上面所有的初始化可以看到（APIGroupVersion、APIGroupInfo、Scheme、GroupMeta、RESTMapper、APIRegistrationManager），
-
- 其实主要用internal version和external versions填充Scheme，
-
- 用external versions去填充GroupMeta以及其成员RESTMapper。
-
- GroupMeta有啥作用呢？主要用于生成最后的APIGroupVersion。
-
-```
-
-## API资源注册为Restful API
-
-当API资源初始化完成以后，需要将这些API资源注册为restful api，用来接收用户的请求。
-
-kube-apiServer使用了go-restful这套框架，里面主要包括三种对象：
-
-- Container: 一个Container包含多个WebService
-
-- WebService: 一个WebService包含多条route
-
-- Route: 一条route包含一个method(GET、POST、DELETE等)，一条具体的path(URL)以及一个响应的handler function。
-
-API注册的入口函数有两个： m.InstallAPIs 和 m.InstallLegacyAPI。
-
-文件路径：pkg/master/master.go
-
-这两个函数分别用于注册"/api"和"/apis"的API,这里先拿InstallLegacyAPI进行介绍。
-
-这些接口都是在config.Complete().New()函数中被调用
-
-## Storage机制
-
-Apiserver针对每一类资源(pod、service、replication controller),都会与etcd建立一个连接,获取该资源的opt。
-
-所有资源都定义了restful实现。
-
-Apiserver正是通过这个opt去操作对应的资源。
-
-## Apiserver端List-Watch机制
-
-什么是watch?kubelet、kube-controller-manager、kube-scheduler需要监控各种资源(pod、service等)的变化，
-
-当这些对象发生变化时(add、delete、update)，kube-apiserver能够主动通知这些组件。这是Client端的Watch实现。
-
-Apiserver端的Watch机制是建立在etcd的Watch基础上的。
-
-etcd的watch是没有过滤功能的，而kube-apiserver增加了过滤功能。
-
-什么是过滤功能？，比如说kubelet只对调度到本节点上的pod感兴趣，也就是pod.host=node1；
-
-而kube-scheduler只对未被调度的pod感兴趣，也就是pod.host=”“。
-
-etcd只能watch到pod的add、delete、update。
-
-kube-apiserver则增加了过滤功能，将订阅方感兴趣的部分资源发给订阅方。
 
 ## 一个Restful请求需要经过的流程
 
 Authentication-->Authorization-->Admission Control
 
-![一个请求需要经过的流程](https://github.com/Kevin-fqh/learning-k8s-source-code/blob/master/images/access-control-overview.jpg)
+![一个请求需要经过的流程](/assets/access-control-overview.jpg)
