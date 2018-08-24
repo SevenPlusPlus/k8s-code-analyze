@@ -251,31 +251,37 @@ type watchChan struct {
 watchChan调用run开始对对象存储节点的watch，其启动步骤如下：
 ```
 func (wc *watchChan) run() {
+ //创建channel用于接收底层客户端watch操作结束事件
   watchClosedCh := make(chan struct{})
+ //调用底层etcd客户端开始watch节点变更事件
  go wc.startWatching(watchClosedCh)
+
  var resultChanWG sync.WaitGroup
  resultChanWG.Add(1)
- go wc.processEvent(&resultChanWG) select {
- case err := <-wc.errChan:
- if err == context.Canceled {
- break
- }
- errResult := transformErrorToEvent(err)
- if errResult != nil {
- // error result is guaranteed to be received by user before closing ResultChan.
+ //处理后端etcd存储收到的变更事件并发送结果到resultChan
+ go wc.processEvent(&resultChanWG)
  select {
- case wc.resultChan <- *errResult:
- case <-wc.ctx.Done(): // user has given up all results
- }
- }
- case <-watchClosedCh:
- case <-wc.ctx.Done(): // user cancel
+ case err := <-wc.errChan: //收到后端错误事件
+ 	if err == context.Canceled {
+ 	break
+ 	}
+ 	errResult := transformErrorToEvent(err)
+ 	if errResult != nil {
+ 	// error result is guaranteed to be received by user before closing 	ResultChan.
+ 		select {
+ 		case wc.resultChan <- *errResult:
+ 		case <-wc.ctx.Done(): // user has given up all results
+ 		}
+ 	}
+ case <-watchClosedCh: //底层客户端watch操作结束
+ case <-wc.ctx.Done(): // 用户取消操作
  }
  // We use wc.ctx to reap all goroutines. Under whatever condition, we should stop them all.
  // It's fine to double cancel.
  wc.cancel()
  // we need to wait until resultChan wouldn't be used anymore
  resultChanWG.Wait()
+ //watch结束前关闭对外发布变更的resultChan
  close(wc.resultChan)
 }
 ```
