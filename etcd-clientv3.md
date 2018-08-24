@@ -253,4 +253,81 @@ type LeaseKeepAliveResponse struct {
 
 KeepAlive和Put一样，如果在执行之前Lease就已经过期了，那么需要重新分配Lease。Etcd并没有提供API来实现原子的Put with Lease。
 
+### 一个完整的应用示例
+```
+package main
+
+import (
+	"log"
+	"time"
+
+	"golang.org/x/net/context"
+
+	"github.com/coreos/etcd/clientv3"
+)
+
+var (
+	dialTimeout    = 5 * time.Second
+	requestTimeout = 2 * time.Second
+	endpoints      = []string{"localhost:2379"}
+)
+
+func main() {
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   endpoints,
+		DialTimeout: dialTimeout,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+
+	ch := make(chan struct{})
+	go func() {
+		rch := cli.Watch(context.Background(), "", clientv3.WithPrefix())
+		for wresp := range rch {
+			for _, ev := range wresp.Events {
+				log.Printf("Watch: %s %q: %q \n", ev.Type, ev.Kv.Key, ev.Kv.Value)
+			}
+		}
+		ch <- struct{}{}
+	}()
+
+	resp, _ := cli.Grant(context.TODO(), 2)
+
+	kvs := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3",
+		"key4": "value4",
+	}
+	for k, v := range kvs {
+		cli.Put(context.TODO(), k, v, clientv3.WithLease(resp.ID))
+	}
+
+	cli.Put(context.TODO(), "key2", "value2new")
+	cli.Put(context.TODO(), "key3", "value3new", clientv3.WithIgnoreLease())
+	resp, _ = cli.Grant(context.TODO(), 4)
+	cli.Put(context.TODO(), "key4", "value4new", clientv3.WithLease(resp.ID))
+
+	select {
+	case <-ch:
+	case <-time.After(5 * time.Second):
+	}
+}
+```
+输出结果为：
+```
+2018/05/11 13:37:48 Watch: PUT "key4": "value4"
+2018/05/11 13:37:48 Watch: PUT "key1": "value1"
+2018/05/11 13:37:48 Watch: PUT "key2": "value2"
+2018/05/11 13:37:48 Watch: PUT "key3": "value3"
+2018/05/11 13:37:48 Watch: PUT "key2": "value2new"
+2018/05/11 13:37:48 Watch: PUT "key3": "value3new"
+2018/05/11 13:37:48 Watch: PUT "key4": "value4new"
+2018/05/11 13:37:50 Watch: DELETE "key1": ""
+2018/05/11 13:37:50 Watch: DELETE "key3": ""
+2018/05/11 13:37:52 Watch: DELETE "key4": ""
+```
+
 
