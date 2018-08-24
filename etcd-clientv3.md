@@ -273,6 +273,7 @@ var (
 )
 
 func main() {
+       //创建客户端
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
 		DialTimeout: dialTimeout,
@@ -283,6 +284,7 @@ func main() {
 	defer cli.Close()
 
 	ch := make(chan struct{})
+	//开启节点watch routine
 	go func() {
 		rch := cli.Watch(context.Background(), "", clientv3.WithPrefix())
 		for wresp := range rch {
@@ -292,7 +294,7 @@ func main() {
 		}
 		ch <- struct{}{}
 	}()
-
+        //创建2s的lease
 	resp, _ := cli.Grant(context.TODO(), 2)
 
 	kvs := map[string]string{
@@ -301,10 +303,11 @@ func main() {
 		"key3": "value3",
 		"key4": "value4",
 	}
+	//创建存储节点键值对
 	for k, v := range kvs {
 		cli.Put(context.TODO(), k, v, clientv3.WithLease(resp.ID))
 	}
-
+        //更新键值
 	cli.Put(context.TODO(), "key2", "value2new")
 	cli.Put(context.TODO(), "key3", "value3new", clientv3.WithIgnoreLease())
 	resp, _ = cli.Grant(context.TODO(), 4)
