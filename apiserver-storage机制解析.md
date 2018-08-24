@@ -288,22 +288,29 @@ func (wc *watchChan) run() {
 接着分析下调用底层etcd客户端真正开启节点watch的过程wc.startWatching：
 ```
 func (wc *watchChan) startWatching(watchClosedCh chan struct{}) {
+ //准备clientv3调用watch操作选项options
  opts := []clientv3.OpOption{clientv3.WithRev(wc.initialRev + 1), clientv3.WithPrevKV()}
  if wc.recursive {
  opts = append(opts, clientv3.WithPrefix())
  }
+ //调用etcd clientv3的watch方法，返回其内部的WatchChan即（<-chan WatchResponse）
  wch := wc.watcher.client.Watch(wc.ctx, wc.key, opts...)
+ //循环处理watch到的回包
  for wres := range wch {
- if wres.Err() != nil {
- err := wres.Err()
- // If there is an error on server (e.g. compaction), the channel will return it before closed. wc.sendError(err)
- return
- }
- for _, e := range wres.Events {
- wc.sendEvent(parseEvent(e))
- }
+        //收到错误回包，则发送错误事件到内部的errChan
+ 	if wres.Err() != nil {
+ 		err := wres.Err()
+ 		// If there is an error on server (e.g. compaction), the channel will return it before closed. 
+               wc.sendError(err)
+ 		return
+ 	}
+	//收到正常的变更事件包，则发送到内部的incomingEventChan以便后续processEvent routine去消费
+ 	for _, e := range wres.Events {
+ 		wc.sendEvent(parseEvent(e))
+ 	}
  }
  // When we come to this point, it's only possible that client side ends the watch. // e.g. cancel the context, close the client. // If this watch chan is broken and context isn't cancelled, other goroutines will still hang. // We should notify the main thread that this goroutine has exited.
+ //关闭watchClosedCh，通知外部routine watch操作结束
  close(watchClosedCh)
 }
 ```
