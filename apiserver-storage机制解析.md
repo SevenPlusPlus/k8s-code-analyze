@@ -175,18 +175,24 @@ func decode(codec runtime.Codec, versioner storage.Versioner, value []byte, objP
 store对storage.Interface的Create方法实现解析如下：
 ```
 func (s *store) Create(ctx context.Context, key string, obj, out runtime.Object, ttl uint64) error {
- if version, err := s.versioner.ObjectResourceVersion(obj); err == nil && version != 0 {
- return errors.New("resourceVersion should not be set on objects to be created")
- }
+ //为API存储对象的SelfLink、ResourceVersion设置空值
  if err := s.versioner.PrepareObjectForStorage(obj); err != nil {
  return fmt.Errorf("PrepareObjectForStorage failed: %v", err)
  }
+ //将要存储的API对象编码为字节数组
  data, err := runtime.Encode(s.codec, obj)
- key = path.Join(s.pathPrefix, key) opts, err := s.ttlOpts(ctx, int64(ttl))
- newData, err := s.transformer.TransformToStorage(data, authenticatedDataString(key)) txnResp, err := s.client.KV.Txn(ctx).If( notFound(key), ).Then( clientv3.OpPut(key, string(newData), opts...), ).Commit()
+ //生成API对象存储路径
+ key = path.Join(s.pathPrefix, key) 
+ //设置ttl
+ opts, err := s.ttlOpts(ctx, int64(ttl))
+ //对象值存储前数据加密转换操作
+ newData, err := s.transformer.TransformToStorage(data, authenticatedDataString(key)) 
+ //API对象键值对kv存储提交
+ txnResp, err := s.client.KV.Txn(ctx).If( notFound(key), ).Then( clientv3.OpPut(key, string(newData), opts...), ).Commit()
  if !txnResp.Succeeded {
  return storage.NewKeyExistsError(key, 0)
  } if out != nil {
+ //返回存储后的API对象（含存储的ResourceVersion信息）
  putResp := txnResp.Responses[0].GetResponsePut()
  return decode(s.codec, s.versioner, data, out, putResp.Header.Revision)
  }
