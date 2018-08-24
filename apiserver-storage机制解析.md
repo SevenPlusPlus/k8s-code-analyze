@@ -240,9 +240,11 @@ type watchChan struct {
  //通过外部watch调用传入的Context参数WithCancel得到当前watch子routine的Context及其Cancel方法实现
  ctx context.Context
  cancel context.CancelFunc
+ //通过clientv3客户端watch到的ETCD节点变更event暂时存于该channel，由precessEvent routine消费处理
  incomingEventChan chan *event
- //从存储中watch得到的结果event channel
+ //用于返回从存储中watch得到的对象变更事件channel
  resultChan chan watch.Event
+ //通过clientv3客户端watch到错误事件暂存于该channel
  errChan chan error
 }
 ```
