@@ -218,7 +218,8 @@ type watcher struct {
 ```
 watch.Interface接口用于watch和report存储的变更：
 ```
-type Interface interface { // Stops watching. Will close the channel returned by ResultChan(). Releases // any resources used by the watch.
+type Interface interface { 
+// Stops watching. Will close the channel returned by ResultChan(). Releases // any resources used by the watch.
  Stop()
  // 返回一个channel用户接收所有变更事件. If an error occurs // or Stop() is called, this channel will be closed, in which case the // watch should be completely cleaned up.
  ResultChan() <-chan Event
