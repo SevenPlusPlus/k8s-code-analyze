@@ -248,6 +248,37 @@ type watchChan struct {
  errChan chan error
 }
 ```
+watchChan调用run开始对对象存储节点的watch，其启动步骤如下：
+```
+func (wc *watchChan) run() {
+  watchClosedCh := make(chan struct{})
+ go wc.startWatching(watchClosedCh)
+ var resultChanWG sync.WaitGroup
+ resultChanWG.Add(1)
+ go wc.processEvent(&resultChanWG) select {
+ case err := <-wc.errChan:
+ if err == context.Canceled {
+ break
+ }
+ errResult := transformErrorToEvent(err)
+ if errResult != nil {
+ // error result is guaranteed to be received by user before closing ResultChan.
+ select {
+ case wc.resultChan <- *errResult:
+ case <-wc.ctx.Done(): // user has given up all results
+ }
+ }
+ case <-watchClosedCh:
+ case <-wc.ctx.Done(): // user cancel
+ }
+ // We use wc.ctx to reap all goroutines. Under whatever condition, we should stop them all.
+ // It's fine to double cancel.
+ wc.cancel()
+ // we need to wait until resultChan wouldn't be used anymore
+ resultChanWG.Wait()
+ close(wc.resultChan)
+}
+```
 
 
 
