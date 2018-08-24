@@ -118,5 +118,44 @@ Header里保存的主要是本次更新的revision信息，而PrevKv可以返回
 	// When passed WithSort(), the keys will be sorted.
 	Get(ctx context.Context, key string, opts ...OpOption) (*GetResponse, error)
 ```
+和Put类似，函数注释里提示我们可以传递一些控制参数来影响Get的行为，比如：WithFromKey表示读取从参数key开始递增的所有key，而不是读取单个key。
+
+在上面的例子中，我没有传递opOption，所以就是获取key=/test/a的最新版本数据。
+
+这里err并不能反馈出key是否存在（只能反馈出本次操作因为各种原因异常了），我们需要通过GetResponse（实际上是pb.RangeResponse）判断key是否存在：
+```
+type RangeResponse struct {
+	Header *ResponseHeader `protobuf:"bytes,1,opt,name=header" json:"header,omitempty"`
+	// kvs is the list of key-value pairs matched by the range request.
+	// kvs is empty when count is requested.
+	Kvs []*mvccpb.KeyValue `protobuf:"bytes,2,rep,name=kvs" json:"kvs,omitempty"`
+	// more indicates if there are more keys to return in the requested range.
+	More bool `protobuf:"varint,3,opt,name=more,proto3" json:"more,omitempty"`
+	// count is set to the number of keys within the range when requested.
+	Count int64 `protobuf:"varint,4,opt,name=count,proto3" json:"count,omitempty"`
+}
+```
+Kvs字段，保存了本次Get查询到的所有k-v对，因为上述例子只Get了一个单key，所以只需要判断一下len(Kvs)是否==1即可知道是否存在。
+KeyValue的结构描述为：
+```
+type KeyValue struct {
+	// key is the key in bytes. An empty key is not allowed.
+	Key []byte `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// create_revision is the revision of last creation on this key.
+	CreateRevision int64 `protobuf:"varint,2,opt,name=create_revision,json=createRevision,proto3" json:"create_revision,omitempty"`
+	// mod_revision is the revision of last modification on this key.
+	ModRevision int64 `protobuf:"varint,3,opt,name=mod_revision,json=modRevision,proto3" json:"mod_revision,omitempty"`
+	// version is the version of the key. A deletion resets
+	// the version to zero and any modification of the key
+	// increases its version.
+	Version int64 `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	// value is the value held by the key, in bytes.
+	Value []byte `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
+	// lease is the ID of the lease that attached to key.
+	// When the attached lease expires, the key will be deleted.
+	// If lease is 0, then no lease is attached to the key.
+	Lease int64 `protobuf:"varint,6,opt,name=lease,proto3" json:"lease,omitempty"`
+}
+```
 
 
