@@ -172,6 +172,28 @@ func decode(codec runtime.Codec, versioner storage.Versioner, value []byte, objP
  return nil
 }
 ```
+store对storage.Interface的Create方法实现解析如下：
+```
+func (s *store) Create(ctx context.Context, key string, obj, out runtime.Object, ttl uint64) error {
+ if version, err := s.versioner.ObjectResourceVersion(obj); err == nil && version != 0 {
+ return errors.New("resourceVersion should not be set on objects to be created")
+ }
+ if err := s.versioner.PrepareObjectForStorage(obj); err != nil {
+ return fmt.Errorf("PrepareObjectForStorage failed: %v", err)
+ }
+ data, err := runtime.Encode(s.codec, obj)
+ key = path.Join(s.pathPrefix, key) opts, err := s.ttlOpts(ctx, int64(ttl))
+ newData, err := s.transformer.TransformToStorage(data, authenticatedDataString(key)) txnResp, err := s.client.KV.Txn(ctx).If( notFound(key), ).Then( clientv3.OpPut(key, string(newData), opts...), ).Commit()
+ if !txnResp.Succeeded {
+ return storage.NewKeyExistsError(key, 0)
+ } if out != nil {
+ putResp := txnResp.Responses[0].GetResponsePut()
+ return decode(s.codec, s.versioner, data, out, putResp.Header.Revision)
+ }
+ return nil
+}
+```
+
 
 
 
