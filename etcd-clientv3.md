@@ -212,5 +212,45 @@ Lease提供了几个功能：
 * KeepAliveOnce：为某个租约续约一次。
 * Close：貌似是关闭当前客户端建立的所有租约。
 
+###### Grant与TTL
+要想实现key自动过期，首先得创建一个租约，它有10秒的TTL：
+```
+grantResp, err := lease.Grant(context.TODO(), 10)
+```
+grantResp中主要使用到了ID，也就是租约ID：
+```
+// LeaseGrantResponse wraps the protobuf message LeaseGrantResponse.
+type LeaseGrantResponse struct {
+	*pb.ResponseHeader
+	ID    LeaseID
+	TTL   int64
+	Error string
+}
+```
+接下来，我们用这个租约来Put一个会自动过期的Key：
+```
+kv.Put(context.TODO(), "/test/expireme", "gone...", clientv3.WithLease(grantResp.ID))
+```
+
+这里特别需要注意，有一种情况是在Put之前Lease已经过期了，那么这个Put操作会返回error，此时你需要重新分配Lease。
+
+当我们实现服务注册时，需要主动给Lease进行续约，这需要调用KeepAlive/KeepAliveOnce，你可以在一个循环中定时的调用：
+```
+keepResp, err := lease.KeepAliveOnce(context.TODO(), grantResp.ID)
+// sleep一会..
+```
+
+keepResp结构如下：
+```
+// LeaseKeepAliveResponse wraps the protobuf message LeaseKeepAliveResponse.
+type LeaseKeepAliveResponse struct {
+	*pb.ResponseHeader
+	ID  LeaseID
+	TTL int64
+}
+```
+没什么特别需要用到的字段。
+
+KeepAlive和Put一样，如果在执行之前Lease就已经过期了，那么需要重新分配Lease。Etcd并没有提供API来实现原子的Put with Lease。
 
 
