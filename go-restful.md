@@ -71,53 +71,68 @@ type WebService struct {
 一个 Route 包含HTTP 协议协议相关的HTTP Request 、HTTP Reponse 、方法等处理 
 ```
 type Route struct {
-
  Method string
-
  Produces []string
-
  Consumes []string
-
  Path string // webservice root path + described path
-
  Function RouteFunction
-
  Filters []FilterFunction
-
  If []RouteSelectionConditionFunction
-
  // cached values for dispatching
-
  relativePath string
-
  pathParts []string
-
  pathExpr *pathExpression // cached compilation of relativePath as RegExp
-
  // documentation
-
  Doc string
-
  Notes string
-
  Operation string
-
  ParameterDocs []*Parameter
-
  ResponseErrors map[int]ResponseError
-
  ReadSample, WriteSample interface{} // structs that model an example request or response payload
-
  // Extra information used to store custom information about the route.
-
  Metadata map[string]interface{}
-
  // marks a route as deprecated
-
  Deprecated bool
-
 }
 ```
+具体的处理函数是：RouteFunction 
+```
+type RouteFunction func(*Request, *Response)
+```
+**所以整体处理流程如下**
+* 启动http 服务，指定端口并监听：需要传入端口和Handler 接口
+```
+log.Fatal(http.ListenAndServe(":9990", apiServer.Container))
+```
+* 定义一个 container ，container 类实现了Handler 接口
+```
+apiServer := &APIServer{
+ Container: restful.DefaultContainer.Add(u.WebService()), 
+}
+```
+* container 内需要定义一个或者多个 webservice, 内含具体的Route 处理函数 RouteFunction
+```
+func (u UserResource) WebService() *restful.WebService {
+ ws := new(restful.WebService)
+ ws. Path("/users").
+ Consumes(restful.MIME_XML, restful.MIME_JSON).
+ Produces(restful.MIME_JSON, restful.MIME_XML) // you can specify this per route as well
+ ws.Route(ws.GET("/").To(u.findAllUsers).
+ // docs Doc("get all users").
+ Writes([]User{}).
+ Returns(200, "OK", []User{}))
+
+ ws.Route(ws.GET("/{user-id}").To(u.findUser).
+ // docs
+ Doc("get a user").
+ Param(ws.PathParameter("user-id", "identifier of the user").DataType("integer").DefaultValue("1")).
+ Writes(User{}). // on the response
+ Returns(200, "OK", User{}).
+ Returns(404, "Not Found", nil))
+
+ return ws }
+```
+
 
 
 
