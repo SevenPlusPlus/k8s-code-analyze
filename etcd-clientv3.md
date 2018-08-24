@@ -202,6 +202,15 @@ type Lease interface {
 	Close() error
 }
 ```
+Lease提供了几个功能：
+
+* Grant：分配一个租约。
+* Revoke：释放一个租约。
+* TimeToLive：获取剩余TTL时间。
+* Leases：列举所有etcd中的租约。
+* KeepAlive：自动定时的续约某个租约。
+* KeepAliveOnce：为某个租约续约一次。
+* Close：貌似是关闭当前客户端建立的所有租约。
 
 
 
