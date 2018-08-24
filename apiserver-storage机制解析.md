@@ -216,17 +216,31 @@ type watcher struct {
  transformer value.Transformer
 }
 ```
+watch.Interface接口用于watch和report存储的变更：
+```
+type Interface interface { // Stops watching. Will close the channel returned by ResultChan(). Releases // any resources used by the watch.
+ Stop()
+ // 返回一个channel用户接收所有变更事件. If an error occurs // or Stop() is called, this channel will be closed, in which case the // watch should be completely cleaned up.
+ ResultChan() <-chan Event
+}
+```
 watchChan结构实现了watch Interface接口，其结构描述如下：
 ```
 type watchChan struct {
+ //创建自己的外部watcher对象引用
  watcher *watcher
+ //watch的API对象的path
  key string
+ //watch的初始版本信息
  initialRev int64
+ //是否watch其子节点列表
  recursive bool
  internalPred storage.SelectionPredicate
+ //通过外部watch调用传入的Context参数WithCancel得到当前watch子routine的Context及其Cancel方法实现
  ctx context.Context
  cancel context.CancelFunc
  incomingEventChan chan *event
+ //从存储中watch得到的结果event channel
  resultChan chan watch.Event
  errChan chan error
 }
