@@ -175,7 +175,33 @@ withPrefix实际上会转化为范围查询，它根据前缀/test/生成了一�
 ```
 lease := clientv3.NewLease(cli)
 ```
+Lease描述如下：
+```
+type Lease interface {
+	// Grant creates a new lease.
+	Grant(ctx context.Context, ttl int64) (*LeaseGrantResponse, error)
 
+	// Revoke revokes the given lease.
+	Revoke(ctx context.Context, id LeaseID) (*LeaseRevokeResponse, error)
+
+	// TimeToLive retrieves the lease information of the given lease ID.
+	TimeToLive(ctx context.Context, id LeaseID, opts ...LeaseOption) (*LeaseTimeToLiveResponse, error)
+
+	// Leases retrieves all leases.
+	Leases(ctx context.Context) (*LeaseLeasesResponse, error)
+
+	// KeepAlive keeps the given lease alive forever.
+	KeepAlive(ctx context.Context, id LeaseID) (<-chan *LeaseKeepAliveResponse, error)
+
+	// KeepAliveOnce renews the lease once. In most of the cases, KeepAlive
+	// should be used instead of KeepAliveOnce.
+	KeepAliveOnce(ctx context.Context, id LeaseID) (*LeaseKeepAliveResponse, error)
+
+	// Close releases all resources Lease keeps for efficient communication
+	// with the etcd server.
+	Close() error
+}
+```
 
 
 
