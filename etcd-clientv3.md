@@ -157,5 +157,13 @@ type KeyValue struct {
 	Lease int64 `protobuf:"varint,6,opt,name=lease,proto3" json:"lease,omitempty"`
 }
 ```
+至于RangeResponse.More和Count，当我们使用withLimit()选项进行Get时会发挥作用，相当于翻页查询。
+
+接下来，我们通过一个特别的Get选项，获取/test目录下的所有孩子：
+```
+rangeResp, err := kv.Get(context.TODO(), "/test/", clientv3.WithPrefix())
+```
+WithPrefix()是指查找以/test/为前缀的所有key，因此可以模拟出查找子目录的效果。
+
 
 
