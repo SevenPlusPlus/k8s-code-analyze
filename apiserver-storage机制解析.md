@@ -285,6 +285,28 @@ func (wc *watchChan) run() {
  close(wc.resultChan)
 }
 ```
+接着分析下调用底层etcd客户端真正开启节点watch的过程wc.startWatching：
+```
+func (wc *watchChan) startWatching(watchClosedCh chan struct{}) {
+ opts := []clientv3.OpOption{clientv3.WithRev(wc.initialRev + 1), clientv3.WithPrevKV()}
+ if wc.recursive {
+ opts = append(opts, clientv3.WithPrefix())
+ }
+ wch := wc.watcher.client.Watch(wc.ctx, wc.key, opts...)
+ for wres := range wch {
+ if wres.Err() != nil {
+ err := wres.Err()
+ // If there is an error on server (e.g. compaction), the channel will return it before closed. wc.sendError(err)
+ return
+ }
+ for _, e := range wres.Events {
+ wc.sendEvent(parseEvent(e))
+ }
+ }
+ // When we come to this point, it's only possible that client side ends the watch. // e.g. cancel the context, close the client. // If this watch chan is broken and context isn't cancelled, other goroutines will still hang. // We should notify the main thread that this goroutine has exited.
+ close(watchClosedCh)
+}
+```
 
 
 
