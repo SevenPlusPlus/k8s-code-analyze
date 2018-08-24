@@ -105,5 +105,18 @@ Header里保存的主要是本次更新的revision信息，而PrevKv可以返回
 	// 再写一个同前缀的干扰项
 	kv.Put(context.TODO(), "/testxxx", "干扰")
 ```
+##### Get操作
+函数原型为:
+```
+	// Get retrieves keys.
+	// By default, Get will return the value for "key", if any.
+	// When passed WithRange(end), Get will return the keys in the range [key, end).
+	// When passed WithFromKey(), Get returns keys greater than or equal to key.
+	// When passed WithRev(rev) with rev > 0, Get retrieves keys at the given revision;
+	// if the required revision is compacted, the request will fail with ErrCompacted .
+	// When passed WithLimit(limit), the number of returned keys is bounded by limit.
+	// When passed WithSort(), the keys will be sorted.
+	Get(ctx context.Context, key string, opts ...OpOption) (*GetResponse, error)
+```
 
 
