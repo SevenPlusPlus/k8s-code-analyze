@@ -208,10 +208,27 @@ func (s *store) watch(ctx context.Context, key string, rv string, pred storage.S
 watcher结构描述如下：
 ```
 type watcher struct {
+ //ETCD v3客户端对象
  client *clientv3.Client
+ //API对象编解码接口对象
  codec runtime.Codec
  versioner storage.Versioner
  transformer value.Transformer
+}
+```
+watchChan结构实现了watch Interface接口，其结构描述如下：
+```
+type watchChan struct {
+ watcher *watcher
+ key string
+ initialRev int64
+ recursive bool
+ internalPred storage.SelectionPredicate
+ ctx context.Context
+ cancel context.CancelFunc
+ incomingEventChan chan *event
+ resultChan chan watch.Event
+ errChan chan error
 }
 ```
 
