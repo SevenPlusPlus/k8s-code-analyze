@@ -199,7 +199,21 @@ func (s *store) Create(ctx context.Context, key string, obj, out runtime.Object,
  return nil
 }
 ```
-
+store对storage.Interface的Watch方法实现解析如下：
+```
+func (s *store) watch(ctx context.Context, key string, rv string, pred storage.SelectionPredicate, recursive bool) (watch.Interface, error) { rev, err := s.versioner.ParseResourceVersion(rv) if err != nil { return nil, err }
+ //生成对象存储path key = path.Join(s.pathPrefix, key) return s.watcher.Watch(ctx, key, int64(rev), recursive, pred)}
+```
+接下来重点解析存储watch过程的实现，store结构中包含一个watcher对象实现watch方法，watcher对象的Watch方法实现中会创建一个watchChan对象并调用其run方法启动watch goroutine，而该watchChan对象实现了watch.Interface接口作为结果返回。
+watcher结构描述如下：
+```
+type watcher struct {
+ client *clientv3.Client
+ codec runtime.Codec
+ versioner storage.Versioner
+ transformer value.Transformer
+}
+```
 
 
 
