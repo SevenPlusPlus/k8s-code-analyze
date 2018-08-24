@@ -9,9 +9,9 @@
 
 代码示例如下:
 ```
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"localhost:2378"},
-		DialTimeout: 5 * time.Second,
-	})
+cli, err := clientv3.New(clientv3.Config{
+   Endpoints:   []string{"localhost:2378"},
+   DialTimeout: 5 * time.Second,
+})
 ```
 
