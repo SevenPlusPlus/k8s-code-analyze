@@ -36,7 +36,18 @@ Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
 ```
 
 ```
-// CreateServerChain creates the apiservers connected via delegation.func CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan struct{}) (*genericapiserver.GenericAPIServer, error) { 
+// CreateServerChain creates the apiservers connected via delegation.func 
+CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan struct{}) (*genericapiserver.GenericAPIServer, error) { 
+	kubeAPIServerConfig, sharedInformers, versionedInformers, insecureServingOptions, serviceResolver, pluginInitializer, admissionPostStartHook, err := CreateKubeAPIServerConfig(completedOptions, nodeTunneler, proxyTransport)
+	
+	kubeAPIServer, err := CreateKubeAPIServer(kubeAPIServerConfig, apiExtensionsServer.GenericAPIServer, sharedInformers, versionedInformers, admissionPostStartHook)
+
+	kubeAPIServer.GenericAPIServer.PrepareRun()
+
+return aggregatorServer.GenericAPIServer, nil
+}
+```
+
 
 
 
