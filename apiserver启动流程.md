@@ -62,6 +62,18 @@ func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Dur
  return RunServer(secureServer, s.Listener, shutdownTimeout, stopCh)
 }
 
+// RunServer listens on the given port if listener is not given,
+// then spawns a go-routine continuously serving
+// until the stopCh is closed. This function does not block.
+// TODO: make private when insecure serving is gone from the kube-apiserver
+func RunServer(
+ server *http.Server,
+ ln net.Listener,
+ shutDownTimeout time.Duration,
+ stopCh <-chan struct{},
+) error { go func() {   var listener net.Listener   listener = tcpKeepAliveListener{ln.(*net.TCPListener)}   if server.TLSConfig != nil {
+      listener = tls.NewListener(listener, server.TLSConfig)   }   err := server.Serve(listener) }() return nil}
+
 ```
 
 
