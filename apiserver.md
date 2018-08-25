@@ -120,8 +120,38 @@ apiGroupInfo是通过调用legacyRESTStorageProvider.NewLegacyRESTStorage()创�
 k8s.io/kubernetes/pkg/registry/core/rest/storage_core.go:
 ```
 func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
- apiGroupInfo := genericapiserver.APIGroupInfo{ PrioritizedVersions: legacyscheme.Scheme.PrioritizedVersionsForGroup(""), VersionedResourcesStorageMap: map[string]map[string]rest.Storage{}, Scheme: legacyscheme.Scheme, ParameterCodec: legacyscheme.ParameterCodec, NegotiatedSerializer: legacyscheme.Codecs, }
-
+ apiGroupInfo := genericapiserver.APIGroupInfo{
+ PrioritizedVersions: legacyscheme.Scheme.PrioritizedVersionsForGroup(""), VersionedResourcesStorageMap: map[string]map[string]rest.Storage{}, Scheme: legacyscheme.Scheme, ParameterCodec: legacyscheme.ParameterCodec, NegotiatedSerializer: legacyscheme.Codecs,
+ }
+ restStorage := LegacyRESTStorage{}
+	...
+	nodeStorage, err := nodestore.NewStorage(restOptionsGetter, c.KubeletClientConfig, c.ProxyTransport)
+	...
+	//按资源创建了Storage
+	podTemplateStorage := podtemplatestore.NewREST(restOptionsGetter)
+	eventStorage := eventstore.NewREST(restOptionsGetter, uint64(c.EventTTL.Seconds()))
+	limitRangeStorage := limitrangestore.NewREST(restOptionsGetter)
+	...
+	podStorage := podstore.NewStorage(
+			restOptionsGetter,
+			nodeStorage.KubeletConnectionInfo,
+			c.ProxyTransport,
+			podDisruptionClient,
+			)
+	...
+	
+	//将新建的storage保存到
+	restStorageMap := map[string]rest.Storage{
+		"pods":             podStorage.Pod,
+		"pods/attach":      podStorage.Attach,
+		"pods/status":      podStorage.Status,
+		"pods/log":         podStorage.Log,
+		...
+		"nodes":        nodeStorage.Node,
+	...
+	//restStorageMap被装载到了apiGroupInfo
+	apiGroupInfo.VersionedResourcesStorageMap["v1"] = restStorageMap
+	...
 ```
 
 
