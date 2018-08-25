@@ -105,7 +105,47 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 ```
 * vendor/k8s.io/apiserver/pkg/server/handler.go
 ```
-func NewAPIServerHandler(name string, s runtime.NegotiatedSerializer, handlerChainBuilder HandlerChainBuilderFn, notFoundHandler http.Handler) *APIServerHandler { nonGoRestfulMux := mux.NewPathRecorderMux(name) if notFoundHandler != nil { nonGoRestfulMux.NotFoundHandler(notFoundHandler) } gorestfulContainer := restful.NewContainer() gorestfulContainer.ServeMux = http.NewServeMux() gorestfulContainer.Router(restful.CurlyRouter{}) // e.g. for proxy/{kind}/{name}/{*}  director := director{ name: name, goRestfulContainer: gorestfulContainer, nonGoRestfulMux: nonGoRestfulMux, } return &APIServerHandler{ FullHandlerChain: handlerChainBuilder(director), GoRestfulContainer: gorestfulContainer, NonGoRestfulMux: nonGoRestfulMux, Director: director, }}
+func NewAPIServerHandler(name string, s runtime.NegotiatedSerializer, handlerChainBuilder HandlerChainBuilderFn, notFoundHandler http.Handler) *APIServerHandler {
+
+	nonGoRestfulMux := mux.NewPathRecorderMux(name)
+
+	if notFoundHandler != nil {
+
+		nonGoRestfulMux.NotFoundHandler(notFoundHandler)
+
+	}
+
+
+	gorestfulContainer := restful.NewContainer()
+
+	gorestfulContainer.ServeMux = http.NewServeMux()
+
+	gorestfulContainer.Router(restful.CurlyRouter{}) // e.g. for proxy/{kind}/{name}/{*}
+	
+
+	director := director{
+
+		name:               name,
+
+		goRestfulContainer: gorestfulContainer,
+
+		nonGoRestfulMux:    nonGoRestfulMux,
+
+	}
+
+
+	return &APIServerHandler{
+
+		FullHandlerChain:   handlerChainBuilder(director),
+
+		GoRestfulContainer: gorestfulContainer,
+
+		NonGoRestfulMux:    nonGoRestfulMux,
+
+		Director:           director,
+
+	}
+}
 
 ```
 
