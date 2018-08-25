@@ -147,6 +147,21 @@ APIServerHandler和Director都实现了http.Handler接口ServeHTTP方法：
 func (a *APIServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
  a.FullHandlerChain.ServeHTTP(w, r)
 }
+
+func (d director) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+ path := req.URL.Path
+ // check to see if our webservices want to claim this path
+ for _, ws := range d.goRestfulContainer.RegisteredWebServices() {
+ switch {
+ case ws.RootPath() == "/apis":
+ if path == "/apis" || path == "/apis/" { d.goRestfulContainer.Dispatch(w, req) return } case strings.HasPrefix(path, ws.RootPath()):
+ // ensure an exact match or a path boundary match if len(path) == len(ws.RootPath()) || path[len(ws.RootPath())] == '/' {  d.goRestfulContainer.Dispatch(w, req)
+ return
+ } } } // if we didn't find a match, then we just skip gorestful altogether
+ glog.V(5).Infof("%v: %v %q satisfied by nonGoRestful", d.name, req.Method, path)
+ d.nonGoRestfulMux.ServeHTTP(w, req)
+}
+
 ```
 
 ```
