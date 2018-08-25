@@ -117,7 +117,8 @@ func DefaultBuildHandlerChain(apiHandler http.Handler, c *Config) http.Handler {
  handler = genericfilters.WithMaxInFlightLimit(handler, c.MaxRequestsInFlight, c.MaxMutatingRequestsInFlight, c.LongRunningFunc)
  handler = genericapifilters.WithImpersonation(handler, c.Authorization.Authorizer, c.Serializer)
   handler = genericapifilters.WithAuthentication(handler, c.Authentication.Authenticator, failedHandler)
- ... return handler
+ ... 
+ return handler
 }
 
 
