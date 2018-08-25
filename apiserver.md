@@ -104,6 +104,13 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 ```
 留意这里创建的legacyRESTStorageProvider和restStorageProviders，通过接下来的过程可以看到storage最终是由它们创建的。 
 
+### m.InstallLegacyAPI()
+k8s.io/kubernetes/pkg/master/master.go: 
+```
+func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.RESTOptionsGetter, legacyRESTStorageProvider corerest.LegacyRESTStorageProvider) {
+ legacyRESTStorage, apiGroupInfo, err := legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter) m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo); }
+```
+
 
 
 
