@@ -169,6 +169,12 @@ func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client
  NewListFunc:              func() runtime.Object { return &api.NodeList{} },
 ... 
  }
+
+ // Set up REST handlers
+	nodeREST := &REST{Store: store, proxyTransport: proxyTransport}
+	statusREST := &StatusREST{store: &statusStore}
+	proxyREST := &noderest.ProxyREST{Store: store, ProxyTransport: proxyTransport}
+
  return &NodeStorage{
  Node: nodeREST,
  Status: statusREST,
