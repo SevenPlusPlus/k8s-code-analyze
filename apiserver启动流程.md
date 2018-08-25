@@ -8,6 +8,7 @@ command := app.NewAPIServerCommand(server.SetupSignalHandler())
 err := command.Execute()
 ```
 * cmd/kube-apiserver/app/server.go
+
 ```
 func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
   server, err := CreateServerChain(completeOptions, stopCh)
