@@ -46,5 +46,10 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 	}
 }
 ```
+* vendor/k8s.io/apiserver/pkg/server/serve.go
+```
+// serveSecurely runs the secure http server. It fails only if certificates cannot// be loaded or the initial listen call fails. The actual server loop (stoppable by closing// stopCh) runs in a go routine, i.e. serveSecurely does not block.func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Duration, stopCh <-chan struct{}) error { if s.Listener == nil { return fmt.Errorf("listener must not be nil") } secureServer := &http.Server{   Addr: s.Listener.Addr().String(), Handler: handler, MaxHeaderBytes: 1 << 20, TLSConfig: &tls.Config{ NameToCertificate: s.SNICerts, // Can't use SSLv3 because of POODLE and BEAST // Can't use TLSv1.0 because of POODLE and BEAST using CBC cipher // Can't use TLSv1.1 because of RC4 cipher usage MinVersion: tls.VersionTLS12, // enable HTTP2 for go's 1.7 HTTP Server NextProtos: []string{"h2", "http/1.1"}, }, }
+
+```
 
 
