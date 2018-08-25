@@ -53,9 +53,10 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 // stopCh) runs in a go routine, i.e. serveSecurely does not block.
 
 func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Duration, stopCh <-chan struct{}) error {
+
  secureServer := &http.Server{
- Addr: s.Listener.Addr().String(),
- Handler: handler,
+   Addr: s.Listener.Addr().String(),
+   Handler: handler,
  }
 
 
