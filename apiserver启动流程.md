@@ -232,4 +232,8 @@ func NewAPIServerHandler(name string, s runtime.NegotiatedSerializer, handlerCha
 
 ```
 
+### 整体思维脑图
+![apiserver脑图](/assets/apiserver-start-02.jpg)
+
+
 
