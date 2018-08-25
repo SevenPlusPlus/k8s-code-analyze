@@ -343,6 +343,14 @@ func (c completedConfig) New() (*Master, error) {
  }
 ...
 ```
+c.Config.GenericConfig.RESTOptionsGetter就是optsGetter，而c.Config就是一开始就提醒要记住的kubeAPIServerConfig: 
+k8s.io/kubernetes/cmd/kube-apiserver/app/server.go: 
+```
+func Run(runOptions *options.ServerRunOptions, stopCh <-chan struct{}) error {
+ kubeAPIServerConfig, sharedInformers, insecureServingOptions, err := CreateKubeAPIServerConfig(runOptions)
+ ...
+
+```
 
 
 
