@@ -184,6 +184,12 @@ func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client
 ...
 
 ```
+NodeStorage的成员变量Status实现了Get()、New()、Update(), Status类型是｀StatusREST`。 
+```
+// StatusREST implements the REST endpoint for changing the status of a node.type StatusREST struct { store *genericregistry.Store}
+func (r *StatusREST) New() runtime.Object { return &api.Node{}}// Get retrieves the object from the storage. It is required to support Patch.func (r *StatusREST) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) { return r.store.Get(ctx, name, options)}// Update alters the status subset of an object.func (r *StatusREST) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) { // We are explicitly setting forceAllowCreate to false in the call to the underlying storage because // subresources should never allow create on update. return r.store.Update(ctx, name, objInfo, createValidation, updateValidation, false, options)}
+
+```
 
 
 
