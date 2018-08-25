@@ -202,6 +202,24 @@ func (r *StatusREST) Update(ctx context.Context, name string, objInfo rest.Updat
   ...}
 
 ```
+回到创建NodeStorage的函数中，找到变量StatusREST.store的创建。 可以看到，StatusREST.store是genericregistry.Store。genericregistry.Store中包含了NewFunc、NewListFunc等函数变量，需要看一下genericregistry.Store的Get等方法是怎样实现的。
+### generic.registry.Store
+k8s.io/kubernetes/vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go: 
+```
+// Store implements pkg/api/rest.StandardStorage. It's intended to be
+ // embeddable and allows the consumer to implement any non-generic functions    // that are required. This object is intended to be copyable so that it can be // used in different ways but share the same underlying behavior.
+ //
+ // All fields are required unless specified. 
+//
+ // The intended use of this type is embedding within a Kind specific
+ // RESTStorage implementation. This type provides CRUD semantics on a Kubelike 
+// resource, handling details like conflict detection with ResourceVersion and
+ // semantics. The RESTCreateStrategy, RESTUpdateStrategy, and
+ // RESTDeleteStrategy are generic across all backends, and encapsulate logic // specific to the API.
+
+```
+
+
 
 
 
