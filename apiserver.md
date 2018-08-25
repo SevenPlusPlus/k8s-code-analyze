@@ -259,8 +259,9 @@ registry.Store的成员:
  +Watch(ctx genericapirequest.Context, options *metainternalversion.ListOptions) : watch.Interface, error
  +WatchPredicate(ctx genericapirequest.Context, p storage.SelectionPredicate, resourceVersion string) : watch.Interface, error
 
-
 ```
+看一下Create()方法的实现: 
+
 
 
 
