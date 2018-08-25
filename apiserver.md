@@ -158,7 +158,21 @@ func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generi
 	...
 ```
 重点分析几个具体的storage，了解它们的实现。 
+#### nodeStorage
+在上面的代码中可以看到nodeStorage是通过调用nodestore.NewStorage创建的。
+k8s.io/kubernetes/pkg/registry/core/node/storage/storage.go: 
+```
+func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client.KubeletClientConfig, proxyTransport http.RoundTripper) (*NodeStorage, error) {
+ store := &genericregistry.Store{ ... 
+ return &NodeStorage{
+ Node: nodeREST,
+ Status: statusREST,
+ Proxy: proxyREST,
+ KubeletConnectionInfo: connectionInfoGetter,
+ }, nil 
+...
 
+```
 
 
 
