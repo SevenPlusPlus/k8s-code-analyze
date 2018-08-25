@@ -371,7 +371,53 @@ func (s *EtcdOptions) ApplyWithStorageFactoryTo(factory serverstorage.StorageFac
  return nil
 }
 ```
+而且注意s的类型是EtcdOptions! 
+我们最终要找的是e.Storage -> opts.Decorator -> opts -> options.RESTOptions.GetRESTOptions()即
+k8s.io/kubernetes/vendor/src/k8s.io/apiserver/pkg/server/options/etcd.go:
+```
+func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource) (generic.RESTOptions, error) {
 
+	ret := generic.RESTOptions{
+
+		StorageConfig:           &f.Options.StorageConfig,
+
+		Decorator:               generic.UndecoratedStorage,
+
+		EnableGarbageCollection: f.Options.EnableGarbageCollection,
+
+		DeleteCollectionWorkers: f.Options.DeleteCollectionWorkers,
+
+		ResourcePrefix:          resource.Group + "/" + resource.Resource,
+
+		CountMetricPollPeriod:   f.Options.StorageConfig.CountMetricPollPeriod,
+
+	}
+
+	if f.Options.EnableWatchCache {
+
+		sizes, err := ParseWatchCacheSizes(f.Options.WatchCacheSizes)
+
+		if err != nil {
+
+			return generic.RESTOptions{}, err
+
+		}
+
+		cacheSize, ok := sizes[resource]
+
+		if !ok {
+
+			cacheSize = f.Options.DefaultWatchCacheSize
+
+		}
+
+		ret.Decorator = genericregistry.StorageWithCacher(cacheSize)
+
+	}
+
+	return ret, nil
+}
+```
 
 
 
