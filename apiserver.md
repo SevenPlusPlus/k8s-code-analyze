@@ -425,6 +425,7 @@ func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource)
 	return ret, nil
 }
 ```
+找到Decorator方法实现了，e.Storage.Storage就是通过调用这个函数得到的，也就是genericregistry.StorageWithCacher方法: 
 
 
 
