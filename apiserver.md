@@ -23,5 +23,9 @@ k8s.io/kubernetes/pkg/registry/
  ▸ settings/
  ▸ storage/
 ```
+每类资源目录下都有一个rest目录，其中实现了各自的storage。例如apps/rest中的代码定义了可以提供给GenericAPIServer的storage。 
+
+### Storage的注册装载过程
+
 
 
