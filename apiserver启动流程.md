@@ -20,6 +20,24 @@ func CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan
 
   kubeAPIServer, err := CreateKubeAPIServer(kubeAPIServerConfig, apiExtensionsServer.GenericAPIServer, sharedInformers, versionedInformers, admissionPostStartHook)
 
+  return kubeAPIServer, nil
 }
+```
+* vendor/k8s.io/apiserver/pkg/server/genericapiserver.go
+
+```
+// PrepareRun does post API installation setup steps.func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
+  routes.Swagger{Config: s.swaggerConfig}.Install(s.Handler.GoRestfulContainer)
+  s.installHealthz()
+  return preparedGenericAPIServer{s}
+}
+func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
+	err := s.NonBlockingRun(stopCh)
+}
+
+// NonBlockingRun spawns the secure http server. An error is// returned if the secure port cannot be listened on.
+func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
+
+```
 
 
