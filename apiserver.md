@@ -306,21 +306,13 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
  	e.Storage.Codec = opts.StorageConfig.Codec
 
 	e.Storage.Storage, e.DestroyFunc = opts.Decorator(
-
 			opts.StorageConfig,
-
 			e.NewFunc(),
-
 			prefix,
-
 			keyFunc,
-
 			e.NewListFunc,
-
 			attrFunc,
-
 			triggerFunc,
-
 		)
  }
  ...
