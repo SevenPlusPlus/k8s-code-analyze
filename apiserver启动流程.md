@@ -88,4 +88,16 @@ func RunServer(
 
 ### Container初始化
 
+* vendor/k8s.io/apiserver/pkg/server/config.go
+```
+// New creates a new server which logically combines the handling chain with the passed server.
+func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*GenericAPIServer, error) {
+  handlerChainBuilder := func(handler http.Handler) http.Handler {
+
+		return c.BuildHandlerChainFunc(handler, c.Config)
+
+	}
+   
+```
+
 
