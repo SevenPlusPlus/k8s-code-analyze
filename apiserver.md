@@ -294,8 +294,37 @@ e.NewFunc()返回的对象是调用创建方法时传入的变量，对于NodeSt
  	ExportStrategy: node.Strategy,
  }
 ```
-创建时在调用了e.NewFunc()之后，又调用了e.Storage.Create(ctx, key, obj, out, ttl)，需要继续回溯找到创建e.Storage的地方。 NodeStorage创建store时没有为Storage
+创建时在调用了e.NewFunc()之后，又调用了e.Storage.Create(ctx, key, obj, out, ttl)，需要继续回溯找到创建e.Storage的地方。 NodeStorage创建store时没有为store的Storage字段赋值，所以应该是后续进行的赋值操作。回溯NodeStorage的创建代码，发现了store.CompleteWithOptions()，kubernetes的代码中经常会用这种方式来补全一个结构体的成员变量。
+回到k8s.io/kubernetes/vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go: 
+```
+func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
 
+ ...
+ opts, err := options.RESTOptions.GetRESTOptions(e.QualifiedResource)
+ ...
+ if e.Storage == nil {
+ 	e.Storage.Codec = opts.StorageConfig.Codec
+
+	e.Storage.Storage, e.DestroyFunc = opts.Decorator(
+
+			opts.StorageConfig,
+
+			e.NewFunc(),
+
+			prefix,
+
+			keyFunc,
+
+			e.NewListFunc,
+
+			attrFunc,
+
+			triggerFunc,
+
+		)
+ }
+ ...
+```
 
 
 
