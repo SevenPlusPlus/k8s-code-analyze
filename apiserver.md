@@ -269,15 +269,14 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
  qualifiedResource := e.qualifiedResourceFromContext(ctx)
  ttl, err := e.calculateTTL(obj, 0, false)
  out := e.NewFunc()
- if err := e.Storage.Create(ctx, key, obj, out, ttl, dryrun.IsDryRun(options.DryRun))
- if errGet := e.Storage.Get(ctx, key, "", out, false); errGet != nil {
- return nil, err
- }
+ e.Storage.Create(ctx, key, obj, out, ttl, dryrun.IsDryRun(options.DryRun))
+
  if e.AfterCreate != nil {... } }
  if e.Decorator != nil { ... } }
  return out, nil
 }
 ```
+
 
 
 
