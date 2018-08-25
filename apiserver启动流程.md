@@ -141,6 +141,13 @@ type APIServerHandler struct {
 }
 
 ```
+APIServerHandler和Director都实现了http.Handler接口ServeHTTP方法：
+```
+// ServeHTTP makes it an http.Handler
+func (a *APIServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+ a.FullHandlerChain.ServeHTTP(w, r)
+}
+```
 
 ```
 func NewAPIServerHandler(name string, s runtime.NegotiatedSerializer, handlerChainBuilder HandlerChainBuilderFn, notFoundHandler http.Handler) *APIServerHandler {
