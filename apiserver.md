@@ -240,7 +240,7 @@ registry.Store的成员:
  +PredicateFunc : func(label labels.Selector, field fields.Selector) storage.SelectionPredicate
  +QualifiedResource : schema.GroupResource
  +ReturnDeletedObject : bool
- +Storage : storage.Interface
+ +Storage : DryRunnableStorage 
  +TTLFunc : func(obj runtime.Object, existing uint64, update bool) uint64, error
  +UpdateStrategy : rest.RESTUpdateStrategy
  +WatchCacheSize : int
@@ -260,7 +260,7 @@ registry.Store的成员:
  +WatchPredicate(ctx genericapirequest.Context, p storage.SelectionPredicate, resourceVersion string) : watch.Interface, error
 
 ```
-其中的Storage成员类型为：
+其中的Storage成员类型为DryRunnableStorage：
 ```
 type DryRunnableStorage struct {
  Storage storage.Interface
