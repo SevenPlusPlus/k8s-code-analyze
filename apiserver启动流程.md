@@ -59,7 +59,8 @@ func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Dur
    Addr: s.Listener.Addr().String(),
    Handler: handler,
  }
-
+ return RunServer(secureServer, s.Listener, shutdownTimeout, stopCh)
+}
 
 ```
 
