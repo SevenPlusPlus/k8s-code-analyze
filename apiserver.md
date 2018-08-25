@@ -319,7 +319,15 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
 ```
 不出所料，e.Storage就是在这里创建的，还需要继续回溯，找到opts.Decorator()的实现。 
 #### RESTOptions opts.Decorator
+要找到opts.Decorator()的实现，看它是如何创建了e.Storage。 在上面的代码中可以看到opts是通过options.RESTOptions.GetRESTOptions()创建的。而options则是在NodeStorage的NewStorage中调用store.CompletWithOptions之前创建的：
+k8s.io/kubernetes/pkg/registry/core/node/storage/storage.go:
+```
+func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client.KubeletClientConfig, proxyTransport http.RoundTripper) (*NodeStorage, error) {
+...
+options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: node.GetAttrs, TriggerFunc: node.NodeNameTriggerFunc}
+...
 
+```
 
 
 
