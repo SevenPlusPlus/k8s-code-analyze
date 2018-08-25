@@ -462,6 +462,8 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
  }
 }
 ```
+StorageWithCache又是一个很复杂的过程，它会与etcd通信。 
+将会在下一节**ApiServer Storage实现解析**中重点解析。
 
 
 
