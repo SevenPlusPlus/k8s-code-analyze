@@ -102,6 +102,8 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 
 	return m, nil
 ```
+留意这里创建的legacyRESTStorageProvider和restStorageProviders，通过接下来的过程可以看到storage最终是由它们创建的。 
+
 
 
 
