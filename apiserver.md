@@ -230,7 +230,6 @@ registry.Store的成员:
  +Decorator : ObjectFunc
  +DeleteCollectionWorkers : int
  +DeleteStrategy : rest.RESTDeleteStrategy
- +DestroyFunc : func()
  +EnableGarbageCollection : bool
  +ExportStrategy : rest.RESTExportStrategy
  +KeyFunc : func(ctx genericapirequest.Context, name string) string, error +KeyRootFunc : func(ctx genericapirequest.Context) string
@@ -241,6 +240,7 @@ registry.Store的成员:
  +QualifiedResource : schema.GroupResource
  +ReturnDeletedObject : bool
  +Storage : DryRunnableStorage 
+ +DestroyFunc : func()
  +TTLFunc : func(obj runtime.Object, existing uint64, update bool) uint64, error
  +UpdateStrategy : rest.RESTUpdateStrategy
  +WatchCacheSize : int
