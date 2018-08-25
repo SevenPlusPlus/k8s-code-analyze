@@ -108,7 +108,18 @@ func NewConfig(codecs serializer.CodecFactory) *Config {
  BuildHandlerChainFunc: DefaultBuildHandlerChain,
  HandlerChainWaitGroup: new(utilwaitgroup.SafeWaitGroup),
  LegacyAPIGroupPrefixes: sets.NewString(DefaultLegacyAPIPrefix),
- ... }}
+ ... 
+ }
+}
+
+func DefaultBuildHandlerChain(apiHandler http.Handler, c *Config) http.Handler {
+ handler := genericapifilters.WithAuthorization(apiHandler, c.Authorization.Authorizer, c.Serializer)
+ handler = genericfilters.WithMaxInFlightLimit(handler, c.MaxRequestsInFlight, c.MaxMutatingRequestsInFlight, c.LongRunningFunc)
+ handler = genericapifilters.WithImpersonation(handler, c.Authorization.Authorizer, c.Serializer)
+  handler = genericapifilters.WithAuthentication(handler, c.Authentication.Authenticator, failedHandler)
+ ... return handler
+}
+
 
 
 // New creates a new server which logically combines the handling chain with the passed server.
