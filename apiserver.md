@@ -1,0 +1,2 @@
+## ApiServer Storage的由来
+从ApiServer的注册流程可以看到，ApiGroupInfo中装载了各类的Storage，然后GenericApiServer根据传入的ApiGroupInfo中的Storage，来自动生成REST Handler
