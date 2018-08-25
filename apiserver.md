@@ -71,27 +71,20 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 			ServiceAccountAPIAudiences:  c.ExtraConfig.ServiceAccountAPIAudiences,
 			ServiceAccountMaxExpiration: c.ExtraConfig.ServiceAccountMaxExpiration,
 		}
-		m.InstallLegacyAPI(&c, c.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
-	}
+	m.InstallLegacyAPI(&c, c.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
+	
 
 
 	restStorageProviders := []RESTStorageProvider{
 
 		authenticationrest.RESTStorageProvider{Authenticator: c.GenericConfig.Authentication.Authenticator},
-
 		authorizationrest.RESTStorageProvider{Authorizer: c.GenericConfig.Authorization.Authorizer, RuleResolver: c.GenericConfig.RuleResolver},
-		
-autoscalingrest.RESTStorageProvider{},
-		
-batchrest.RESTStorageProvider{},
-		
-certificatesrest.RESTStorageProvider{},
-		
-coordinationrest.RESTStorageProvider{},
-		
-extensionsrest.RESTStorageProvider{},
-		
-networkingrest.RESTStorageProvider{},
+		autoscalingrest.RESTStorageProvider{},
+		batchrest.RESTStorageProvider{},
+		certificatesrest.RESTStorageProvider{},
+		coordinationrest.RESTStorageProvider{},
+		extensionsrest.RESTStorageProvider{},
+		networkingrest.RESTStorageProvider{},
 		policyrest.RESTStorageProvider{},
 		rbacrest.RESTStorageProvider{Authorizer: c.GenericConfig.Authorization.Authorizer},
 		schedulingrest.RESTStorageProvider{},
