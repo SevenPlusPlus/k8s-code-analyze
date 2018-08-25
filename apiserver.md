@@ -273,7 +273,9 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
  if errGet := e.Storage.Get(ctx, key, "", out, false); errGet != nil {
  return nil, err
  }
- if e.AfterCreate != nil {... } } if e.Decorator != nil { ... } } return out, nil
+ if e.AfterCreate != nil {... } }
+ if e.Decorator != nil { ... } }
+ return out, nil
 }
 ```
 
