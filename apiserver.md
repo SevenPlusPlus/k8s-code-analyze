@@ -34,17 +34,20 @@ Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
  return server.PrepareRun().Run(stopCh)
 }
 ```
-
+创建GenericApiServer
+cmd/kube-apiserver/app/server.go:
 ```
 // CreateServerChain creates the apiservers connected via delegation.func 
 CreateServerChain(completedOptions completedServerRunOptions, stopCh <-chan struct{}) (*genericapiserver.GenericAPIServer, error) { 
 	kubeAPIServerConfig, sharedInformers, versionedInformers, insecureServingOptions, serviceResolver, pluginInitializer, admissionPostStartHook, err := CreateKubeAPIServerConfig(completedOptions, nodeTunneler, proxyTransport)
-	
 	kubeAPIServer, err := CreateKubeAPIServer(kubeAPIServerConfig, apiExtensionsServer.GenericAPIServer, sharedInformers, versionedInformers, admissionPostStartHook)
-
 	kubeAPIServer.GenericAPIServer.PrepareRun()
-
-return aggregatorServer.GenericAPIServer, nil
+	return aggregatorServer.GenericAPIServer, nil
+}
+```
+```
+func CreateKubeAPIServer(kubeAPIServerConfig *master.Config, delegateAPIServer genericapiserver.DelegationTarget, sharedInformers informers.SharedInformerFactory, versionedInformers clientgoinformers.SharedInformerFactory, admissionPostStartHook genericapiserver.PostStartHookFunc) (*master.Master, error) {
+ kubeAPIServer, err := kubeAPIServerConfig.Complete(versionedInformers).New(delegateAPIServer)  return kubeAPIServer, nil
 }
 ```
 
