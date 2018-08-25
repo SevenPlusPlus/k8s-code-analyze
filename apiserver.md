@@ -26,6 +26,10 @@ k8s.io/kubernetes/pkg/registry/
 每类资源目录下都有一个rest目录，其中实现了各自的storage。例如apps/rest中的代码定义了可以提供给GenericAPIServer的storage。 
 
 ### Storage的注册装载过程
-
+cmd/kube-apiserver/app/server.go: 
+```
+// Run runs the specified APIServer. This should never exit.func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
+ server, err := CreateServerChain(completeOptions, stopCh) return server.PrepareRun().Run(stopCh)}
+```
 
 
