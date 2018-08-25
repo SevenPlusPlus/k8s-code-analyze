@@ -363,7 +363,14 @@ if lastErr = s.Etcd.ApplyWithStorageFactoryTo(storageFactory, genericConfig); la
 }
 
 ```
-
+进入到s.Etcd.ApplyWithStorageFactoryTo()中，才猛然发现: 
+k8s.io/kubernetes/vendor/src/k8s.io/apiserver/pkg/server/options/etcd.go:
+```
+func (s *EtcdOptions) ApplyWithStorageFactoryTo(factory serverstorage.StorageFactory, c *server.Config) error {
+ c.RESTOptionsGetter = &storageFactoryRestOptionsFactory{Options: *s, StorageFactory: factory}
+ return nil
+}
+```
 
 
 
