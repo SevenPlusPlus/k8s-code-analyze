@@ -121,7 +121,11 @@ k8s.io/kubernetes/pkg/registry/core/rest/storage_core.go:
 ```
 func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
      apiGroupInfo := genericapiserver.APIGroupInfo{
- PrioritizedVersions: legacyscheme.Scheme.PrioritizedVersionsForGroup(""), VersionedResourcesStorageMap: map[string]map[string]rest.Storage{}, Scheme: legacyscheme.Scheme, ParameterCodec: legacyscheme.ParameterCodec, NegotiatedSerializer: legacyscheme.Codecs,
+ PrioritizedVersions: legacyscheme.Scheme.PrioritizedVersionsForGroup(""), 
+VersionedResourcesStorageMap: map[string]map[string]rest.Storage{},
+ Scheme: legacyscheme.Scheme,
+ ParameterCodec: legacyscheme.ParameterCodec,
+ NegotiatedSerializer: legacyscheme.Codecs,
  	}
        restStorage := LegacyRESTStorage{}
 	...
