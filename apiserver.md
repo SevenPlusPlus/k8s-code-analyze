@@ -58,7 +58,56 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	m := &Master{
 		GenericAPIServer: s,
 	}}
+	// install legacy rest storage
+	legacyRESTStorageProvider := corerest.LegacyRESTStorageProvider{
+			StorageFactory:              c.ExtraConfig.StorageFactory,
+			ProxyTransport:              c.ExtraConfig.ProxyTransport,
+			KubeletClientConfig:         c.ExtraConfig.KubeletClientConfig,
+			EventTTL:                    c.ExtraConfig.EventTTL,
+			ServiceIPRange:              c.ExtraConfig.ServiceIPRange,
+			ServiceNodePortRange:        c.ExtraConfig.ServiceNodePortRange,
+			LoopbackClientConfig:        c.GenericConfig.LoopbackClientConfig,
+			ServiceAccountIssuer:        c.ExtraConfig.ServiceAccountIssuer,
+			ServiceAccountAPIAudiences:  c.ExtraConfig.ServiceAccountAPIAudiences,
+			ServiceAccountMaxExpiration: c.ExtraConfig.ServiceAccountMaxExpiration,
+		}
+		m.InstallLegacyAPI(&c, c.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
+	}
 
+
+	restStorageProviders := []RESTStorageProvider{
+
+		authenticationrest.RESTStorageProvider{Authenticator: c.GenericConfig.Authentication.Authenticator},
+
+		authorizationrest.RESTStorageProvider{Authorizer: c.GenericConfig.Authorization.Authorizer, RuleResolver: c.GenericConfig.RuleResolver},
+		
+autoscalingrest.RESTStorageProvider{},
+		
+batchrest.RESTStorageProvider{},
+		
+certificatesrest.RESTStorageProvider{},
+		
+coordinationrest.RESTStorageProvider{},
+		
+extensionsrest.RESTStorageProvider{},
+		
+networkingrest.RESTStorageProvider{},
+		policyrest.RESTStorageProvider{},
+		rbacrest.RESTStorageProvider{Authorizer: c.GenericConfig.Authorization.Authorizer},
+		schedulingrest.RESTStorageProvider{},
+		settingsrest.RESTStorageProvider{},
+		storagerest.RESTStorageProvider{},
+		// keep apps after extensions so legacy clients resolve the extensions versions of shared resource names.
+		// See https://github.com/kubernetes/kubernetes/issues/42392
+		appsrest.RESTStorageProvider{},
+		admissionregistrationrest.RESTStorageProvider{},
+		eventsrest.RESTStorageProvider{TTL: c.ExtraConfig.EventTTL},
+	}
+
+	m.InstallAPIs(c.ExtraConfig.APIResourceConfigSource, c.GenericConfig.RESTOptionsGetter, restStorageProviders...)
+
+
+	return m, nil
 ```
 
 
