@@ -163,7 +163,12 @@ func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generi
 k8s.io/kubernetes/pkg/registry/core/node/storage/storage.go: 
 ```
 func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client.KubeletClientConfig, proxyTransport http.RoundTripper) (*NodeStorage, error) {
- store := &genericregistry.Store{ ... 
+ store := &genericregistry.Store{ 
+ NewFunc:                  func() runtime.Object { return &api.Node{} },
+		
+ NewListFunc:              func() runtime.Object { return &api.NodeList{} },
+... 
+ }
  return &NodeStorage{
  Node: nodeREST,
  Status: statusREST,
