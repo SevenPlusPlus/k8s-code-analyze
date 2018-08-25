@@ -113,6 +113,17 @@ func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.
  m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo); 
 }
 ```
+可以看到，这里生成了一个apiGroupInfo，然后将其装载到了m.GenericAPIServer中，与GenericAPIServer的工作方式衔接上了。 
+
+### legacyRESTStorageProvider
+apiGroupInfo是通过调用legacyRESTStorageProvider.NewLegacyRESTStorage()创建的.
+k8s.io/kubernetes/pkg/registry/core/rest/storage_core.go:
+```
+func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
+ apiGroupInfo := genericapiserver.APIGroupInfo{ PrioritizedVersions: legacyscheme.Scheme.PrioritizedVersionsForGroup(""), VersionedResourcesStorageMap: map[string]map[string]rest.Storage{}, Scheme: legacyscheme.Scheme, ParameterCodec: legacyscheme.ParameterCodec, NegotiatedSerializer: legacyscheme.Codecs, }
+
+```
+
 
 
 
