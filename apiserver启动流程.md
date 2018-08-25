@@ -113,8 +113,9 @@ ApiServerHandler为最终APIServer中http.Server的handler。
 // and the nonGoRestful handler (which can contain a fallthrough of its own)
 // FullHandlerChain -> Director -> {GoRestfulContainer,NonGoRestfulMux} based on inspection of registered web services
 type APIServerHandler struct {
- // FullHandlerChain is the one that is eventually served with. It should include the full filter 
-// chain and then call the Director. FullHandlerChain http.Handler
+ // FullHandlerChain is the one that is eventually served with. It should include the full filter chain and then call the Director.
+ FullHandlerChain http.Handler
+
  // The registered APIs. InstallAPIs uses this. Other servers probably shouldn't access this directly.
  GoRestfulContainer *restful.Container
  // NonGoRestfulMux is the final HTTP handler in the chain.
