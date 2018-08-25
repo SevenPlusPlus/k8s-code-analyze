@@ -428,7 +428,37 @@ func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource)
 找到Decorator方法实现了，e.Storage.Storage就是通过调用这个函数得到的，也就是genericregistry.StorageWithCacher方法，不开启watchcache时Decorator的实现为generic.UndecoratedStorage方法: 
 #### genericregistry.StorageWithCacher方法
 别忘了NodeStorage的Create方法最终操作落到e.Storage上，而e.Storage.Storage是通过opts.Decorator()创建的。
-而opt.Decorator就是genericregistry.StorageWithCacher()
+而opt.Decorator真正实现就是genericregistry.StorageWithCacher()
+k8s.io/kubernetes/vendor/src/k8s.io/apiserver/pkg/registry/generic/registry/storage_factory.go:
+
+```
+// Creates a cacher based given storageConfig.
+func StorageWithCacher(capacity int) generic.StorageDecorator {
+ return func( storageConfig *storagebackend.Config, objectType runtime.Object, resourcePrefix string, keyFunc func(obj runtime.Object) (string, error), newListFunc func() runtime.Object, getAttrsFunc storage.AttrFunc, triggerFunc storage.TriggerPublisherFunc) (storage.Interface, factory.DestroyFunc) {
+ s, d := generic.NewRawStorage(storageConfig) // TODO: we would change this later to make storage always have cacher and hide low level KV layer inside.
+ // Currently it has two layers of same storage interface -- cacher and low level kv.
+ cacherConfig := cacherstorage.Config{
+ CacheCapacity: capacity,
+ Storage: s,
+ Versioner: etcdstorage.APIObjectVersioner{},
+ Type: objectType,
+ ResourcePrefix: resourcePrefix,
+ KeyFunc: keyFunc,
+ NewListFunc: newListFunc,
+ GetAttrsFunc: getAttrsFunc,
+ TriggerPublisherFunc: triggerFunc,
+ Codec: storageConfig.Codec,
+ }
+ cacher := cacherstorage.NewCacherFromConfig(cacherConfig)
+ destroyFunc := func() {
+ cacher.Stop()
+ d()
+ }
+ RegisterStorageCleanup(destroyFunc)
+
+ return cacher, destroyFunc
+ }}
+```
 
 
 
