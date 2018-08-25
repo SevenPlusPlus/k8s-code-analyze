@@ -325,10 +325,24 @@ k8s.io/kubernetes/pkg/registry/core/node/storage/storage.go:
 func NewStorage(optsGetter generic.RESTOptionsGetter, kubeletClientConfig client.KubeletClientConfig, proxyTransport http.RoundTripper) (*NodeStorage, error) {
 ...
 options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: node.GetAttrs, TriggerFunc: node.NodeNameTriggerFunc}
+
 ...
 
 ```
-
+options.RESTOptions就是变量optsGetter，继续回溯，找到optsGetter的实现： 
+k8s.io/kubernetes/pkg/master/master.go: 
+```
+func (c completedConfig) New() (*Master, error) {
+ ...
+ m := &Master{ GenericAPIServer: s, }
+ if c.APIResourceConfigSource.AnyResourcesForVersionEnabled(apiv1.SchemeGroupVersion) {
+ ...
+ //装载pod、service的资源操作的REST api
+ //参数2就是optsGetter m.InstallLegacyAPI(c.Config, 
+ c.Config.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
+ }
+...
+```
 
 
 
