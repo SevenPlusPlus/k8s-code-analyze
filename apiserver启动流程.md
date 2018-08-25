@@ -35,9 +35,16 @@ func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
 	err := s.NonBlockingRun(stopCh)
 }
 
-// NonBlockingRun spawns the secure http server. An error is// returned if the secure port cannot be listened on.
+// NonBlockingRun spawns the secure http server. An error is
+// returned if the secure port cannot be listened on.
 func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
-
+  if s.SecureServingInfo != nil && s.Handler != nil {
+		if err := s.SecureServingInfo.Serve(s.Handler, s.ShutdownTimeout, internalStopCh); err != nil {
+			close(internalStopCh)
+			return err
+		}
+	}
+}
 ```
 
 
