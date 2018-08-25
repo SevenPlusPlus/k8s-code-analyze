@@ -425,7 +425,10 @@ func (f *SimpleRestOptionsFactory) GetRESTOptions(resource schema.GroupResource)
 	return ret, nil
 }
 ```
-找到Decorator方法实现了，e.Storage.Storage就是通过调用这个函数得到的，也就是genericregistry.StorageWithCacher方法: 
+找到Decorator方法实现了，e.Storage.Storage就是通过调用这个函数得到的，也就是genericregistry.StorageWithCacher方法，不开启watchcache时Decorator的实现为generic.UndecoratedStorage方法: 
+#### genericregistry.StorageWithCacher方法
+别忘了NodeStorage的Create方法最终操作落到e.Storage上，而e.Storage.Storage是通过opts.Decorator()创建的。
+而opt.Decorator就是genericregistry.StorageWithCacher()
 
 
 
