@@ -294,7 +294,7 @@ e.NewFunc()返回的对象是调用创建方法时传入的变量，对于NodeSt
  	ExportStrategy: node.Strategy,
  }
 ```
-创建时在调用了e.NewFunc()之后，又调用了e.Storage.Create(ctx, key, obj, out, ttl)，需要继续回溯找到创建e.Storage的地方。 
+创建时在调用了e.NewFunc()之后，又调用了e.Storage.Create(ctx, key, obj, out, ttl)，需要继续回溯找到创建e.Storage的地方。 NodeStorage创建store时没有为Storage
 
 
 
