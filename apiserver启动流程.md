@@ -87,9 +87,29 @@ func RunServer(
 ```
 
 ### Container初始化
+* cmd/kube-apiserver/app/server.go
+```
+func CreateKubeAPIServerConfig(...) {
+  genericConfig, ... = buildGenericConfig(s.ServerRunOptions, proxyTransport)
+}
+
+func buildGenericConfig(s *options.ServerRunOptions, proxyTransport *http.Transport,)(...) {
+  genericConfig = genericapiserver.NewConfig(legacyscheme.Codecs)
+}
+
 
 * vendor/k8s.io/apiserver/pkg/server/config.go
 ```
+/ NewConfig returns a Config struct with the default values
+func NewConfig(codecs serializer.CodecFactory) *Config {
+ return &Config{
+ Serializer: codecs,
+ BuildHandlerChainFunc: DefaultBuildHandlerChain,
+ HandlerChainWaitGroup: new(utilwaitgroup.SafeWaitGroup),
+ LegacyAPIGroupPrefixes: sets.NewString(DefaultLegacyAPIPrefix),
+ ... }}
+
+
 // New creates a new server which logically combines the handling chain with the passed server.
 func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*GenericAPIServer, error) {
   handlerChainBuilder := func(handler http.Handler) http.Handler {
