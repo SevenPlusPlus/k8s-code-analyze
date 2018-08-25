@@ -157,6 +157,8 @@ func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generi
 	apiGroupInfo.VersionedResourcesStorageMap["v1"] = restStorageMap
 	...
 ```
+重点分析几个具体的storage，了解它们的实现。 
+
 
 
 
