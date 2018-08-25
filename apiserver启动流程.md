@@ -118,10 +118,12 @@ type APIServerHandler struct {
 
  // The registered APIs. InstallAPIs uses this. Other servers probably shouldn't access this directly.
  GoRestfulContainer *restful.Container
+
  // NonGoRestfulMux is the final HTTP handler in the chain.
  // It comes after all filters and the API handling
  // This is where other servers can attach handler to various parts of the chain.
  NonGoRestfulMux *mux.PathRecorderMux
+
  // Director is here so that we can properly handle fall through and proxy cases.
  // This looks a bit bonkers, but here's what's happening. We need to have /apis handling registered in gorestful in order to have
  // swagger generated for compatibility. Doing that with `/apis` as a webservice, means that it forcibly 404s (no defaulting allowed)
@@ -137,7 +139,6 @@ type APIServerHandler struct {
  // Other servers should only use this opaquely to delegate to an API server.
  Director http.Handler
 }
-
 
 ```
 
