@@ -269,7 +269,9 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
  key, err := e.KeyFunc(ctx, name)
  qualifiedResource := e.qualifiedResourceFromContext(ctx)
  ttl, err := e.calculateTTL(obj, 0, false)
- **out := e.NewFunc()**
+
+ out := e.NewFunc()
+
  e.Storage.Create(ctx, key, obj, out, ttl, dryrun.IsDryRun(options.DryRun))
  if e.AfterCreate != nil {... } }
  if e.Decorator != nil { ... } }
