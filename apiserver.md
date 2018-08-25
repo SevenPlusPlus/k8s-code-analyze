@@ -317,6 +317,9 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
  }
  ...
 ```
+不出所料，e.Storage就是在这里创建的，还需要继续回溯，找到opts.Decorator()的实现。 
+#### RESTOptions opts.Decorator
+
 
 
 
