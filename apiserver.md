@@ -29,7 +29,9 @@ k8s.io/kubernetes/pkg/registry/
 cmd/kube-apiserver/app/server.go: 
 ```
 // Run runs the specified APIServer. This should never exit.func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
- server, err := CreateServerChain(completeOptions, stopCh) return server.PrepareRun().Run(stopCh)}
+ server, err := CreateServerChain(completeOptions, stopCh) 
+ return server.PrepareRun().Run(stopCh)
+}
 ```
 
 
