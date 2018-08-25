@@ -278,6 +278,22 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
  return out, nil
 }
 ```
+e.NewFunc()返回的对象是调用创建方法时传入的变量，对于NodeStorage而言是: 
+```
+ store := &genericregistry.Store{
+ Copier: api.Scheme,
+ NewFunc: func() runtime.Object { return &api.Node{} },
+ NewListFunc: func() runtime.Object { return &api.NodeList{} }, 
+ObjectNameFunc: func(obj runtime.Object) (string, error) { return obj.(*api.Node).Name, nil },
+ PredicateFunc: node.MatchNode,
+ QualifiedResource: api.Resource("nodes"),
+ WatchCacheSize: cachesize.GetWatchCacheSizeByResource("nodes"), 
+CreateStrategy: node.Strategy,
+ UpdateStrategy: node.Strategy,
+ DeleteStrategy: node.Strategy,
+ ExportStrategy: node.Strategy,
+ }
+```
 
 
 
