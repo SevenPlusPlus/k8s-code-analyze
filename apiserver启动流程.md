@@ -105,8 +105,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 ```
 * vendor/k8s.io/apiserver/pkg/server/handler.go
 ApiServerHandler为最终APIServer中http.Server的handler。
-```
 
+```
 // APIServerHandlers holds the different http.Handlers used by the API server.
 // This includes the full handler chain, the director (which chooses between gorestful and nonGoRestful,
 // the gorestful handler (used for the API) which falls through to the nonGoRestful handler on unregistered paths,
