@@ -28,7 +28,8 @@ k8s.io/kubernetes/pkg/registry/
 ### Storage的注册装载过程
 cmd/kube-apiserver/app/server.go: 
 ```
-// Run runs the specified APIServer. This should never exit.func Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
+// Run runs the specified APIServer. This should never exit.func 
+Run(completeOptions completedServerRunOptions, stopCh <-chan struct{}) error {
  server, err := CreateServerChain(completeOptions, stopCh) 
  return server.PrepareRun().Run(stopCh)
 }
