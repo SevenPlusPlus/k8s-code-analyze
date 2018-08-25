@@ -435,29 +435,32 @@ k8s.io/kubernetes/vendor/src/k8s.io/apiserver/pkg/registry/generic/registry/stor
 // Creates a cacher based given storageConfig.
 func StorageWithCacher(capacity int) generic.StorageDecorator {
  return func( storageConfig *storagebackend.Config, objectType runtime.Object, resourcePrefix string, keyFunc func(obj runtime.Object) (string, error), newListFunc func() runtime.Object, getAttrsFunc storage.AttrFunc, triggerFunc storage.TriggerPublisherFunc) (storage.Interface, factory.DestroyFunc) {
- s, d := generic.NewRawStorage(storageConfig) // TODO: we would change this later to make storage always have cacher and hide low level KV layer inside.
+    s, d := generic.NewRawStorage(storageConfig)
+ // TODO: we would change this later to make storage always have cacher and hide low level KV layer inside.
  // Currently it has two layers of same storage interface -- cacher and low level kv.
- cacherConfig := cacherstorage.Config{
- CacheCapacity: capacity,
- Storage: s,
- Versioner: etcdstorage.APIObjectVersioner{},
- Type: objectType,
- ResourcePrefix: resourcePrefix,
- KeyFunc: keyFunc,
- NewListFunc: newListFunc,
- GetAttrsFunc: getAttrsFunc,
- TriggerPublisherFunc: triggerFunc,
- Codec: storageConfig.Codec,
- }
- cacher := cacherstorage.NewCacherFromConfig(cacherConfig)
- destroyFunc := func() {
- cacher.Stop()
- d()
- }
- RegisterStorageCleanup(destroyFunc)
+   cacherConfig := cacherstorage.Config{
+ 	CacheCapacity: capacity,
+	Storage: s,
+ 	Versioner: etcdstorage.APIObjectVersioner{},
+ 	Type: objectType,
+ 	ResourcePrefix: resourcePrefix,
+ 	KeyFunc: keyFunc,
+ 	NewListFunc: newListFunc,
+ 	GetAttrsFunc: getAttrsFunc,
+ 	TriggerPublisherFunc: triggerFunc,
+ 	Codec: storageConfig.Codec,
+   }
+   cacher := cacherstorage.NewCacherFromConfig(cacherConfig)
 
- return cacher, destroyFunc
- }}
+   destroyFunc := func() {
+ 	cacher.Stop()
+ 	d()
+   }
+   RegisterStorageCleanup(destroyFunc)
+
+   return cacher, destroyFunc
+ }
+}
 ```
 
 
