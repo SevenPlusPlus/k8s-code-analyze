@@ -93,11 +93,15 @@ func RunServer(
 // New creates a new server which logically combines the handling chain with the passed server.
 func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*GenericAPIServer, error) {
   handlerChainBuilder := func(handler http.Handler) http.Handler {
-
 		return c.BuildHandlerChainFunc(handler, c.Config)
+  }
+  apiServerHandler := NewAPIServerHandler(name, c.Serializer, handlerChainBuilder, delegationTarget.UnprotectedHandler())
+  s := &GenericAPIServer{
+		legacyAPIGroupPrefixes: c.LegacyAPIGroupPrefixes,
+		SecureServingInfo: c.SecureServing,
 
-	}
-   
+		Handler: apiServerHandler,
+   }
 ```
 
 
