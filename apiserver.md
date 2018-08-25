@@ -260,6 +260,13 @@ registry.Store的成员:
  +WatchPredicate(ctx genericapirequest.Context, p storage.SelectionPredicate, resourceVersion string) : watch.Interface, error
 
 ```
+其中的Storage成员类型为：
+```
+type DryRunnableStorage struct {
+ Storage storage.Interface
+ Codec runtime.Codec
+}
+```
 看一下Create()方法的实现: 
 
 ```
