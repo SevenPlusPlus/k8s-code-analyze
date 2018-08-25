@@ -9,6 +9,7 @@
     * [go context深入理解](go-context深入理解.md)
     * [go 反射reflect](go-反射reflect.md)
 * [kube-apiserver组件源码分析](kube-apiserver组件源码分析.md)
-    * [kube-apiserver相关源码包说明](kube-apiserver相关源码包说明.md)
+    * [ApiServer启动流程](apiserver启动流程.md)
     * [ApiServer Storage机制解析](apiserver-storage机制解析.md)
+    * [kube-apiserver相关源码包说明](kube-apiserver相关源码包说明.md)
 
