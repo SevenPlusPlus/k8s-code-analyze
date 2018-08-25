@@ -54,7 +54,7 @@ func CreateKubeAPIServer(kubeAPIServerConfig *master.Config, delegateAPIServer g
 k8s.io/kubernetes/pkg/master/master.go: 
 ```
 func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget) (*Master, error) {
-	s, err := c.GenericConfig.New("kube-apiserver", delegationTarget)
+  	s, err := c.GenericConfig.New("kube-apiserver", delegationTarget)
 	m := &Master{
 		GenericAPIServer: s,
 	}}
