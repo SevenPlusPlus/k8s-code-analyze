@@ -99,6 +99,7 @@ func buildGenericConfig(s *options.ServerRunOptions, proxyTransport *http.Transp
 
 
 * vendor/k8s.io/apiserver/pkg/server/config.go
+
 ```
 / NewConfig returns a Config struct with the default values
 func NewConfig(codecs serializer.CodecFactory) *Config {
