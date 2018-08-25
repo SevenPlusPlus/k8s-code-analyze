@@ -71,8 +71,18 @@ func RunServer(
  ln net.Listener,
  shutDownTimeout time.Duration,
  stopCh <-chan struct{},
-) error { go func() {   var listener net.Listener   listener = tcpKeepAliveListener{ln.(*net.TCPListener)}   if server.TLSConfig != nil {
-      listener = tls.NewListener(listener, server.TLSConfig)   }   err := server.Serve(listener) }() return nil}
+) error {
+  go func() {
+   var listener net.Listener
+   listener = tcpKeepAliveListener{ln.(*net.TCPListener)}
+   if server.TLSConfig != nil {
+      listener = tls.NewListener(listener, server.TLSConfig)
+   }
+   err := server.Serve(listener)
+  }()
+
+ return nil
+}
 
 ```
 
