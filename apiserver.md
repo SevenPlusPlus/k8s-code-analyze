@@ -358,9 +358,10 @@ func Run(runOptions *options.ServerRunOptions, stopCh <-chan struct{}) error {
 func buildGenericConfig(s *options.ServerRunOptions) (*genericapiserver.Config, informers.SharedInformerFactory, *kubeserver.InsecureServingInfo, error) {
  genericConfig := genericapiserver.NewConfig(api.Codecs)
  ...
- if err := s.Etcd.ApplyWithStorageFactoryTo(storageFactory, genericConfig); err != nil {
- return nil, nil, nil, err
- }
+if lastErr = s.Etcd.ApplyWithStorageFactoryTo(storageFactory, genericConfig); lastErr != nil {
+ return
+}
+
 ```
 
 
