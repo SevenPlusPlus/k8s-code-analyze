@@ -351,6 +351,18 @@ func Run(runOptions *options.ServerRunOptions, stopCh <-chan struct{}) error {
  ...
 
 ```
+要找到kubeAPIServerConfig.GenericConfig.RESTOptionsGetter。 
+此处的kubeAPIServerConfig.GenericConfig即master.config.GenericConfig
+其在CreateKubeAPIServerConfig方法中调用buildGenericConfig得到的。
+```
+func buildGenericConfig(s *options.ServerRunOptions) (*genericapiserver.Config, informers.SharedInformerFactory, *kubeserver.InsecureServingInfo, error) {
+ genericConfig := genericapiserver.NewConfig(api.Codecs)
+ ...
+ if err := s.Etcd.ApplyWithStorageFactoryTo(storageFactory, genericConfig); err != nil {
+ return nil, nil, nil, err
+ }
+```
+
 
 
 
