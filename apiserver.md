@@ -345,7 +345,8 @@ func (c completedConfig) New() (*Master, error) {
  if c.APIResourceConfigSource.AnyResourcesForVersionEnabled(apiv1.SchemeGroupVersion) {
  ...
  //装载pod、service的资源操作的REST api
- //参数2就是optsGetter m.InstallLegacyAPI(c.Config, 
+ //参数2就是optsGetter
+ m.InstallLegacyAPI(c.Config, 
  c.Config.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
  }
 ...
