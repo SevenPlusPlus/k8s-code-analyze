@@ -262,7 +262,20 @@ registry.Store的成员:
 ```
 看一下Create()方法的实现: 
 
-
+```
+// Create inserts a new item according to the unique key from the object.
+func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) { name, err := e.ObjectNameFunc(obj)
+ key, err := e.KeyFunc(ctx, name)
+ qualifiedResource := e.qualifiedResourceFromContext(ctx)
+ ttl, err := e.calculateTTL(obj, 0, false)
+ out := e.NewFunc()
+ if err := e.Storage.Create(ctx, key, obj, out, ttl, dryrun.IsDryRun(options.DryRun))
+ if errGet := e.Storage.Get(ctx, key, "", out, false); errGet != nil {
+ return nil, err
+ }
+ if e.AfterCreate != nil {... } } if e.Decorator != nil { ... } } return out, nil
+}
+```
 
 
 
