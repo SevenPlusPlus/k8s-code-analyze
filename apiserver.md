@@ -264,7 +264,8 @@ registry.Store的成员:
 
 ```
 // Create inserts a new item according to the unique key from the object.
-func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) { name, err := e.ObjectNameFunc(obj)
+func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
+ name, err := e.ObjectNameFunc(obj)
  key, err := e.KeyFunc(ctx, name)
  qualifiedResource := e.qualifiedResourceFromContext(ctx)
  ttl, err := e.calculateTTL(obj, 0, false)
@@ -275,6 +276,7 @@ func (e *Store) Create(ctx context.Context, obj runtime.Object, createValidation
  return out, nil
 }
 ```
+
 
 
 
