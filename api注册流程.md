@@ -7,6 +7,7 @@
 func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget) (*Master, error) {
   
   ...
+
   m.InstallLegacyAPI(&c, c.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
 
   ...
