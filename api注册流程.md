@@ -171,4 +171,7 @@ func createHandler(r rest.NamedCreater, scope RequestScope, admit admission.Inte
   original := r.New()
   ...
   transformResponseObject(ctx, scope, req, w, code, result)
+}
 ```
+* /vendor/k8s.io/apiserver/pkg/endpoints/handlers/response.go:
+
