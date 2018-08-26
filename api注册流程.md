@@ -209,6 +209,7 @@ func (m *Master) InstallLegacyAPI(c *Config, restOptionsGetter generic.RESTOptio
 }
 ```
 * pkg/registry/core/rest/storage_core.go
+```
 func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
   // 初始化: VersionedResourcesStorageMap
     apiGroupInfo := genericapiserver.APIGroupInfo{
@@ -235,6 +236,7 @@ func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generi
 
     return restStorage, apiGroupInfo, nil
 }
+```
 即
 
 apiGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
