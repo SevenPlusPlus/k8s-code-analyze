@@ -179,6 +179,6 @@ func createHandler(r rest.NamedCreater, scope RequestScope, admit admission.Inte
 // transformResponseObject takes an object loaded from storage and performs any necessary transformations.
 // Will write the complete response object.
 func transformResponseObject(ctx context.Context, scope RequestScope, req *http.Request, w http.ResponseWriter, statusCode int, result runtime.Object) {
-
-
+  ...
+  responsewriters.WriteObject(statusCode, scope.Kind.GroupVersion(), scope.Serializer, result, w, req)
 ```
