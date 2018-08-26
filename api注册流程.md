@@ -199,6 +199,8 @@ func transformResponseObject(ctx context.Context, scope RequestScope, req *http.
 storage = apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version][path]
 creater, isCreater := storage.(rest.Creater)
 ```
+接着寻找apiGroupInfo初始化的位置
+
 
 
 
