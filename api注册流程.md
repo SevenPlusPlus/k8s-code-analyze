@@ -107,3 +107,5 @@ func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []e
 2. 将API对应的route新建初始化后加入WebService
 3. 将WebService加入Container
 
+### WebService新增router
+
