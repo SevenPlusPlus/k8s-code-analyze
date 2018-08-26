@@ -81,6 +81,7 @@ func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
    installer := &APIInstaller{     group: g,     prefix: prefix,   }
    apiResources, ws, registrationErrors := installer.Install()   
    container.Add(ws)
-
+   ...
+}
 ```
 
