@@ -139,6 +139,6 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		Reads(defaultVersionedObject).
 		Writes(producedObject)
 
-	addParams(route, action.Params)
-	routes = append(routes, route)
+	    addParams(route, action.Params)
+	    routes = append(routes, route)
 ```
