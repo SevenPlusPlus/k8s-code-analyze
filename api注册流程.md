@@ -127,7 +127,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 	  } else {
 		handler = restfulCreateResource(creater, reqScope, admit)
 	  }
-         route := ws.POST(action.Path).To(handler).
+       route := ws.POST(action.Path).To(handler).
 		Doc(doc).
 		Param(ws.QueryParameter("pretty", "If 'true', then the output is pretty printed.")).
 		Operation("create"+namespaced+kind+strings.Title(subresource)+operationSuffix).				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), mediaTypes...)...).
