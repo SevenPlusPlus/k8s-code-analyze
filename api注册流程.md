@@ -3,7 +3,6 @@
 ![API注册流程概要](/assets/apiserver-register-01.jpg)
 开始API注册
 * /pkg/master/master.go:
-
 ```
 func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget) (*Master, error) { 
   ...
