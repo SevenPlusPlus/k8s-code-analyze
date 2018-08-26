@@ -238,7 +238,7 @@ func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generi
 }
 ```
 即
-
+```
 apiGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
         "pods":             podStorage.Pod,
         "pods/attach":      podStorage.Attach,
@@ -247,6 +247,7 @@ apiGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
         "nodes":        nodeStorage.Node,
         .....
     }
+```
 此时, 根据
 
 // apiGroupInfo.VersionedResourcesStorageMap
