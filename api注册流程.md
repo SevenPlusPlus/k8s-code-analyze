@@ -29,5 +29,9 @@ func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.
 * /vendor/k8s.io/apiserver/pkg/server/genericapiserver.go:
 
 ```
-afasdf
+func (s *GenericAPIServer) InstallLegacyAPIGroup(apiPrefix string, apiGroupInfo *APIGroupInfo) error {
+  if err := s.installAPIResources(apiPrefix, apiGroupInfo); err != nil {
+		return err
+	}
+  ...
 ```
