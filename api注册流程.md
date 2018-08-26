@@ -202,11 +202,13 @@ creater, isCreater := storage.(rest.Creater)
 接着寻找apiGroupInfo初始化的位置
 ### 第二步: apiGroupInfo 初始化
 * pkg/master/master.go
+```
 func (m *Master) InstallLegacyAPI(c *Config, restOptionsGetter generic.RESTOptionsGetter, legacyRESTStorageProvider corerest.LegacyRESTStorageProvider) {
     legacyRESTStorage, apiGroupInfo, err := legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter) // => next
     m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
 }
-pkg/registry/core/rest/storage_core.go
+```
+* pkg/registry/core/rest/storage_core.go
 func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
   // 初始化: VersionedResourcesStorageMap
     apiGroupInfo := genericapiserver.APIGroupInfo{
