@@ -72,4 +72,8 @@ func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *A
 }
 
 ```
+* /vendor/k8s.io/apiserver/pkg/endpoints/groupversion.go:
+```
+
+```
 
