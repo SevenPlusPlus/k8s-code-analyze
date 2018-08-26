@@ -15,7 +15,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 * k8s.io/kubernetes/pkg/master/master.go:
 ```
 func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.RESTOptionsGetter, legacyRESTStorageProvider corerest.LegacyRESTStorageProvider) {
- legacyRESTStorage, apiGroupInfo, err := legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter)
+ legacyRESTStorage, apiGroupInfo, err := 		  legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter)
 
 m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
 ...
