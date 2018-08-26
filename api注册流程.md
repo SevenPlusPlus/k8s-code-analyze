@@ -176,6 +176,9 @@ func createHandler(r rest.NamedCreater, scope RequestScope, admit admission.Inte
 * /vendor/k8s.io/apiserver/pkg/endpoints/handlers/response.go:
 
 ```
-// transformResponseObject takes an object loaded from storage and performs any necessary transformations.// Will write the complete response object.func transformResponseObject(ctx context.Context, scope RequestScope, req *http.Request, w http.ResponseWriter, statusCode int, result runtime.Object) {
+// transformResponseObject takes an object loaded from storage and performs any necessary transformations.
+// Will write the complete response object.
+func transformResponseObject(ctx context.Context, scope RequestScope, req *http.Request, w http.ResponseWriter, statusCode int, result runtime.Object) {
+
 
 ```
