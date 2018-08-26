@@ -165,4 +165,7 @@ func restfulCreateNamedResource(r rest.NamedCreater, scope handlers.RequestScope
 func CreateNamedResource(r rest.NamedCreater, scope RequestScope, admission admission.Interface) http.HandlerFunc {
 	return createHandler(r, scope, admission, true)
 }
+
+func createHandler(r rest.NamedCreater, scope RequestScope, admit admission.Interface, includeName bool) http.HandlerFunc { return func(w http.ResponseWriter, req *http.Request) {
+
 ```
