@@ -200,7 +200,61 @@ storage = apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version][path]
 creater, isCreater := storage.(rest.Creater)
 ```
 接着寻找apiGroupInfo初始化的位置
+### 第二步: apiGroupInfo 初始化
+* pkg/master/master.go
+func (m *Master) InstallLegacyAPI(c *Config, restOptionsGetter generic.RESTOptionsGetter, legacyRESTStorageProvider corerest.LegacyRESTStorageProvider) {
+    legacyRESTStorage, apiGroupInfo, err := legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter) // => next
+    m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
+}
+pkg/registry/core/rest/storage_core.go
+func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) {
+  // 初始化: VersionedResourcesStorageMap
+    apiGroupInfo := genericapiserver.APIGroupInfo{
+        GroupMeta:                    *api.Registry.GroupOrDie(api.GroupName),
+        VersionedResourcesStorageMap: map[string]map[string]rest.Storage{},
+        Scheme:                      api.Scheme,
+        ParameterCodec:              api.ParameterCodec,
+        NegotiatedSerializer:        api.Codecs,
+        SubresourceGroupVersionKind: map[string]schema.GroupVersionKind{},
+    }
+    // ......
 
+    // 初始化了一个restStorage的map，然后赋值给APIGroupInfo.VersionedResourcesStorageMap["v1"]
+    restStorageMap := map[string]rest.Storage{
+        "pods":             podStorage.Pod,
+        "pods/attach":      podStorage.Attach,
+        "pods/status":      podStorage.Status,
+        "services":        serviceRest.Service,
+        "nodes":        nodeStorage.Node,
+        .....
+    }
+
+    apiGroupInfo.VersionedResourcesStorageMap["v1"] = restStorageMap
+
+    return restStorage, apiGroupInfo, nil
+}
+即
+
+apiGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
+        "pods":             podStorage.Pod,
+        "pods/attach":      podStorage.Attach,
+        "pods/status":      podStorage.Status,
+        "services":        serviceRest.Service,
+        "nodes":        nodeStorage.Node,
+        .....
+    }
+此时, 根据
+
+// apiGroupInfo.VersionedResourcesStorageMap
+storage = apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version][path]
+creater, isCreater := storage.(rest.Creater)
+我们可以得到
+
+storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"]
+// equals
+storage = podStorage.Pod
+creater, isCreater := (podStorage.Pod).(rest.Creater)
+然后, 我们再看下podStorage.Pod的实现
 
 
 
