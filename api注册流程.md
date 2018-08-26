@@ -53,7 +53,8 @@ func (m *Master) InstallAPIs(apiResourceConfigSource serverstorage.APIResourceCo
 ```
 func (s *GenericAPIServer) InstallAPIGroup(apiGroupInfo *APIGroupInfo) error {
 
-if err := s.installAPIResources(APIGroupPrefix, apiGroupInfo); err != nil { return err
+if err := s.installAPIResources(APIGroupPrefix, apiGroupInfo); err != nil { 
+return err
 }
 ...
 }
