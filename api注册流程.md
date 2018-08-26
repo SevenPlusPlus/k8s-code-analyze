@@ -21,8 +21,8 @@ func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.
  legacyRESTStorage, apiGroupInfo, err := 		
        legacyRESTStorageProvider.NewLegacyRESTStorage(restOptionsGetter)
 
-m.GenericAPIServer.InstallLegacyAPIGroup(
-genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
+  m.GenericAPIServer.InstallLegacyAPIGroup(
+        genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
 ...
 
 }
