@@ -193,6 +193,12 @@ func transformResponseObject(ctx context.Context, scope RequestScope, req *http.
 这里, 想要知道handler最终调用的是哪里定义的方法, 我们需要分析storage的来源
 #### 第一步: 链路分析
 ![creater链路分析](/assets/apiserver-register-04.jpg)
+基于图不难分析得出以下结论：
+```
+// apiGroupInfo.VersionedResourcesStorageMap
+storage = apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version][path]
+creater, isCreater := storage.(rest.Creater)
+```
 
 
 
