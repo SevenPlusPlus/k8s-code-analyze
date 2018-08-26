@@ -64,6 +64,11 @@ func (s *GenericAPIServer) InstallAPIGroup(apiGroupInfo *APIGroupInfo) error {
 ```
 
 func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *APIGroupInfo) error {
+  for _, groupVersion := range apiGroupInfo.PrioritizedVersions {
+    apiGroupVersion.InstallREST(s.Handler.GoRestfulContainer)
+    ...
+  }
+}
 
 ```
 
