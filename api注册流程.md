@@ -122,9 +122,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
     switch action.Verb {
     case "POST": // Create a resource.
        var handler restful.RouteFunction
-			if isNamedCreater {
-				handler = restfulCreateNamedResource(namedCreater, reqScope, admit)
-			} else {
-				handler = restfulCreateResource(creater, reqScope, admit)
-			}
+	  if isNamedCreater {
+		handler = restfulCreateNamedResource(namedCreater, reqScope, admit)
+	  } else {
+		handler = restfulCreateResource(creater, reqScope, admit)
+	  }
 ```
