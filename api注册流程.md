@@ -39,5 +39,12 @@ func (s *GenericAPIServer) InstallLegacyAPIGroup(apiPrefix string, apiGroupInfo 
 * /pkg/master/master.go:
 
 ```
+func (m *Master) InstallAPIs(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter, restStorageProviders ...RESTStorageProvider) {
+ apiGroupsInfo := []genericapiserver.APIGroupInfo{}
 
+ for i := range apiGroupsInfo {
+		if err := m.GenericAPIServer.InstallAPIGroup(&apiGroupsInfo[i]); err != nil {
+			glog.Fatalf("Error in registering group versions: %v", err)
+		}
+	}
 ```
