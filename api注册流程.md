@@ -248,17 +248,19 @@ apiGroupInfo.VersionedResourcesStorageMap["v1"] = map[string]rest.Storage{
         .....
     }
 ```
-此时, 根据
-
+此时, 根据上一节分析得出的结论：
+```
 // apiGroupInfo.VersionedResourcesStorageMap
 storage = apiGroupInfo.VersionedResourcesStorageMap[groupVersion.Version][path]
 creater, isCreater := storage.(rest.Creater)
+```
 我们可以得到
-
+```
 storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"]
 // equals
 storage = podStorage.Pod
 creater, isCreater := (podStorage.Pod).(rest.Creater)
+```
 然后, 我们再看下podStorage.Pod的实现
 
 
