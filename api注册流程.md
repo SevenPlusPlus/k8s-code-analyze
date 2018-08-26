@@ -279,3 +279,14 @@ type PodStorage struct { Pod *REST ... } // REST implements a RESTStorage for po
 storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals storage = podStorage.Pod creater, isCreater := (podStorage.Pod).(rest.Creater) // equals creater, isCreater := (REST).(rest.Creater) creater, isCreater := (*genericregistry.Store).(rest.Creater)
 ```
 
+### 第四步: creater.New()
+![creater.New分析](/assets/apiserver-register-05.jpg)
+
+* vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
+```
+// New implements RESTStorage.New. func (e *Store) New() runtime.Object { return e.NewFunc() }
+```
+* pkg/registry/core/pod/storage/storage.go
+```
+func NewStorage(optsGetter generic.RESTOptionsGetter, k client.ConnectionInfoGetter, proxyTransport http.RoundTripper, podDisruptionBudgetClient policyclient.PodDisruptionBudgetsGetter) PodStorage { store := &genericregistry.Store{ NewFunc: func() runtime.Object { return &api.Pod{} }, .... } } // pkg/api/types.go type Pod struct { metav1.TypeMeta // +optional metav1.ObjectMeta // Spec defines the behavior of a pod. // +optional Spec PodSpec // Status represents the current information about a pod. This data may not be up // to date. // +optional Status PodStatus }
+```
