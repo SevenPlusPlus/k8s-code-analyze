@@ -186,6 +186,10 @@ func transformResponseObject(ctx context.Context, scope RequestScope, req *http.
 ```
 ### 回到最初的问题
 最终, handler调用的是rest.Creater.New()
-而creater声明的位于：
+而creater声明的位于/vendor/k8s.io/apiserver/pkg/endpoints/installer.go中
+```
+ creater, isCreater := storage.(rest.Creater)
+```
+
 
 
