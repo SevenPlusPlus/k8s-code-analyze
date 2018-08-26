@@ -62,7 +62,6 @@ func (s *GenericAPIServer) InstallAPIGroup(apiGroupInfo *APIGroupInfo) error {
 ```
 ### all to installAPIResources
 * /vendor/k8s.io/apiserver/pkg/server/genericapiserver.go:
-
 ```
 func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *APIGroupInfo) error {
   for _, groupVersion := range apiGroupInfo.PrioritizedVersions {
