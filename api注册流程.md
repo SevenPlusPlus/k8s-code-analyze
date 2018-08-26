@@ -141,4 +141,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 
 	    addParams(route, action.Params)
 	    routes = append(routes, route)
+     ...
+   }
+   for _, route := range routes {
 ```
