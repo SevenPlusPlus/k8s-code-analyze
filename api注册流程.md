@@ -147,3 +147,4 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
       ws.Route(route)
    }
 ```
+#### Create Handler
