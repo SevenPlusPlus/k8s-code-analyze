@@ -111,5 +111,20 @@ func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []e
 
 ```
 func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
-
+  ...
+  creater, isCreater := storage.(rest.Creater)
+  actions := []action{}
+  ...
+  actions = appendIf(actions, action{"POST", resourcePath, resourceParams, namer, false}, isCreater)
+  ...
+  // Create Routes for the actions.
+  for _, action := range actions {
+    switch action.Verb {
+    case "POST": // Create a resource.
+       var handler restful.RouteFunction
+			if isNamedCreater {
+				handler = restfulCreateNamedResource(namedCreater, reqScope, admit)
+			} else {
+				handler = restfulCreateResource(creater, reqScope, admit)
+			}
 ```
