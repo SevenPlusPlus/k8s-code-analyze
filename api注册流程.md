@@ -144,4 +144,6 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
      ...
    }
    for _, route := range routes {
+      ws.Route(route)
+   }
 ```
