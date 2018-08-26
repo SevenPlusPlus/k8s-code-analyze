@@ -19,6 +19,7 @@ func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.
 
 m.GenericAPIServer.InstallLegacyAPIGroup(genericapiserver.DefaultLegacyAPIPrefix, &apiGroupInfo)
 ...
+
 }
 ```
 * /vendor/k8s.io/apiserver/pkg/server/genericapiserver.go:
