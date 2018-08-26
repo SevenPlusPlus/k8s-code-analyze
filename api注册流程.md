@@ -167,5 +167,8 @@ func CreateNamedResource(r rest.NamedCreater, scope RequestScope, admission admi
 }
 
 func createHandler(r rest.NamedCreater, scope RequestScope, admit admission.Interface, includeName bool) http.HandlerFunc { return func(w http.ResponseWriter, req *http.Request) {
-
+  ...
+  original := r.New()
+  ...
+  transformResponseObject(ctx, scope, req, w, code, result)
 ```
