@@ -75,6 +75,11 @@ func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *A
 * /vendor/k8s.io/apiserver/pkg/endpoints/groupversion.go:
 
 ```
+func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
+
+   prefix := path.Join(g.Root, g.GroupVersion.Group, g.GroupVersion.Version)
+   installer := &APIInstaller{     group: g,     prefix: prefix,   }
+   apiResources, ws, registrationErrors := installer.Install()   container.Add(ws)
 
 ```
 
