@@ -87,6 +87,9 @@ func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
 * /vendor/k8s.io/apiserver/pkg/endpoints/installer.go:
 
 ```
+// Install handlers for API resources.
+func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []error) {
+ ... ws := a.newWebService()  for _, path := range paths {    apiResource, err := a.registerResourceHandlers(path, a.group.Storage[path], ws)  }  if apiResource != nil {    apiResources = append(apiResources, *apiResource)  } } return apiResources, ws, errors}
 
 ```
 
