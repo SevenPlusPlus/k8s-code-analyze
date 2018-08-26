@@ -60,3 +60,4 @@ func (s *GenericAPIServer) InstallAPIGroup(apiGroupInfo *APIGroupInfo) error {
 }
 
 ```
+### all to installAPIResources
