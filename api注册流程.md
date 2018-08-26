@@ -183,3 +183,4 @@ func transformResponseObject(ctx context.Context, scope RequestScope, req *http.
   responsewriters.WriteObject(statusCode, scope.Kind.GroupVersion(), scope.Serializer, result, w, req)
 }
 ```
+
