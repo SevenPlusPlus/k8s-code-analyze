@@ -15,7 +15,6 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 * /pkg/master/master.go:
 
 ```
-
 func (m *Master) InstallLegacyAPI(c *completedConfig, restOptionsGetter generic.RESTOptionsGetter, legacyRESTStorageProvider corerest.LegacyRESTStorageProvider) {
 
  legacyRESTStorage, apiGroupInfo, err := 		
