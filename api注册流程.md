@@ -148,3 +148,11 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
    }
 ```
 #### Create Handler
+* /vendor/k8s.io/apiserver/pkg/endpoints/installer.go:
+```
+func restfulCreateNamedResource(r rest.NamedCreater, scope handlers.RequestScope, admit admission.Interface) restful.RouteFunction {
+	return func(req *restful.Request, res *restful.Response) {
+		handlers.CreateNamedResource(r, scope, admit)(res.ResponseWriter, req.Request)
+	}
+}
+```
