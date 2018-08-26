@@ -109,3 +109,7 @@ func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []e
 
 ### WebService新增router
 
+```
+func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
+
+```
