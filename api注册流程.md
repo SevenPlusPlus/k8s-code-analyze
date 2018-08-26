@@ -288,5 +288,24 @@ storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals stor
 ```
 * pkg/registry/core/pod/storage/storage.go
 ```
-func NewStorage(optsGetter generic.RESTOptionsGetter, k client.ConnectionInfoGetter, proxyTransport http.RoundTripper, podDisruptionBudgetClient policyclient.PodDisruptionBudgetsGetter) PodStorage { store := &genericregistry.Store{ NewFunc: func() runtime.Object { return &api.Pod{} }, .... } } // pkg/api/types.go type Pod struct { metav1.TypeMeta // +optional metav1.ObjectMeta // Spec defines the behavior of a pod. // +optional Spec PodSpec // Status represents the current information about a pod. This data may not be up // to date. // +optional Status PodStatus }
+func NewStorage(optsGetter generic.RESTOptionsGetter, k client.ConnectionInfoGetter, proxyTransport http.RoundTripper, podDisruptionBudgetClient policyclient.PodDisruptionBudgetsGetter) PodStorage {
+ store := &genericregistry.Store{
+    NewFunc: func() runtime.Object {
+         return &api.Pod{}
+    },
+     ....
+    }
+ }
+ // pkg/api/types.go
+ type Pod struct {
+ metav1.TypeMeta
+ // +optional metav1.ObjectMeta
+ // Spec defines the behavior of a pod.
+ // +optional
+ Spec PodSpec
+ // Status represents the current information about a pod. This data may not be up
+ // to date.
+ // +optional
+ Status PodStatus
+ }
 ```
