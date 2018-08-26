@@ -158,3 +158,6 @@ func restfulCreateNamedResource(r rest.NamedCreater, scope handlers.RequestScope
 }
 
 ```
+* /vendor/k8s.io/apiserver/pkg/endpoints/handlers/create.go:
+```
+```
