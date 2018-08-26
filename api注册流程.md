@@ -262,6 +262,20 @@ storage = podStorage.Pod
 creater, isCreater := (podStorage.Pod).(rest.Creater)
 ```
 然后, 我们再看下podStorage.Pod的实现
+### 第三步: podStorage.Pod
 
+* pkg/registry/core/pod/storage/storage.go
+```
+type PodStorage struct { Pod *REST ... } // REST implements a RESTStorage for pods type REST struct { *genericregistry.Store // => NOTE proxyTransport http.RoundTripper }
+```
+即, PodStorage.Pod 类型是 REST, 而REST.genericregistry.Store, 其定义文件中存在
 
+* vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
+```
+// New implements RESTStorage.New. func (e *Store) New() runtime.Object { return e.NewFunc() } func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runtime.Object, error) { }
+```
+即,
+```
+storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals storage = podStorage.Pod creater, isCreater := (podStorage.Pod).(rest.Creater) // equals creater, isCreater := (REST).(rest.Creater) creater, isCreater := (*genericregistry.Store).(rest.Creater)
+```
 
