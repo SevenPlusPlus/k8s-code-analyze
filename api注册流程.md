@@ -108,6 +108,7 @@ func (a *APIInstaller) Install() ([]metav1.APIResource, *restful.WebService, []e
 3. 将WebService加入Container
 
 ### WebService新增router
+* /vendor/k8s.io/apiserver/pkg/endpoints/installer.go:
 
 ```
 func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
@@ -183,4 +184,8 @@ func transformResponseObject(ctx context.Context, scope RequestScope, req *http.
   responsewriters.WriteObject(statusCode, scope.Kind.GroupVersion(), scope.Serializer, result, w, req)
 }
 ```
+### 回到最初的问题
+最终, handler调用的是rest.Creater.New()
+而creater声明的位于：
+
 
