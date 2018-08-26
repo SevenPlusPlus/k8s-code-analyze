@@ -49,6 +49,7 @@ func (m *Master) InstallAPIs(apiResourceConfigSource serverstorage.APIResourceCo
 	}
 ```
 * /vendor/k8s.io/apiserver/pkg/server/genericapiserver.go:
+
 ```
 func (s *GenericAPIServer) InstallAPIGroup(apiGroupInfo *APIGroupInfo) error {
 
