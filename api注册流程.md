@@ -161,4 +161,8 @@ func restfulCreateNamedResource(r rest.NamedCreater, scope handlers.RequestScope
 * /vendor/k8s.io/apiserver/pkg/endpoints/handlers/create.go:
 
 ```
+// CreateNamedResource returns a function that will handle a resource creation with name.
+func CreateNamedResource(r rest.NamedCreater, scope RequestScope, admission admission.Interface) http.HandlerFunc {
+	return createHandler(r, scope, admission, true)
+}
 ```
