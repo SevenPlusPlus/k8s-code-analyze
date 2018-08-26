@@ -9,5 +9,5 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
   m.InstallLegacyAPI(&c, c.GenericConfig.RESTOptionsGetter, legacyRESTStorageProvider)
   ...
   m.InstallAPIs(c.ExtraConfig.APIResourceConfigSource, c.GenericConfig.RESTOptionsGetter, restStorageProviders...)
-
+  ...
 ```
