@@ -79,7 +79,8 @@ func (g *APIGroupVersion) InstallREST(container *restful.Container) error {
 
    prefix := path.Join(g.Root, g.GroupVersion.Group, g.GroupVersion.Version)
    installer := &APIInstaller{     group: g,     prefix: prefix,   }
-   apiResources, ws, registrationErrors := installer.Install()   container.Add(ws)
+   apiResources, ws, registrationErrors := installer.Install()   
+   container.Add(ws)
 
 ```
 
