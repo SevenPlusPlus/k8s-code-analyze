@@ -28,21 +28,13 @@ type Config struct {
 ```
 
 func CreateHealthCheck(c storagebackend.Config) (func() error, error) {
-
  switch c.Type {
-
  case storagebackend.StorageTypeETCD2:
-
- return newETCD2HealthCheck(c)
-
+   return newETCD2HealthCheck(c)
  case storagebackend.StorageTypeUnset, storagebackend.StorageTypeETCD3:
-
- return newETCD3HealthCheck(c)
-
+   return newETCD3HealthCheck(c)
  default:
-
- return nil, fmt.Errorf("unknown storage type: %s", c.Type)
-
+   return nil, fmt.Errorf("unknown storage type: %s", c.Type)
  }
 
 }
