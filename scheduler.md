@@ -7,3 +7,6 @@ func main() {
    command.Execute()
 }
 ```
+新建SchedulerCommand
+* cmd/kube-scheduler/app/server.go:
+
