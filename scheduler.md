@@ -3,7 +3,7 @@
 * cmd/kube-scheduler/scheduler.go:
 ```
 func main() {
-
    command := app.NewSchedulerCommand()
    command.Execute()
 }
+```
