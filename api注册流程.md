@@ -279,8 +279,13 @@ type PodStorage struct {
 
 * vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
 ```
-// New implements RESTStorage.New. func (e *Store) New() runtime.Object { 
-return e.NewFunc() } func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runtime.Object, error) { }
+// New implements RESTStorage.New.
+func (e *Store) New() runtime.Object { 
+
+  return e.NewFunc()
+} 
+
+func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runtime.Object, error) { }
 ```
 即,
 ```
