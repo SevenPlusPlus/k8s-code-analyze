@@ -338,6 +338,7 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 // its internal cache and updating its cache in the background based on the
 // given configuration.
 func NewCacherFromConfig(config Config) *Cacher {
+
 }
 ```
 
