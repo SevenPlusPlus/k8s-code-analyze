@@ -278,6 +278,7 @@ type PodStorage struct {
 即, PodStorage.Pod 类型是 REST, 而REST实现了RESTStorage for pods对象，内部继承了genericregistry.Store, 其定义文件是：
 
 * vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
+
 ```
 // New implements RESTStorage.New.
 func (e *Store) New() runtime.Object { 
