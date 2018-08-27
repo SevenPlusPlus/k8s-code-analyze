@@ -275,7 +275,7 @@ type PodStorage struct {
  proxyTransport http.RoundTripper
  }
 ```
-即, PodStorage.Pod 类型是 REST, 而REST.genericregistry.Store, 其定义文件中存在
+即, PodStorage.Pod 类型是 REST, 而REST.genericregistry.Store, 其定义文件中是：
 
 * vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
 ```
