@@ -267,7 +267,7 @@ creater, isCreater := (podStorage.Pod).(rest.Creater)
 * pkg/registry/core/pod/storage/storage.go
 ```
 type PodStorage struct {
- Pod *REST ...
+  Pod *REST ...
  } 
 // REST implements a RESTStorage for pods
  type REST struct {
