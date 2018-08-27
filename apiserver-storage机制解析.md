@@ -309,7 +309,10 @@ func (wc *watchChan) startWatching(watchClosedCh chan struct{}) {
  		wc.sendEvent(parseEvent(e))
  	}
  }
- // When we come to this point, it's only possible that client side ends the watch. // e.g. cancel the context, close the client. // If this watch chan is broken and context isn't cancelled, other goroutines will still hang. // We should notify the main thread that this goroutine has exited.
+ // When we come to this point, it's only possible that client side ends the watch.
+ // e.g. cancel the context, close the client.
+ // If this watch chan is broken and context isn't cancelled, other goroutines will still hang.
+ // We should notify the main thread that this goroutine has exited.
  //关闭watchClosedCh，通知外部routine watch操作结束
  close(watchClosedCh)
 }
