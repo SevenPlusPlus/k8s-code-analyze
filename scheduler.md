@@ -12,7 +12,11 @@ func main() {
 
 ```
 func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error {
+    // Apply algorithms based on feature gates.
+    algorithmprovider.ApplyFeatureGates()
 
+    // Build a scheduler config from the provided algorithm source.
+    schedulerConfig, err := NewSchedulerConfig(c)
 }
 
 ```
