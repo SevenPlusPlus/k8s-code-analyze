@@ -309,6 +309,7 @@ func (e *Store) New() runtime.Object {
  return e.NewFunc()
 }
 ```
+NewFunc的具体来源需要回溯到PodStorage的创建过程，即
 * pkg/registry/core/pod/storage/storage.go
 ```
 func NewStorage(optsGetter generic.RESTOptionsGetter, k client.ConnectionInfoGetter, proxyTransport http.RoundTripper, podDisruptionBudgetClient policyclient.PodDisruptionBudgetsGetter) PodStorage {
