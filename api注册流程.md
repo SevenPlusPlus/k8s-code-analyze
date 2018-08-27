@@ -292,7 +292,10 @@ func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runti
 ```
 即,
 ```
-storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals storage = podStorage.Pod creater, isCreater := (podStorage.Pod).(rest.Creater) // equals creater, isCreater := (REST).(rest.Creater) creater, isCreater := (*genericregistry.Store).(rest.Creater)
+storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals 
+ storage = podStorage.Pod
+creater, isCreater := (podStorage.Pod).(rest.Creater) // equals
+ creater, isCreater := (REST).(rest.Creater) creater, isCreater := (*genericregistry.Store).(rest.Creater)
 ```
 
 ### 第四步: creater.New()
