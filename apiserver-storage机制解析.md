@@ -312,6 +312,7 @@ func (wc *watchChan) startWatching(watchClosedCh chan struct{}) {
 
 前面解析了基于ETCD V3的Storage实现，下面我们接着上一节遗留问题，解析StorageWithCache的实现。
 ### StorageWithCache
+* vendor/k8s.io/apiserver/pkg/registry/generic/registry/storage_factory.go:
 ```
 // Creates a cacher based given storageConfig.
 func StorageWithCacher(capacity int) generic.StorageDecorator {
