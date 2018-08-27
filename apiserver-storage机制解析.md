@@ -315,6 +315,20 @@ func (wc *watchChan) startWatching(watchClosedCh chan struct{}) {
 ```
 // Creates a cacher based given storageConfig.
 func StorageWithCacher(capacity int) generic.StorageDecorator {
+   cacherConfig := cacherstorage.Config{
+			CacheCapacity:        capacity,
+			Storage:              s,
+			Versioner:            etcdstorage.APIObjectVersioner{},
+			Type:                 objectType,
+			ResourcePrefix:       resourcePrefix,
+			KeyFunc:              keyFunc,
+			NewListFunc:          newListFunc,
+			GetAttrsFunc:         getAttrsFunc,
+			TriggerPublisherFunc: triggerFunc,
+			Codec:                storageConfig.Codec,
+		}
+		cacher := cacherstorage.NewCacherFromConfig(cacherConfig)
+    ...
 ```
 
 
