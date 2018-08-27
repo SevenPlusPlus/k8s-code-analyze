@@ -17,6 +17,8 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
 
     // Build a scheduler config from the provided algorithm source.
     schedulerConfig, err := NewSchedulerConfig(c)
+    // Create the scheduler.
+    sched := scheduler.NewFromConfig(schedulerConfig)
 }
 
 ```
