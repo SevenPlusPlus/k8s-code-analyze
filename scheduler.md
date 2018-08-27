@@ -7,6 +7,10 @@ func main() {
    command.Execute()
 }
 ```
-新建SchedulerCommand
+新建SchedulerCommand并run
 * cmd/kube-scheduler/app/server.go:
+```
+func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error {
 
+}
+```
