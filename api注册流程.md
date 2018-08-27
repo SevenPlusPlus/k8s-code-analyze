@@ -287,6 +287,7 @@ func (e *Store) New() runtime.Object {
 } 
 
 func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runtime.Object, error) {
+   ...
 }
 ```
 即,
