@@ -320,7 +320,10 @@ func NewStorage(optsGetter generic.RESTOptionsGetter, k client.ConnectionInfoGet
      ....
     }
  }
- // pkg/api/types.go
+```
+Pod定义位于：
+* pkg/apis/core/types.go
+```
  type Pod struct {
  metav1.TypeMeta
  // +optional metav1.ObjectMeta
