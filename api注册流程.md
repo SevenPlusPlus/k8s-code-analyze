@@ -295,7 +295,8 @@ func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object) (runti
 storage = apiGroupInfo.VersionedResourcesStorageMap["v1"]["pods"] // equals 
  storage = podStorage.Pod
 creater, isCreater := (podStorage.Pod).(rest.Creater) // equals
- creater, isCreater := (REST).(rest.Creater) creater, isCreater := (*genericregistry.Store).(rest.Creater)
+ creater, isCreater := (REST).(rest.Creater) //也即
+ creater, isCreater := (*genericregistry.Store).(rest.Creater)
 ```
 
 ### 第四步: creater.New()
@@ -303,7 +304,10 @@ creater, isCreater := (podStorage.Pod).(rest.Creater) // equals
 
 * vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go
 ```
-// New implements RESTStorage.New. func (e *Store) New() runtime.Object { return e.NewFunc() }
+// New implements RESTStorage.New. 
+func (e *Store) New() runtime.Object {
+ return e.NewFunc()
+}
 ```
 * pkg/registry/core/pod/storage/storage.go
 ```
