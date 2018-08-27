@@ -14,4 +14,5 @@
     * [ApiServer Storage的使用](apiserver.md)
     * [ApiServer Storage实现解析](apiserver-storage机制解析.md)
     * [ApiServer相关源码包说明](kube-apiserver相关源码包说明.md)
+* [kube-scheduler组件源码分析](kube-scheduler组件源码分析.md)
 
