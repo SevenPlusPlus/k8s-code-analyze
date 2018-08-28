@@ -339,13 +339,17 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 // its internal cache and updating its cache in the background based on the
 // given configuration.
 func NewCacherFromConfig(config Config) *Cacher {
+  //新建watchCache，用来存储apiserver从etcd那里watch到的对象
   watchCache := newWatchCache(config.CacheCapacity, config.KeyFunc, config.GetAttrsFunc, config.Versioner)
+  //新建cacherListerWatcher将内部storage暴露为cache.ListerWacher的接口实现
   listerWatcher := newCacherListerWatcher(config.Storage, config.ResourcePrefix, config.NewListFunc)
 
+  //新建Cacher实现，四个重要成员: storage、watchCache、reflector、watchers
   cacher := &Cacher{
 		storage:     config.Storage,
 		objectType:  reflect.TypeOf(config.Type),
 		watchCache:  watchCache,
+      //reflector主要工作是将watch到的config.Type类型的对象存放到watchCache中
 		reflector:   cache.NewNamedReflector(reflectorName, listerWatcher, config.Type, watchCache, 0),
 		watchers: indexedWatchers{
 			allWatchers:   make(map[int]*cacheWatcher),
