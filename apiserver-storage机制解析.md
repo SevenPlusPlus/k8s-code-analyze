@@ -458,4 +458,6 @@ func newWatchCache(capacity int, keyFunc func(runtime.Object) (string, error)) *
 * vendor/k8s.io/client.go/tools/cache/store.go:
 
 ```
+// NewStore returns a Store implemented simply with a map and a lock.func NewStore(keyFunc KeyFunc) Store { return &cache{ cacheStorage: NewThreadSafeStore(Indexers{}, Indices{}), keyFunc: keyFunc, }}
+
 ```
