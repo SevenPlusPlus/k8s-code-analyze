@@ -575,5 +575,11 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 }
 ```
 
+### 启动Cacher（Cacher.startCaching）
+
+```
+
+``` 
+
 
 
