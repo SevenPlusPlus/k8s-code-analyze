@@ -415,7 +415,7 @@ func NewCacherFromConfig(config Config) *Cacher {
 #### watchCache
 * vendor/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go:
 watchCache实现了cache.Store(vendor/k8s.io/client-go/tools/cache/store.go)接口，其内部包含两个重要的成员：cache和store
-* cache中存储的是event(add\delete\update)
+* cache中存储的是event(watchCacheElement/watchCacheEvent)(add\delete\update)
 * store存储的是资源对象
 
 ```
