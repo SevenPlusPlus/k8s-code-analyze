@@ -591,11 +591,13 @@ func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
 ``` 
 #### 调用Reflector的ListAndWatch
 分析其流程如下：
+1. 调用listerWatcher的List方法
+2. 调用listerWatcher的Watch方法
+3. 调用func (r *Reflector) watchHandler
 
 ```
 // ListAndWatch first lists all items and get the resource version at the moment of call,
 // and then use the resource version to watch.
-// It returns error if ListAndWatch didn't even try to initialize watch.
 func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 	glog.V(3).Infof("Listing and watching %v from %s", r.expectedType, r.name)
 	var resourceVersion string
