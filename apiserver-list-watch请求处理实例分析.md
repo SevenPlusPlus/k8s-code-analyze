@@ -37,11 +37,7 @@ func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch
 	return func(w http.ResponseWriter, req *http.Request) {
 		
 		namespace, err := scope.Namer.Namespace(req)
-		if err != nil {
-			scope.err(err, w, req)
-			return
-		}
-
+		
 		// Watches for single objects are routed to this function.
 		// Treat a name parameter the same as a field selector entry.
 		hasName := true
