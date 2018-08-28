@@ -340,54 +340,29 @@ Cacher本身实现了storage.Interface接口，当然其大部分调用都直接
 
 type Cacher struct {
 
-
-
  // Incoming events that should be dispatched to watchers.
-
  incoming chan watchCacheEvent
 
-
-
  // Underlying storage.Interface.
-
  storage storage.Interface
 
-
-
  // Expected type of objects in the underlying cache.
-
  objectType reflect.Type
-
-
-
  // "sliding window" of recent changes of objects and the current state.
 
  watchCache *watchCache
 
  reflector *cache.Reflector
-
-
-
  // Versioner is used to handle resource versions.
 
  versioner storage.Versioner
-
-
-
  // triggerFunc is used for optimizing amount of watchers that needs to process
-
  // an incoming event.
-
  triggerFunc storage.TriggerPublisherFunc
-
  // watchers is mapping from the value of trigger function that a
-
  // watcher is interested into the watchers
-
  watcherIdx int
-
  watchers indexedWatchers
-
 }
 
 ```
