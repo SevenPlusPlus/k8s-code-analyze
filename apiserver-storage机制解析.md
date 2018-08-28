@@ -701,7 +701,9 @@ func (w *watchCache) Add(obj interface{}) error {
 	return w.processEvent(event, resourceVersion, f)
 }
 ```
-继续调用processEvent方法处理event，其流程如下：
+继续调用processEvent方法处理event，其流程如下：  
+1. 将event包装为watchCacheEvent
+2. 
 
 ```
 func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, updateFunc func(*storeElement) error) error {
