@@ -35,9 +35,7 @@ func restfulListResource(r rest.Lister, rw rest.Watcher, scope handlers.RequestS
 ```
 func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch bool, minRequestTimeout time.Duration) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		// For performance tracking purposes.
-		trace := utiltrace.New("List " + req.URL.Path)
-
+		
 		namespace, err := scope.Namer.Namespace(req)
 		if err != nil {
 			scope.err(err, w, req)
