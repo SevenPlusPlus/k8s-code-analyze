@@ -334,6 +334,68 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 ### Cacher
 * vendor/k8s.io/apiserver/pkg/storage/cacher/cacher.go:
 
+Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cacher主要用来封装实现了对特定资源的WATCH和LIST服务请求的处理，而其Cache的数据则是基于真正后端存储的内容后台进行更新。Cacher的定义如下：
+
+
+
+```
+
+type Cacher struct {
+
+
+
+ // Incoming events that should be dispatched to watchers.
+
+ incoming chan watchCacheEvent
+
+
+
+ // Underlying storage.Interface.
+
+ storage storage.Interface
+
+
+
+ // Expected type of objects in the underlying cache.
+
+ objectType reflect.Type
+
+
+
+ // "sliding window" of recent changes of objects and the current state.
+
+ watchCache *watchCache
+
+ reflector *cache.Reflector
+
+
+
+ // Versioner is used to handle resource versions.
+
+ versioner storage.Versioner
+
+
+
+ // triggerFunc is used for optimizing amount of watchers that needs to process
+
+ // an incoming event.
+
+ triggerFunc storage.TriggerPublisherFunc
+
+ // watchers is mapping from the value of trigger function that a
+
+ // watcher is interested into the watchers
+
+ watcherIdx int
+
+ watchers indexedWatchers
+
+}
+
+```
+
+
+
 
 #### NewCacherFromConfig 
 ```
@@ -380,36 +442,6 @@ func NewCacherFromConfig(config Config) *Cacher {
 		)
 	}()
    return cacher
-}
-```
-Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cacher主要用来封装实现了对特定资源的WATCH和LIST服务请求的处理，而其Cache的数据则是基于真正后端存储的内容后台进行更新。Cacher的定义如下：
-
-```
-type Cacher struct {
-
-	// Incoming events that should be dispatched to watchers.
-	incoming chan watchCacheEvent
-
-	// Underlying storage.Interface.
-	storage storage.Interface
-
-	// Expected type of objects in the underlying cache.
-	objectType reflect.Type
-
-	// "sliding window" of recent changes of objects and the current state.
-	watchCache *watchCache
-	reflector  *cache.Reflector
-
-	// Versioner is used to handle resource versions.
-	versioner storage.Versioner
-
-	// triggerFunc is used for optimizing amount of watchers that needs to process
-	// an incoming event.
-	triggerFunc storage.TriggerPublisherFunc
-	// watchers is mapping from the value of trigger function that a
-	// watcher is interested into the watchers
-	watcherIdx int
-	watchers   indexedWatchers
 }
 ```
 
