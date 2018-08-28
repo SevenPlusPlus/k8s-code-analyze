@@ -475,6 +475,7 @@ func NewStore(keyFunc KeyFunc) Store {
 watchCache实现了Add、Update、processEvent等一系列函数对cache中的event数据流进行处理。 
 
 #### cacherListerWatcher
+cacherListerWatcher内部的storage.Interface暴露给cache.ListerWatcher，其实现了List和Watch方法，但其实都是在调用之前通过newETCD3Storage(c)创建的定义在vendor/k8s.io/apiserver/pkg/storage/etcd3/store.go中List和Watch方法。
 
 ```
 // cacherListerWatcher opaques storage.Interface to expose cache.ListerWatcher.
