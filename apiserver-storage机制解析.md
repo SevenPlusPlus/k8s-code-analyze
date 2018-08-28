@@ -706,14 +706,8 @@ func (w *watchCache) Add(obj interface{}) error {
 ```
 func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, updateFunc func(*storeElement) error) error {
 	key, err := w.keyFunc(event.Object)
-	if err != nil {
-		return fmt.Errorf("couldn't compute key: %v", err)
-	}
 	elem := &storeElement{Key: key, Object: event.Object}
 	elem.Labels, elem.Fields, elem.Uninitialized, err = w.getAttrsFunc(event.Object)
-	if err != nil {
-		return err
-	}
 
 	watchCacheEvent := &watchCacheEvent{
 		Type:             event.Type,
