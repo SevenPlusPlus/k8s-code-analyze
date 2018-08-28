@@ -792,6 +792,39 @@ func (c *Cacher) dispatchEvents() {
 		}
 	}
 }
+
+func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
+	triggerValues, supported := c.triggerValues(event)
+
+	c.Lock()
+	defer c.Unlock()
+	// Iterate over "allWatchers" no matter what the trigger function is.
+	for _, watcher := range c.watchers.allWatchers {
+		watcher.add(event, c.dispatchTimeoutBudget)
+	}
+	if supported {
+		// Iterate over watchers interested in the given values of the trigger.
+		for _, triggerValue := range triggerValues {
+			for _, watcher := range c.watchers.valueWatchers[triggerValue] {
+				watcher.add(event, c.dispatchTimeoutBudget)
+			}
+		}
+	} else {
+		// supported equal to false generally means that trigger function
+		// is not defined (or not aware of any indexes). In this case,
+		// watchers filters should generally also don't generate any
+		// trigger values, but can cause problems in case of some
+		// misconfiguration. Thus we paranoidly leave this branch.
+
+		// Iterate over watchers interested in exact values for all values.
+		for _, watchers := range c.watchers.valueWatchers {
+			for _, watcher := range watchers {
+				watcher.add(event, c.dispatchTimeoutBudget)
+			}
+		}
+	}
+}
 ```
+
 
 
