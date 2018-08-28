@@ -419,6 +419,7 @@ watchCache实现了cache.Store(vendor/k8s.io/client-go/tools/cache/store.go)接�
 * store存储的是资源对象
 
 ```
+type watchCache struct { sync.RWMutex // Condition on which lists are waiting for the fresh enough // resource version. cond *sync.Cond // Maximum size of history window. capacity int // keyFunc is used to get a key in the underlying storage for a given object. keyFunc func(runtime.Object) (string, error)
 
 
 ```
