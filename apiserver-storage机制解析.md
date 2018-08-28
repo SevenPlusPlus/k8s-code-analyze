@@ -355,29 +355,10 @@ Cacher的四个重要的成员：storage、watchCache、reflector、watchers。
 
 ```
 type Cacher struct {
-	// HighWaterMarks for performance debugging.
-	// Important: Since HighWaterMark is using sync/atomic, it has to be at the top of the struct due to a bug on 32-bit platforms
-	// See: https://golang.org/pkg/sync/atomic/ for more information
-	incomingHWM HighWaterMark
+
 	// Incoming events that should be dispatched to watchers.
 	/** Incoming events 会被分发到watchers **/
 	incoming chan watchCacheEvent
-
-	sync.RWMutex
-
-	// Before accessing the cacher's cache, wait for the ready to be ok.
-	// This is necessary to prevent users from accessing structures that are
-	// uninitialized or are being repopulated right now.
-	// ready needs to be set to false when the cacher is paused or stopped.
-	// ready needs to be set to true when the cacher is ready to use after
-	// initialization.
-	/*
-		在访问cacher的cache之前，等待ready变成ok。
-		这是必要的，以防止用户访问未初始化或正在重新填充的结构。
-		当cacher被stop时，需要把ready设置成false
-		当初始化之后准备开始使用cacher时，需要把ready设置为true
-	*/
-	ready *ready
 
 	// Underlying storage.Interface.
 	storage Interface
@@ -388,24 +369,12 @@ type Cacher struct {
 	// "sliding window" of recent changes of objects and the current state.
 	watchCache *watchCache
 	reflector  *cache.Reflector
-
-	// Versioner is used to handle resource versions.
-	versioner Versioner
-
-	// triggerFunc is used for optimizing amount of watchers that needs to process
-	// an incoming event.
-	triggerFunc TriggerPublisherFunc
 	// watchers is mapping from the value of trigger function that a
 	// watcher is interested into the watchers
 
 	watcherIdx int
 	watchers   indexedWatchers
-
-	// Handling graceful termination.
-	stopLock sync.RWMutex
-	stopped  bool
-	stopCh   chan struct{}
-	stopWg   sync.WaitGroup
+        ...
 }
 ```
 
