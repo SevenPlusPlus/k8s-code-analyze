@@ -435,5 +435,22 @@ type watchCache struct {
 新建一个WatchCache 
 
 ```
-
+func newWatchCache(capacity int, keyFunc func(runtime.Object) (string, error)) *watchCache {
+	wc := &watchCache{
+		capacity:   capacity,
+		keyFunc:    keyFunc,
+		cache:      make([]watchCacheElement, capacity),
+		startIndex: 0,
+		endIndex:   0,
+		/*
+			定义在/pkg/client/cache/store.go
+				==>func NewStore(keyFunc KeyFunc) Store
+		*/
+		store:           cache.NewStore(storeElementKey),
+		resourceVersion: 0,
+		clock:           clock.RealClock{},
+	}
+	wc.cond = sync.NewCond(wc.RLocker())
+	return wc
+}
 ```
