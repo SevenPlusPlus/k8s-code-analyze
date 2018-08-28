@@ -412,5 +412,7 @@ func NewCacherFromConfig(config Config) *Cacher {
    return cacher
 }
 ```
-#### 
+#### watchCache
+* vendor/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go:
+watchCache实现了cache.Store(vendor/k8s.io/client-go/tools/cache/store.go)接口
 
