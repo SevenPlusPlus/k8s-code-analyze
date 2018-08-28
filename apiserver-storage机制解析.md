@@ -769,14 +769,17 @@ func (c *cache) Add(obj interface{}) error {
 至此Event从etcd流向WatchCache的过程已经基本清晰。
 
 ### Event流向各个订阅者的watcher
-前面对watchCache.processEvent流程中的步骤2的onEvent其实是调用的外部Cacher对象的processEvent方法。
+前面对watchCache.processEvent流程中的步骤2的onEvent其实是调用的外部Cacher对象的processEvent方法。对Cacher来说processEvent作为一个生产者将watch到的event发送到incoming channel中。
 
 ```
 func (c *Cacher) processEvent(event *watchCacheEvent) {
 	c.incoming <- *event
 }
 ```
+对应的event消费过程的处理则是前面对NewCacherFromConfig就已经分析过的结论dispatchEvents方法。
 
+```
 
+```
 
 
