@@ -825,7 +825,11 @@ func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
 	}
 }
 ```
+可以看到分发的过程其实就是对Cacher中的watchers.allWatchers进行遍历，将event逐个添加到cacheWatcher中，最后分析下cacheWatcher添加event的过程：
 
+```
+
+```
 
 
 
