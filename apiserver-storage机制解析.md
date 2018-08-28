@@ -591,6 +591,7 @@ func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
 ``` 
 #### 调用Reflector的ListAndWatch
 分析其流程如下：
+
 1. 调用listerWatcher的List方法
 2. 调用listerWatcher的Watch方法
 3. 调用func (r *Reflector) watchHandler
