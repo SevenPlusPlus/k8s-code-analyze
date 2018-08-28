@@ -352,6 +352,18 @@ func NewCacherFromConfig(config Config) *Cacher {
 		},
 		...
 	}
+   go cacher.dispatchEvents()
+
+   go func() {
+		defer cacher.stopWg.Done()
+		wait.Until(
+			func() {
+				if !cacher.isStopped() {
+					cacher.startCaching(stopCh)
+				}
+			}, time.Second, stopCh,
+		)
+	}()
 }
 ```
 
