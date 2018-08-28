@@ -753,7 +753,15 @@ func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, upd
 查看updateFunc里面的Add函数，在pkg/client/cache/store.go 
 
 ```
-
+// Add inserts an item into the cache.
+func (c *cache) Add(obj interface{}) error {
+	key, err := c.keyFunc(obj)
+	if err != nil {
+		return KeyError{obj, err}
+	}
+	c.cacheStorage.Add(key, obj)
+	return nil
+}
 ```
 
 
