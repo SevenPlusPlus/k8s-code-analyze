@@ -21,4 +21,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
    }
 }
 ```
+请求处理的handler为restfulListResource
+
+```
+
+```
 
