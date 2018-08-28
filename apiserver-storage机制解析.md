@@ -334,6 +334,8 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 ### Cacher
 * vendor/k8s.io/apiserver/pkg/storage/cacher/cacher.go:
 
+
+#### NewCacherFromConfig 
 ```
 // NewCacherFromConfig creates a new Cacher responsible for servicing WATCH and LIST requests from
 // its internal cache and updating its cache in the background based on the
