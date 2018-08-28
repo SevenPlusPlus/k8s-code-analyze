@@ -742,6 +742,9 @@ func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, upd
 	}
 
 	if w.onEvent != nil {
+        //回顾Cache的构建方法中NewCacherFromConfig，
+ //其中watchCache的onEvent方法是通过watchCache.SetOnEvent(cacher.processEvent)来设置的
+ //因此此处的onEvent调用其实是调用Cacher的processEvent方法
 		w.onEvent(watchCacheEvent)
 	}
 	w.updateCache(resourceVersion, watchCacheEvent)
