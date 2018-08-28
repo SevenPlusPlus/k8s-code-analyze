@@ -816,7 +816,6 @@ func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
 		// watchers filters should generally also don't generate any
 		// trigger values, but can cause problems in case of some
 		// misconfiguration. Thus we paranoidly leave this branch.
-
 		// Iterate over watchers interested in exact values for all values.
 		for _, watchers := range c.watchers.valueWatchers {
 			for _, watcher := range watchers {
