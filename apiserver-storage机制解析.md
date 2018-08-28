@@ -367,9 +367,6 @@ type Cacher struct {
 
 ```
 
-
-
-
 #### NewCacherFromConfig 
 ```
 // NewCacherFromConfig creates a new Cacher responsible for servicing WATCH and LIST requests from
