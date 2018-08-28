@@ -554,6 +554,8 @@ type Reflector struct {
 新建一个Reflector
 
 ```
+创建一个新的type Reflector struct对象， Reflector会保持‘store中存储的expectedType’和etcd端的内容同步更新。 Reflector保证只会把符合expectedType类型的对象存放到store中，除非expectedType的值为nil。 如果resyncPeriod非0，那么list操作会间隔resyncPeriod执行一次， 所以可以使用reflectors周期性处理所有的数据、后续更新。
+
 // NewNamedReflector same as NewReflector, but with a specified name for logging
 func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, store Store, resyncPeriod time.Duration) *Reflector {
 	reflectorSuffix := atomic.AddInt64(&reflectorDisambiguator, 1)
