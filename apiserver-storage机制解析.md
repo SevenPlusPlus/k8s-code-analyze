@@ -702,6 +702,7 @@ func (w *watchCache) Add(obj interface{}) error {
 }
 ```
 继续调用processEvent方法处理event，其流程如下：  
+
 1. 将event包装为watchCacheEvent
 2. 
 
