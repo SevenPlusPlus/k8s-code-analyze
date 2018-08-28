@@ -648,6 +648,9 @@ func (lw *cacherListerWatcher) Watch(options metav1.ListOptions) (watch.Interfac
 可以分析得出其本质上是调用其内部的storage成员来实现的，根据前面对cacherListerWatcher分析可知最终调用到了位于（vendor/k8s.io/apiserver/pkg/storage/etcd3/store.go）的etcd3.store的实现。
 ##### Reflector的watchHandler实现
 
+```
+
+```
 
 
 
