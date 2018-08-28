@@ -578,7 +578,13 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 ### 启动Cacher（Cacher.startCaching）
 
 ```
-
+func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
+  ...
+  c.terminateAllWatchers()
+  if err := c.reflector.ListAndWatch(stopChannel); err != nil {
+		glog.Errorf("unexpected ListAndWatch error: %v", err)
+	}
+}
 ``` 
 
 
