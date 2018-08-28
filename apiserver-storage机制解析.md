@@ -554,7 +554,22 @@ type Reflector struct {
 新建一个Reflector
 
 ```
-
+// NewNamedReflector same as NewReflector, but with a specified name for logging
+func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, store Store, resyncPeriod time.Duration) *Reflector {
+	reflectorSuffix := atomic.AddInt64(&reflectorDisambiguator, 1)
+	r := &Reflector{
+		name: name,
+		// we need this to be unique per process (some names are still the same) but obvious who it belongs to
+		metrics:       newReflectorMetrics(makeValidPrometheusMetricLabel(fmt.Sprintf("reflector_"+name+"_%d", reflectorSuffix))),
+		listerWatcher: lw,
+		store:         store,
+		expectedType:  reflect.TypeOf(expectedType),
+		period:        time.Second,
+		resyncPeriod:  resyncPeriod,
+		clock:         &clock.RealClock{},
+	}
+	return r
+}
 ```
 
 
