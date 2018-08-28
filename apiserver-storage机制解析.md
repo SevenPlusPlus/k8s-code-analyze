@@ -414,5 +414,11 @@ func NewCacherFromConfig(config Config) *Cacher {
 ```
 #### watchCache
 * vendor/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go:
-watchCache实现了cache.Store(vendor/k8s.io/client-go/tools/cache/store.go)接口
+watchCache实现了cache.Store(vendor/k8s.io/client-go/tools/cache/store.go)接口，其内部包含两个重要的成员：cache和store
+* cache中存储的是event(add\delete\update)
+* store存储的是资源对象
+
+```
+type watchCache struct { sync.RWMutex // Condition on which lists are waiting for the fresh enough // resource version. cond *sync.Cond // Maximum size of history window. capacity int // keyFunc is used to get a key in the underlying storage for a given object. keyFunc func(runtime.Object) (string, error) // getAttrsFunc is used to get labels and fields of an object. getAttrsFunc func(runtime.Object) (labels.Set, fields.Set, bool, error) // cache is used a cyclic buffer - its first element (with the smallest // resourceVersion) is defined by startIndex, its last element is defined // by endIndex (if cache is full it will be startIndex + capacity). // Both startIndex and endIndex can be greater than buffer capacity - // you should always apply modulo capacity to get an index in cache array. cache []watchCacheElement startIndex int endIndex int // store will effectively support LIST operation from the "end of cache // history" i.e. from the moment just after the newest cached watched event. // It is necessary to effectively allow clients to start watching at now. // NOTE: We assume that <store> is thread-safe. store cache.Store // ResourceVersion up to which the watchCache is propagated. resourceVersion uint64 // This handler is run at the end of every successful Replace() method. onReplace func() // This handler is run at the end of every Add/Update/Delete method // and additionally gets the previous value of the object. onEvent func(*watchCacheEvent) // for testing timeouts. clock clock.Clock // An underlying storage.Versioner. versioner storage.Versioner}
+```
 
