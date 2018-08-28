@@ -351,6 +351,12 @@ func NewCacherFromConfig(config Config) *Cacher {
 		watchCache:  watchCache,
       //reflector主要工作是将watch到的config.Type类型的对象存放到watchCache中
 		reflector:   cache.NewNamedReflector(reflectorName, listerWatcher, config.Type, watchCache, 0),
+
+//allWatchers、valueWatchers 都是一个map，map的值类型为cacheWatcher，
+//当kubelet、kube-scheduler需要watch某类资源时， 他们会向kube-apiserver发起watch请求，
+//kube-apiserver就会生成一个cacheWatcher， 他们负责将watch的资源通过http从apiserver传递到kubelet、kube-scheduler
+// ==>event分发功能是在下面的 go cacher.dispatchEvents()中完成
+
 		watchers: indexedWatchers{
 			allWatchers:   make(map[int]*cacheWatcher),
 			valueWatchers: make(map[string]watchersMap),
