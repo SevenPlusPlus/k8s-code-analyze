@@ -363,7 +363,6 @@ type Cacher struct {
  watcherIdx int
  watchers indexedWatchers
 }
-
 ```
 
 #### NewCacherFromConfig 
