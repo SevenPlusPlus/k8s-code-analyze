@@ -576,6 +576,9 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 ```
 
 ### 启动Cacher（Cacher.startCaching）
+分析其流程如下：
+1. 首先会通过terminateAllWatchers注销所有的cachewatcher,因为这个时候apiserver还处于初始化阶段，因此不可能接受其他组件的watch，也就不可能有watcher。
+2. 调用c.reflector.ListAndWatch函数，完成前面说过的功能：reflector主要将apiserver组件从etcd中watch到的资源存储到watchCache中。
 
 ```
 func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
