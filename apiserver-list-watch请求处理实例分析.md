@@ -8,7 +8,17 @@
 func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
    ...
    
-   
+   switch action.Verb {
+       case "WATCHLIST": // Watch all resources of a kind.
+			handler := metrics.InstrumentRouteFunc(action.Verb, resource, subresource, requestScope, restfulListResource(lister, watcher, reqScope, true, a.minRequestTimeout))
+			route := ws.GET(action.Path).To(handler).
+				Doc(doc).
+				Param(ws.QueryParameter("pretty", "If 'true', then the output is pretty printed.")).
+				Operation("watch"+namespaced+kind+strings.Title(subresource)+"List"+operationSuffix).
+				Produces(allMediaTypes...).
+				Returns(http.StatusOK, "OK", versionedWatchEvent).
+				Writes(versionedWatchEvent)
+   }
 }
 ```
 
