@@ -870,7 +870,7 @@ func (c *cacheWatcher) add(event *watchCacheEvent, budget *timeBudget) {
 }
 ```
 
-
+至此可以说Event已经分发到了各个订阅者的cacheWatcher中了，后续各个Watcher组件会从channel input中获取到event。
 
 
 
