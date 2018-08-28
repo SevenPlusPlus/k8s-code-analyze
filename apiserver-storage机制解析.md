@@ -628,6 +628,22 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 	}
 }
 ```
+从Reflector在NewCacherFromConfig方法的创建过程可知，其内部的listerWatch成员即为前面分析过的cacherListerWatcher。其List、Watch实现即为：
 
+```
+// Implements cache.ListerWatcher interface.
+func (lw *cacherListerWatcher) List(options metav1.ListOptions) (runtime.Object, error) {
+	list := lw.newListFunc()
+	if err := lw.storage.List(context.TODO(), lw.resourcePrefix, "", storage.Everything, list); err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+// Implements cache.ListerWatcher interface.
+func (lw *cacherListerWatcher) Watch(options metav1.ListOptions) (watch.Interface, error) {
+	return lw.storage.WatchList(context.TODO(), lw.resourcePrefix, options.ResourceVersion, storage.Everything)
+}
+```
 
 
