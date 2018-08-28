@@ -364,6 +364,7 @@ func NewCacherFromConfig(config Config) *Cacher {
 			}, time.Second, stopCh,
 		)
 	}()
+   return cacher
 }
 ```
 
