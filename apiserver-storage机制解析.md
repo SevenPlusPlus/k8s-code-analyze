@@ -835,38 +835,7 @@ func (c *cacheWatcher) add(event *watchCacheEvent, budget *timeBudget) {
 		return
 	default:
 	}
-
-	// OK, block sending, but only for up to <timeout>.
-	// cacheWatcher.add is called very often, so arrange
-	// to reuse timers instead of constantly allocating.
-	startTime := time.Now()
-	timeout := budget.takeAvailable()
-
-	t, ok := timerPool.Get().(*time.Timer)
-	if ok {
-		t.Reset(timeout)
-	} else {
-		t = time.NewTimer(timeout)
-	}
-	defer timerPool.Put(t)
-
-	select {
-	case c.input <- event:
-		stopped := t.Stop()
-		if !stopped {
-			// Consume triggered (but not yet received) timer event
-			// so that future reuse does not get a spurious timeout.
-			<-t.C
-		}
-	case <-t.C:
-		// This means that we couldn't send event to that watcher.
-		// Since we don't want to block on it infinitely,
-		// we simply terminate it.
-		c.forget(false)
-		c.stop()
-	}
-
-	budget.returnUnused(timeout - time.Since(startTime))
+        ...
 }
 ```
 
