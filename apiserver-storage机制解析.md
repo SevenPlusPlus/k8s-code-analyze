@@ -524,6 +524,7 @@ type cacherListerWatcher struct {
 ```
 #### Reflector
 Reflector主要是watch一个指定的resource，会把resource发生的任何变化反映到指定的store中。 
+* vendor/k8s.io/client-go/tools/cache/reflector.go:
 
 ```
 // Reflector watches a specified resource and causes all changes to be reflected in the given store.
