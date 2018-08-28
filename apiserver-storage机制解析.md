@@ -773,10 +773,6 @@ func (c *cache) Add(obj interface{}) error {
 
 ```
 func (c *Cacher) processEvent(event *watchCacheEvent) {
-	if curLen := int64(len(c.incoming)); c.incomingHWM.Update(curLen) {
-		// Monitor if this gets backed up, and how much.
-		glog.V(1).Infof("cacher (%v): %v objects queued in incoming channel.", c.objectType.String(), curLen)
-	}
 	c.incoming <- *event
 }
 ```
