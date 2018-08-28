@@ -454,3 +454,8 @@ func newWatchCache(capacity int, keyFunc func(runtime.Object) (string, error)) *
 	return wc
 }
 ```
+新建一个cache.Store
+* vendor/k8s.io/client.go/tools/cache/store.go:
+
+```
+```
