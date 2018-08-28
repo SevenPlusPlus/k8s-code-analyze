@@ -704,7 +704,8 @@ func (w *watchCache) Add(obj interface{}) error {
 继续调用processEvent方法处理event，其流程如下：  
 
 1. 将event包装为watchCacheEvent
-2. 
+2. 调用w.onEvent(watchCacheEvent)，后面会通知对应订阅方的watcher
+3. 调用updateFunc(elem)往Cache里面insert一个Event, 这里的updateFunc就是上面Add函数的f := func(elem *storeElement) error { return w.store.Add(elem) }。 也就是说这里完成了Event从etcd流向Cache。
 
 ```
 func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, updateFunc func(*storeElement) error) error {
