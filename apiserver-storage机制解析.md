@@ -599,111 +599,29 @@ func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
 // ListAndWatch first lists all items and get the resource version at the moment of call,
 // and then use the resource version to watch.
 func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
-	glog.V(3).Infof("Listing and watching %v from %s", r.expectedType, r.name)
+	
 	var resourceVersion string
-
 	// Explicitly set "0" as resource version - it's fine for the List()
 	// to be served from cache and potentially be delayed relative to
 	// etcd contents. Reflector framework will catch up via Watch() eventually.
 	options := metav1.ListOptions{ResourceVersion: "0"}
-	r.metrics.numberOfLists.Inc()
-	start := r.clock.Now()
 	list, err := r.listerWatcher.List(options)
-	if err != nil {
-		return fmt.Errorf("%s: Failed to list %v: %v", r.name, r.expectedType, err)
-	}
-	r.metrics.listDuration.Observe(time.Since(start).Seconds())
+	
 	listMetaInterface, err := meta.ListAccessor(list)
-	if err != nil {
-		return fmt.Errorf("%s: Unable to understand list result %#v: %v", r.name, list, err)
-	}
 	resourceVersion = listMetaInterface.GetResourceVersion()
 	items, err := meta.ExtractList(list)
-	if err != nil {
-		return fmt.Errorf("%s: Unable to understand list result %#v (%v)", r.name, list, err)
-	}
-	r.metrics.numberOfItemsInList.Observe(float64(len(items)))
 	if err := r.syncWith(items, resourceVersion); err != nil {
-		return fmt.Errorf("%s: Unable to sync list result: %v", r.name, err)
 	}
 	r.setLastSyncResourceVersion(resourceVersion)
 
-	resyncerrc := make(chan error, 1)
-	cancelCh := make(chan struct{})
-	defer close(cancelCh)
-	go func() {
-		resyncCh, cleanup := r.resyncChan()
-		defer func() {
-			cleanup() // Call the last one written into cleanup
-		}()
-		for {
-			select {
-			case <-resyncCh:
-			case <-stopCh:
-				return
-			case <-cancelCh:
-				return
-			}
-			if r.ShouldResync == nil || r.ShouldResync() {
-				glog.V(4).Infof("%s: forcing resync", r.name)
-				if err := r.store.Resync(); err != nil {
-					resyncerrc <- err
-					return
-				}
-			}
-			cleanup()
-			resyncCh, cleanup = r.resyncChan()
-		}
-	}()
-
 	for {
-		// give the stopCh a chance to stop the loop, even in case of continue statements further down on errors
-		select {
-		case <-stopCh:
-			return nil
-		default:
-		}
-
-		timeoutSeconds := int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
 		options = metav1.ListOptions{
 			ResourceVersion: resourceVersion,
-			// We want to avoid situations of hanging watchers. Stop any wachers that do not
-			// receive any events within the timeout window.
 			TimeoutSeconds: &timeoutSeconds,
 		}
-
-		r.metrics.numberOfWatches.Inc()
 		w, err := r.listerWatcher.Watch(options)
-		if err != nil {
-			switch err {
-			case io.EOF:
-				// watch closed normally
-			case io.ErrUnexpectedEOF:
-				glog.V(1).Infof("%s: Watch for %v closed with unexpected EOF: %v", r.name, r.expectedType, err)
-			default:
-				utilruntime.HandleError(fmt.Errorf("%s: Failed to watch %v: %v", r.name, r.expectedType, err))
-			}
-			// If this is "connection refused" error, it means that most likely apiserver is not responsive.
-			// It doesn't make sense to re-list all objects because most likely we will be able to restart
-			// watch where we ended.
-			// If that's the case wait and resend watch request.
-			if urlError, ok := err.(*url.Error); ok {
-				if opError, ok := urlError.Err.(*net.OpError); ok {
-					if errno, ok := opError.Err.(syscall.Errno); ok && errno == syscall.ECONNREFUSED {
-						time.Sleep(time.Second)
-						continue
-					}
-				}
-			}
-			return nil
-		}
 
-		if err := r.watchHandler(w, &resourceVersion, resyncerrc, stopCh); err != nil {
-			if err != errorStopRequested {
-				glog.Warningf("%s: watch of %v ended with: %v", r.name, r.expectedType, err)
-			}
-			return nil
-		}
+		r.watchHandler(w, &resourceVersion, resyncerrc, stopCh)
 	}
 }
 ```
