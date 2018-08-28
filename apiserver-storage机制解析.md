@@ -337,7 +337,6 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cacher主要用来封装实现了对特定资源的WATCH和LIST服务请求的处理，而其Cache的数据则是基于真正后端存储的内容后台进行更新。Cacher的定义如下：
 
 ```
-
 type Cacher struct {
 
  // Incoming events that should be dispatched to watchers.
