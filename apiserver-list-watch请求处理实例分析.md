@@ -30,4 +30,9 @@ func restfulListResource(r rest.Lister, rw rest.Watcher, scope handlers.RequestS
 	}
 }
 ```
+继续分析ListResource：
+
+```
+
+```
 
