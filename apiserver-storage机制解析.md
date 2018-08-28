@@ -528,10 +528,6 @@ Reflector主要是watch一个指定的resource，会把resource发生的任何�
 ```
 // Reflector watches a specified resource and causes all changes to be reflected in the given store.
 type Reflector struct {
-	// name identifies this reflector. By default it will be a file:line if possible.
-	name string
-	// metrics tracks basic metric information about the reflector
-	metrics *reflectorMetrics
 
 	// The type of object we expect to place in the store.
 	expectedType reflect.Type
