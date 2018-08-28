@@ -551,6 +551,11 @@ type Reflector struct {
 	lastSyncResourceVersionMutex sync.RWMutex
 }
 ```
+新建一个Reflector
+
+```
+
+```
 
 
 
