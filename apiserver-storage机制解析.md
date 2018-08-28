@@ -365,7 +365,6 @@ func NewCacherFromConfig(config Config) *Cacher {
 	}
 
 /* 完成event分发功能，把event分发到对应的watchers中。 是incoming chan watchCacheEvent的消费者 */
-
    go cacher.dispatchEvents()
 
    go func() {
