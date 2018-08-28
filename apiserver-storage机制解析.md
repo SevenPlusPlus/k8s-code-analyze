@@ -596,6 +596,8 @@ func (c *Cacher) startCaching(stopChannel <-chan struct{}) {
 3. 调用func (r *Reflector) watchHandler
 
 ```
+ListAndWatch 首先会list所有的items，得到resource version；
+然后使用该resource version去watch。
 // ListAndWatch first lists all items and get the resource version at the moment of call,
 // and then use the resource version to watch.
 func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
