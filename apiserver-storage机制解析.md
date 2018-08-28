@@ -367,26 +367,13 @@ func NewCacherFromConfig(config Config) *Cacher {
    return cacher
 }
 ```
-Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cache主要用来封装实现了对特定资源的WATCH和LIST请求的处理，而Cache的数据则是基于真正后端存储的内容后台进行更新。Cacher的定义如下：
+Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cache主要用来封装实现了对特定资源的WATCH和LIST服务请求的处理，而Cache的数据则是基于真正后端存储的内容后台进行更新。Cacher的定义如下：
 
 ```
 type Cacher struct {
-	// HighWaterMarks for performance debugging.
-	// Important: Since HighWaterMark is using sync/atomic, it has to be at the top of the struct due to a bug on 32-bit platforms
-	// See: https://golang.org/pkg/sync/atomic/ for more information
-	incomingHWM storage.HighWaterMark
+
 	// Incoming events that should be dispatched to watchers.
 	incoming chan watchCacheEvent
-
-	sync.RWMutex
-
-	// Before accessing the cacher's cache, wait for the ready to be ok.
-	// This is necessary to prevent users from accessing structures that are
-	// uninitialized or are being repopulated right now.
-	// ready needs to be set to false when the cacher is paused or stopped.
-	// ready needs to be set to true when the cacher is ready to use after
-	// initialization.
-	ready *ready
 
 	// Underlying storage.Interface.
 	storage storage.Interface
@@ -408,16 +395,6 @@ type Cacher struct {
 	// watcher is interested into the watchers
 	watcherIdx int
 	watchers   indexedWatchers
-
-	// Defines a time budget that can be spend on waiting for not-ready watchers
-	// while dispatching event before shutting them down.
-	dispatchTimeoutBudget *timeBudget
-
-	// Handling graceful termination.
-	stopLock sync.RWMutex
-	stopped  bool
-	stopCh   chan struct{}
-	stopWg   sync.WaitGroup
 }
 ```
 
