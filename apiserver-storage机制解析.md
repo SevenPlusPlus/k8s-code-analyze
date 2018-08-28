@@ -704,7 +704,53 @@ func (w *watchCache) Add(obj interface{}) error {
 继续调用processEvent方法处理event，其流程如下：
 
 ```
+func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, updateFunc func(*storeElement) error) error {
+	key, err := w.keyFunc(event.Object)
+	if err != nil {
+		return fmt.Errorf("couldn't compute key: %v", err)
+	}
+	elem := &storeElement{Key: key, Object: event.Object}
+	elem.Labels, elem.Fields, elem.Uninitialized, err = w.getAttrsFunc(event.Object)
+	if err != nil {
+		return err
+	}
 
+	watchCacheEvent := &watchCacheEvent{
+		Type:             event.Type,
+		Object:           elem.Object,
+		ObjLabels:        elem.Labels,
+		ObjFields:        elem.Fields,
+		ObjUninitialized: elem.Uninitialized,
+		Key:              key,
+		ResourceVersion:  resourceVersion,
+	}
+
+	// TODO: We should consider moving this lock below after the watchCacheEvent
+	// is created. In such situation, the only problematic scenario is Replace(
+	// happening after getting object from store and before acquiring a lock.
+	// Maybe introduce another lock for this purpose.
+	w.Lock()
+	defer w.Unlock()
+	previous, exists, err := w.store.Get(elem)
+	if err != nil {
+		return err
+	}
+	if exists {
+		previousElem := previous.(*storeElement)
+		watchCacheEvent.PrevObject = previousElem.Object
+		watchCacheEvent.PrevObjLabels = previousElem.Labels
+		watchCacheEvent.PrevObjFields = previousElem.Fields
+		watchCacheEvent.PrevObjUninitialized = previousElem.Uninitialized
+	}
+
+	if w.onEvent != nil {
+		w.onEvent(watchCacheEvent)
+	}
+	w.updateCache(resourceVersion, watchCacheEvent)
+	w.resourceVersion = resourceVersion
+	w.cond.Broadcast()
+	return updateFunc(elem)
+}
 ```
 
 
