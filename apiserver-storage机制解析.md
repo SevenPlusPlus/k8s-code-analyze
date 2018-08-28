@@ -797,6 +797,10 @@ func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
 	triggerValues, supported := c.triggerValues(event)
 
 	// Iterate over "allWatchers" no matter what the trigger function is.
+      /*
+		对Cacher中的watchers.allWatchers进行遍历，
+		把event 发送到所有的watcher中
+	*/
 	for _, watcher := range c.watchers.allWatchers {
 		watcher.add(event, c.dispatchTimeoutBudget)
 	}
