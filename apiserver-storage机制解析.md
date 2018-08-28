@@ -750,6 +750,11 @@ func (w *watchCache) processEvent(event watch.Event, resourceVersion uint64, upd
 	return updateFunc(elem)
 }
 ```
+查看updateFunc里面的Add函数，在pkg/client/cache/store.go 
+
+```
+
+```
 
 
 
