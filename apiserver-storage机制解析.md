@@ -339,7 +339,19 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 ### Cacher
 * vendor/k8s.io/apiserver/pkg/storage/cacher/cacher.go:
 
-Cacher本身实现了storage.Interface接口，当然其大部分调用都直接代理给其底层真正的存储成员(storage)。Cacher主要用来封装实现了对特定资源的WATCH和LIST服务请求的处理，而其Cache的数据则是基于真正后端存储的内容后台进行更新。
+Cacher负责从其内部缓存提供给定资源的WATCH和LIST请求，并根据底层存储内容在后台更新其缓存。 Cacher实现storage.Interface（虽然大部分的调用只是委托给底层的存储）。 Cacher的核心是reflector机制。
+
+Cacher接口必然也实现了storage.Interface接口所需要的方法。 因为该Cacher只用于WATCH和LIST的request，所以可以看下cacher提供的API,除了WATCH和LIST相关的之外的接口都是调用了之前创建的storage的API。
+
+Cacher的四个重要的成员：storage、watchCache、reflector、watchers。
+
+* storage，数据源（可以简单理解为etcd、带cache的etcd），一个资源的etcd handler
+
+* watchCache，用来存储apiserver从etcd那里watch到的对象
+
+* reflector，包含两个重要的数据成员listerWatcher和watchCache。reflector的工作主要是将watch到的config.Type类型的对象存放到watcherCache中。
+
+* watchers， 当kubelet、kube-scheduler需要watch某类资源时，他们会向kube-apiserver发起watch请求，kube-apiserver就会生成一个cacheWatcher，他们负责将watch的资源通过http从apiserver传递到kubelet、kube-scheduler这些订阅方。watcher是kube-apiserver watch的发布方和订阅方的枢纽。
 
 #### NewCacherFromConfig 
 ```
