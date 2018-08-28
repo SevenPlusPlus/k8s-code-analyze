@@ -769,7 +769,11 @@ func (c *cache) Add(obj interface{}) error {
 至此Event从etcd流向WatchCache的过程已经基本清晰。
 
 ### Event流向各个订阅者的watcher
-前面对watchCache.processEvent流程中的步骤2的onEvent
+前面对watchCache.processEvent流程中的步骤2的onEvent其实是调用的外部Cacher对象的processEvent方法。
+
+```
+func (c *Cacher) processEvent(event *watchCacheEvent) { if curLen := int64(len(c.incoming)); c.incomingHWM.Update(curLen) { // Monitor if this gets backed up, and how much. glog.V(1).Infof("cacher (%v): %v objects queued in incoming channel.", c.objectType.String(), curLen) } c.incoming <- *event}
+```
 
 
 
