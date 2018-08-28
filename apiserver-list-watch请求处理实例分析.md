@@ -31,6 +31,7 @@ func restfulListResource(r rest.Lister, rw rest.Watcher, scope handlers.RequestS
 }
 ```
 继续分析ListResource：
+* vendor/k8s.io/apiserver/pkg/endpoints/handlers/get.go
 
 ```
 func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch bool, minRequestTimeout time.Duration) http.HandlerFunc {
