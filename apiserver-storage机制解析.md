@@ -353,6 +353,11 @@ Cacher的四个重要的成员：storage、watchCache、reflector、watchers。
 
 * watchers， 当kubelet、kube-scheduler需要watch某类资源时，他们会向kube-apiserver发起watch请求，kube-apiserver就会生成一个cacheWatcher，他们负责将watch的资源通过http从apiserver传递到kubelet、kube-scheduler这些订阅方。watcher是kube-apiserver watch的发布方和订阅方的枢纽。
 
+```
+
+```
+
+
 #### NewCacherFromConfig 
 ```
 // NewCacherFromConfig creates a new Cacher responsible for servicing WATCH and LIST requests from
