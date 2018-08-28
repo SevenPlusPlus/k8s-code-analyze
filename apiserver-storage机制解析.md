@@ -339,6 +339,31 @@ func StorageWithCacher(capacity int) generic.StorageDecorator {
 // given configuration.
 func NewCacherFromConfig(config Config) *Cacher {
   watchCache := newWatchCache(config.CacheCapacity, config.KeyFunc, config.GetAttrsFunc, config.Versioner)
+  listerWatcher := newCacherListerWatcher(config.Storage, config.ResourcePrefix, config.NewListFunc)
+
+  cacher := &Cacher{
+		ready:       newReady(),
+		storage:     config.Storage,
+		objectType:  reflect.TypeOf(config.Type),
+		watchCache:  watchCache,
+		reflector:   cache.NewNamedReflector(reflectorName, listerWatcher, config.Type, watchCache, 0),
+		versioner:   config.Versioner,
+		triggerFunc: config.TriggerPublisherFunc,
+		watcherIdx:  0,
+		watchers: indexedWatchers{
+			allWatchers:   make(map[int]*cacheWatcher),
+			valueWatchers: make(map[string]watchersMap),
+		},
+		// TODO: Figure out the correct value for the buffer size.
+		incoming:              make(chan watchCacheEvent, 100),
+		dispatchTimeoutBudget: newTimeBudget(stopCh),
+		// We need to (potentially) stop both:
+		// - wait.Until go-routine
+		// - reflector.ListAndWatch
+		// and there are no guarantees on the order that they will stop.
+		// So we will be simply closing the channel, and synchronizing on the WaitGroup.
+		stopCh: stopCh,
+	}
 }
 ```
 
