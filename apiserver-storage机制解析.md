@@ -647,8 +647,83 @@ func (lw *cacherListerWatcher) Watch(options metav1.ListOptions) (watch.Interfac
 ```
 可以分析得出其本质上是调用其内部的storage成员来实现的，根据前面对cacherListerWatcher分析可知最终调用到了位于（vendor/k8s.io/apiserver/pkg/storage/etcd3/store.go）的etcd3.store的实现。
 ##### Reflector的watchHandler实现
+将event对象从上一步Watch操作返回的watch.Interface的ResultChan中读取出来，然后根据event.Type去操作r.store，即操作watchCache。 
 
 ```
+// watchHandler watches w and keeps *resourceVersion up to date.
+func (r *Reflector) watchHandler(w watch.Interface, resourceVersion *string, errc chan error, stopCh <-chan struct{}) error {
+	start := r.clock.Now()
+	eventCount := 0
+
+	// Stopping the watcher should be idempotent and if we return from this function there's no way
+	// we're coming back in with the same watch interface.
+	defer w.Stop()
+	// update metrics
+	defer func() {
+		r.metrics.numberOfItemsInWatch.Observe(float64(eventCount))
+		r.metrics.watchDuration.Observe(time.Since(start).Seconds())
+	}()
+
+loop:
+	for {
+		select {
+		case <-stopCh:
+			return errorStopRequested
+		case err := <-errc:
+			return err
+		case event, ok := <-w.ResultChan():
+			if !ok {
+				break loop
+			}
+			if event.Type == watch.Error {
+				return apierrs.FromObject(event.Object)
+			}
+			if e, a := r.expectedType, reflect.TypeOf(event.Object); e != nil && e != a {
+				utilruntime.HandleError(fmt.Errorf("%s: expected type %v, but watch event object had type %v", r.name, e, a))
+				continue
+			}
+			meta, err := meta.Accessor(event.Object)
+			if err != nil {
+				utilruntime.HandleError(fmt.Errorf("%s: unable to understand watch event %#v", r.name, event))
+				continue
+			}
+			newResourceVersion := meta.GetResourceVersion()
+			switch event.Type {
+			case watch.Added:
+				err := r.store.Add(event.Object)
+				if err != nil {
+					utilruntime.HandleError(fmt.Errorf("%s: unable to add watch event object (%#v) to store: %v", r.name, event.Object, err))
+				}
+			case watch.Modified:
+				err := r.store.Update(event.Object)
+				if err != nil {
+					utilruntime.HandleError(fmt.Errorf("%s: unable to update watch event object (%#v) to store: %v", r.name, event.Object, err))
+				}
+			case watch.Deleted:
+				// TODO: Will any consumers need access to the "last known
+				// state", which is passed in event.Object? If so, may need
+				// to change this.
+				err := r.store.Delete(event.Object)
+				if err != nil {
+					utilruntime.HandleError(fmt.Errorf("%s: unable to delete watch event object (%#v) from store: %v", r.name, event.Object, err))
+				}
+			default:
+				utilruntime.HandleError(fmt.Errorf("%s: unable to understand watch event %#v", r.name, event))
+			}
+			*resourceVersion = newResourceVersion
+			r.setLastSyncResourceVersion(newResourceVersion)
+			eventCount++
+		}
+	}
+
+	watchDuration := r.clock.Now().Sub(start)
+	if watchDuration < 1*time.Second && eventCount == 0 {
+		r.metrics.numberOfShortWatches.Inc()
+		return fmt.Errorf("very short watch: %s: Unexpected watch close - watch lasted less than a second and no items received", r.name)
+	}
+	glog.V(4).Infof("%s: Watch close - %v total %v items received", r.name, r.expectedType, eventCount)
+	return nil
+}
 
 ```
 
