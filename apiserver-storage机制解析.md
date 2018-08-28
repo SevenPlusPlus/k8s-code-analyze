@@ -432,7 +432,7 @@ type watchCache struct {
 	versioner storage.Versioner
 }
 ```
-新建一个WatchCache 
+新建一个watchCache 
 
 ```
 func newWatchCache(capacity int, keyFunc func(runtime.Object) (string, error)) *watchCache {
@@ -467,3 +467,4 @@ func NewStore(keyFunc KeyFunc) Store {
 }
 
 ```
+watchCache实现了Add、Update、processEvent等一系列函数对cache中的event数据流进行处理。 
