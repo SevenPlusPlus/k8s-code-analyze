@@ -5,6 +5,10 @@
 * vendor/k8s.io/apiserver/pkg/endpoints/installer.go:
 
 ```
+func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storage, ws *restful.WebService) (*metav1.APIResource, error) {
+   ...
+   
 
+}
 ```
 
