@@ -1,9 +1,4 @@
-// cacherListerWatcher opaques storage.Interface to expose cache.ListerWatcher.
-type cacherListerWatcher struct {
-	storage        storage.Interface
-	resourcePrefix string
-	newListFunc    func() runtime.Object
-}##ApiServer后端存储机制接口实现
+##ApiServer后端存储机制接口实现
 ---
 主要代码目录为: k8s.io/apiserver/pkg/storage
 ###存储后端(storagebackend/)
