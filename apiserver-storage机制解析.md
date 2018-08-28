@@ -779,7 +779,19 @@ func (c *Cacher) processEvent(event *watchCacheEvent) {
 对应的event消费过程的处理则是前面对NewCacherFromConfig就已经分析过的结论dispatchEvents方法。
 
 ```
-
+func (c *Cacher) dispatchEvents() {
+	for {
+		select {
+		case event, ok := <-c.incoming:
+			if !ok {
+				return
+			}
+			c.dispatchEvent(&event)
+		case <-c.stopCh:
+			return
+		}
+	}
+}
 ```
 
 
