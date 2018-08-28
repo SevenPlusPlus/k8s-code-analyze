@@ -766,6 +766,10 @@ func (c *cache) Add(obj interface{}) error {
 	return nil
 }
 ```
+至此Event从etcd流向WatchCache的过程已经基本清晰。
+
+### Event流向各个订阅者的watcher
+前面对watchCache.processEvent流程中的步骤2的onEvent
 
 
 
