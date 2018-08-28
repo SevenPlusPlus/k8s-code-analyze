@@ -468,3 +468,6 @@ func NewStore(keyFunc KeyFunc) Store {
 
 ```
 watchCache实现了Add、Update、processEvent等一系列函数对cache中的event数据流进行处理。 
+
+#### cacherListerWatcher
+
