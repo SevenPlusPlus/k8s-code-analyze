@@ -794,7 +794,7 @@ func (c *Cacher) dispatchEvents() {
 }
 
 func (c *Cacher) dispatchEvent(event *watchCacheEvent) {
-
+     triggerValues, supported := c.triggerValues(event)
 	// Iterate over "allWatchers" no matter what the trigger function is.
       /*
 		对Cacher中的watchers.allWatchers进行遍历，
