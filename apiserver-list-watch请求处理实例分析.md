@@ -331,11 +331,6 @@ ServeHTTP处理客户端watch请求
 // ServeHTTP serves a series of encoded events via HTTP with Transfer-Encoding: chunked
 // or over a websocket connection.
 func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	kind := s.Scope.Kind
-	metrics.RegisteredWatchers.WithLabelValues(kind.Group, kind.Version, kind.Kind).Inc()
-	defer metrics.RegisteredWatchers.WithLabelValues(kind.Group, kind.Version, kind.Kind).Dec()
-
-	w = httplog.Unlogged(w)
 
 	if wsstream.IsWebSocketRequest(req) {
 		w.Header().Set("Content-Type", s.MediaType)
@@ -344,34 +339,12 @@ func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	cn, ok := w.(http.CloseNotifier)
-	if !ok {
-		err := fmt.Errorf("unable to start watch - can't get http.CloseNotifier: %#v", w)
-		utilruntime.HandleError(err)
-		s.Scope.err(errors.NewInternalError(err), w, req)
-		return
-	}
+	
 	flusher, ok := w.(http.Flusher)
-	if !ok {
-		err := fmt.Errorf("unable to start watch - can't get http.Flusher: %#v", w)
-		utilruntime.HandleError(err)
-		s.Scope.err(errors.NewInternalError(err), w, req)
-		return
-	}
 
 	framer := s.Framer.NewFrameWriter(w)
-	if framer == nil {
-		// programmer error
-		err := fmt.Errorf("no stream framing support is available for media type %q", s.MediaType)
-		utilruntime.HandleError(err)
-		s.Scope.err(errors.NewBadRequest(err.Error()), w, req)
-		return
-	}
+	
 	e := streaming.NewEncoder(framer, s.Encoder)
-
-	// ensure the connection times out
-	timeoutCh, cleanup := s.TimeoutFactory.TimeoutCh()
-	defer cleanup()
-	defer s.Watching.Stop()
 
 	// begin the stream
 	w.Header().Set("Content-Type", s.MediaType)
