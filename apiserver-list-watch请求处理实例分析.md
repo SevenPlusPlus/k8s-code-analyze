@@ -406,6 +406,7 @@ func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 至此就可以说kube-apiserver watch的结果已经发送给订阅方。 订阅方是指kube-controller-manager、proxy、scheduler、kubelet这些组件，向kube-apiserver订阅etcd的信息。
 
 ### 总结如下
+---
 kube-apiserver初始化时，建立对etcd的连接，并对etcd进行watch，将watch的结果存入watchCache。 当其他组件需要watch资源时，其他组件向apiserver发送一个watch请求，这个请求是可以带filter函数的。 apiserver针对这个请求会创建一个cacheWatcher，并基于cacheWatcher创建WatchServer。 watchCache watch的对象，首先会通过filter函数的过滤，假如过滤通过的话，则会通过WatcherServer发送给订阅组件。 
 
 
