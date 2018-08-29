@@ -73,5 +73,7 @@ restStorageMap := map[string]rest.Storage{
 		"pods/status":      podStorage.Status,
 		"pods/log":         podStorage.Log,
 ```
+因此rw=podStorage.Pod，其定义位于: pkg/registry/core/pod/storage/storage.go
+而podStorage.Pod类型为*REST
 
 
