@@ -171,11 +171,13 @@ func newCacheWatcher(resourceVersion uint64, chanSize int, initEvents []*watchCa
 		forget:    forget,
 		versioner: versioner,
 	}
-      //每一个Watcher都会有一些协程处理其channel input 消费者
+      //每一个Watcher都会有一个协程处理对其内部input channel的消费
 	go watcher.process(initEvents, resourceVersion)
 	return watcher
 }
 ```
+每一个cacheWatcher都会有一个协程来消费其内部的 channel input。 其生产者在前面Apiserver端List-Watch机制-1已经介绍过。
+
 
 
 
