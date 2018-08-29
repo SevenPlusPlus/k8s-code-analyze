@@ -171,6 +171,7 @@ func newCacheWatcher(resourceVersion uint64, chanSize int, initEvents []*watchCa
 		forget:    forget,
 		versioner: versioner,
 	}
+      //每一个Watcher都会有一些协程处理其channel input 消费者
 	go watcher.process(initEvents, resourceVersion)
 	return watcher
 }
