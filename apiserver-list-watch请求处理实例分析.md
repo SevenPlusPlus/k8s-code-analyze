@@ -325,6 +325,114 @@ type WatchServer struct {
 }
 ```
 
+ServeHTTP处理客户端watch请求
+
+```
+// ServeHTTP serves a series of encoded events via HTTP with Transfer-Encoding: chunked
+// or over a websocket connection.
+func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	kind := s.Scope.Kind
+	metrics.RegisteredWatchers.WithLabelValues(kind.Group, kind.Version, kind.Kind).Inc()
+	defer metrics.RegisteredWatchers.WithLabelValues(kind.Group, kind.Version, kind.Kind).Dec()
+
+	w = httplog.Unlogged(w)
+
+	if wsstream.IsWebSocketRequest(req) {
+		w.Header().Set("Content-Type", s.MediaType)
+		websocket.Handler(s.HandleWS).ServeHTTP(w, req)
+		return
+	}
+
+	cn, ok := w.(http.CloseNotifier)
+	if !ok {
+		err := fmt.Errorf("unable to start watch - can't get http.CloseNotifier: %#v", w)
+		utilruntime.HandleError(err)
+		s.Scope.err(errors.NewInternalError(err), w, req)
+		return
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		err := fmt.Errorf("unable to start watch - can't get http.Flusher: %#v", w)
+		utilruntime.HandleError(err)
+		s.Scope.err(errors.NewInternalError(err), w, req)
+		return
+	}
+
+	framer := s.Framer.NewFrameWriter(w)
+	if framer == nil {
+		// programmer error
+		err := fmt.Errorf("no stream framing support is available for media type %q", s.MediaType)
+		utilruntime.HandleError(err)
+		s.Scope.err(errors.NewBadRequest(err.Error()), w, req)
+		return
+	}
+	e := streaming.NewEncoder(framer, s.Encoder)
+
+	// ensure the connection times out
+	timeoutCh, cleanup := s.TimeoutFactory.TimeoutCh()
+	defer cleanup()
+	defer s.Watching.Stop()
+
+	// begin the stream
+	w.Header().Set("Content-Type", s.MediaType)
+	w.Header().Set("Transfer-Encoding", "chunked")
+	w.WriteHeader(http.StatusOK)
+	flusher.Flush()
+
+	var unknown runtime.Unknown
+	internalEvent := &metav1.InternalEvent{}
+	buf := &bytes.Buffer{}
+	ch := s.Watching.ResultChan()
+	for {
+		select {
+		case <-cn.CloseNotify():
+			return
+		case <-timeoutCh:
+			return
+		case event, ok := <-ch:
+			if !ok {
+				// End of results.
+				return
+			}
+
+			obj := event.Object
+			s.Fixup(obj)
+			if err := s.EmbeddedEncoder.Encode(obj, buf); err != nil {
+				// unexpected error
+				utilruntime.HandleError(fmt.Errorf("unable to encode watch object %T: %v", obj, err))
+				return
+			}
+
+			// ContentType is not required here because we are defaulting to the serializer
+			// type
+			unknown.Raw = buf.Bytes()
+			event.Object = &unknown
+
+			// create the external type directly and encode it.  Clients will only recognize the serialization we provide.
+			// The internal event is being reused, not reallocated so its just a few extra assignments to do it this way
+			// and we get the benefit of using conversion functions which already have to stay in sync
+			outEvent := &metav1.WatchEvent{}
+			*internalEvent = metav1.InternalEvent(event)
+			err := metav1.Convert_v1_InternalEvent_To_v1_WatchEvent(internalEvent, outEvent, nil)
+			if err != nil {
+				utilruntime.HandleError(fmt.Errorf("unable to convert watch object: %v", err))
+				// client disconnect.
+				return
+			}
+			if err := e.Encode(outEvent); err != nil {
+				utilruntime.HandleError(fmt.Errorf("unable to encode watch object %T: %v (%#v)", outEvent, err, e))
+				// client disconnect.
+				return
+			}
+			if len(ch) == 0 {
+				flusher.Flush()
+			}
+
+			buf.Reset()
+		}
+	}
+}
+```
 
 
 
