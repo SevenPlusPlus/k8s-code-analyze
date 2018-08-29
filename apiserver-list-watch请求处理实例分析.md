@@ -245,6 +245,8 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 }
 ```
 
+最后再来看看c.result的消费者 
+
 
 
 
