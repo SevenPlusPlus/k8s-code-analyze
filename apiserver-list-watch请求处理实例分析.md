@@ -251,7 +251,6 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 
 ```
 // serveWatch handles serving requests to the server
-// TODO: the functionality in this method and in WatchServer.Serve is not cleanly decoupled.
 func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, w http.ResponseWriter, timeout time.Duration) {
 	// negotiate for the stream serializer
 	serializer, err := negotiation.NegotiateOutputStreamSerializer(req, scope.Serializer)
@@ -307,6 +306,8 @@ func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, 
 	server.ServeHTTP(w, req)
 }
 ```
+
+
 
 
 
