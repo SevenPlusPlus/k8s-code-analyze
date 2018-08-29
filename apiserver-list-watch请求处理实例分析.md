@@ -182,31 +182,8 @@ func newCacheWatcher(resourceVersion uint64, chanSize int, initEvents []*watchCa
 func (c *cacheWatcher) process(initEvents []*watchCacheEvent, resourceVersion uint64) {
 	defer utilruntime.HandleCrash()
 
-	// Check how long we are processing initEvents.
-	// As long as these are not processed, we are not processing
-	// any incoming events, so if it takes long, we may actually
-	// block all watchers for some time.
-	// TODO: From the logs it seems that there happens processing
-	// times even up to 1s which is very long. However, this doesn't
-	// depend that much on the number of initEvents. E.g. from the
-	// 2000-node Kubemark run we have logs like this, e.g.:
-	// ... processing 13862 initEvents took 66.808689ms
-	// ... processing 14040 initEvents took 993.532539ms
-	// We should understand what is blocking us in those cases (e.g.
-	// is it lack of CPU, network, or sth else) and potentially
-	// consider increase size of result buffer in those cases.
-	const initProcessThreshold = 500 * time.Millisecond
-	startTime := time.Now()
 	for _, event := range initEvents {
 		c.sendWatchCacheEvent(event)
-	}
-	processingTime := time.Since(startTime)
-	if processingTime > initProcessThreshold {
-		objType := "<null>"
-		if len(initEvents) > 0 {
-			objType = reflect.TypeOf(initEvents[0].Object).String()
-		}
-		glog.V(2).Infof("processing %d initEvents of %s took %v", len(initEvents), objType, processingTime)
 	}
 
 	defer close(c.result)
