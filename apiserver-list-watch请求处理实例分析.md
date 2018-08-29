@@ -176,7 +176,12 @@ func newCacheWatcher(resourceVersion uint64, chanSize int, initEvents []*watchCa
 	return watcher
 }
 ```
-每一个cacheWatcher都会有一个协程来消费其内部的 channel input。 而input channel的生产者则是前一节《ApiServer Storage实现解析》中已经介绍过的Cacher的dispatchEvents方法
+每一个cacheWatcher都会有一个协程来消费其内部的 channel input。 而input channel的生产者则是前一节《ApiServer Storage实现解析》中已经介绍过的Cacher的dispatchEvents方法分发的。
+
+```
+
+```
+
 
 
 
