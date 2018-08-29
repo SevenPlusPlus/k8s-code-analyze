@@ -304,7 +304,25 @@ func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, 
 WatchServer定义如下：
 
 ```
+// WatchServer serves a watch.Interface over a websocket or vanilla HTTP.
+type WatchServer struct {
+	Watching watch.Interface
+	Scope    RequestScope
 
+	// true if websocket messages should use text framing (as opposed to binary framing)
+	UseTextFraming bool
+	// the media type this watch is being served with
+	MediaType string
+	// used to frame the watch stream
+	Framer runtime.Framer
+	// used to encode the watch stream event itself
+	Encoder runtime.Encoder
+	// used to encode the nested object in the watch stream
+	EmbeddedEncoder runtime.Encoder
+	Fixup           func(runtime.Object)
+
+	TimeoutFactory TimeoutFactory
+}
 ```
 
 
