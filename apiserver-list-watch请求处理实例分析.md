@@ -161,6 +161,7 @@ func (c *Cacher) Watch(ctx context.Context, key string, resourceVersion string, 
 
 ```
 func newCacheWatcher(resourceVersion uint64, chanSize int, initEvents []*watchCacheEvent, filter filterWithAttrsFunc, forget func(bool), versioner storage.Versioner) *cacheWatcher {
+       //生成一个新的CacheWatcher
 	watcher := &cacheWatcher{
 		input:     make(chan *watchCacheEvent, chanSize),
 		result:    make(chan watch.Event, chanSize),
