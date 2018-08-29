@@ -434,6 +434,8 @@ func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 ```
 
+至此就可以说kube-apiserver watch的结果已经发送给订阅方。 订阅方是指kube-controller-manager、proxy、scheduler、kubelet这些组件，向kube-apiserver订阅etcd的信息。
+
 
 
 
