@@ -67,6 +67,11 @@ func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch
 就Pod这种resource来说，其对应的podStorage来源于pkg/registry/core/rest/storage_core.go中func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) 中
 
 ```
-
+restStorageMap := map[string]rest.Storage{
+		"pods":             podStorage.Pod,
+		"pods/attach":      podStorage.Attach,
+		"pods/status":      podStorage.Status,
+		"pods/log":         podStorage.Log,
 ```
+
 
