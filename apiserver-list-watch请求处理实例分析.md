@@ -113,12 +113,6 @@ func (e *Store) Watch(ctx context.Context, options *metainternalversion.ListOpti
 func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate, resourceVersion string) (watch.Interface, error) {
 	if name, ok := p.MatchesSingle(); ok {
 		if key, err := e.KeyFunc(ctx, name); err == nil {
-         /*
-			e.Storage.Watch函数定义在/pkg/storage/cacher.go
-				==>func (c *Cacher) Watch(ctx context.Context, key string, resourceVersion string, pred SelectionPredicate)
-
-				开启了cache的时候，e.Storage is: *storage.Cacher
-			*/
 
 			w, err := e.Storage.Watch(ctx, key, resourceVersion, p)
 			if err != nil {
