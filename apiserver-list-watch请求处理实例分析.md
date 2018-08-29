@@ -251,7 +251,7 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 分析其流程如下:
 * 设置返回数据包的编码器
 * 构建WatchServer
-* ServeHTTP开启event流服务
+* ServeHTTP开始服务客户端的event watch请求
 
 ```
 // serveWatch handles serving requests to the server
@@ -324,6 +324,8 @@ type WatchServer struct {
 	TimeoutFactory TimeoutFactory
 }
 ```
+
+
 
 
 
