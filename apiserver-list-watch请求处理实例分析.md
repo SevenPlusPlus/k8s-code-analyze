@@ -246,7 +246,67 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 ```
 
 最后再来看看c.result的消费者 
+回顾前面ListResource的处理流程中第二步，创建好Watcher接口对象以后，函数会调用serveWatch(watcher, scope, req, res, timeout)处理传过来的event。
+* vendor/k8s.io/apiserver/pkg/endpoints/handlers/watch.go:
 
+```
+// serveWatch handles serving requests to the server
+// TODO: the functionality in this method and in WatchServer.Serve is not cleanly decoupled.
+func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, w http.ResponseWriter, timeout time.Duration) {
+	// negotiate for the stream serializer
+	serializer, err := negotiation.NegotiateOutputStreamSerializer(req, scope.Serializer)
+	if err != nil {
+		scope.err(err, w, req)
+		return
+	}
+	framer := serializer.StreamSerializer.Framer
+	streamSerializer := serializer.StreamSerializer.Serializer
+	embedded := serializer.Serializer
+	if framer == nil {
+		scope.err(fmt.Errorf("no framer defined for %q available for embedded encoding", serializer.MediaType), w, req)
+		return
+	}
+	encoder := scope.Serializer.EncoderForVersion(streamSerializer, scope.Kind.GroupVersion())
+
+	useTextFraming := serializer.EncodesAsText
+
+	// find the embedded serializer matching the media type
+	embeddedEncoder := scope.Serializer.EncoderForVersion(embedded, scope.Kind.GroupVersion())
+
+	// TODO: next step, get back mediaTypeOptions from negotiate and return the exact value here
+	mediaType := serializer.MediaType
+	if mediaType != runtime.ContentTypeJSON {
+		mediaType += ";stream=watch"
+	}
+
+	ctx := req.Context()
+	requestInfo, ok := request.RequestInfoFrom(ctx)
+	if !ok {
+		scope.err(fmt.Errorf("missing requestInfo"), w, req)
+		return
+	}
+
+	server := &WatchServer{
+		Watching: watcher,
+		Scope:    scope,
+
+		UseTextFraming:  useTextFraming,
+		MediaType:       mediaType,
+		Framer:          framer,
+		Encoder:         encoder,
+		EmbeddedEncoder: embeddedEncoder,
+		Fixup: func(obj runtime.Object) {
+			if err := setSelfLink(obj, requestInfo, scope.Namer); err != nil {
+				utilruntime.HandleError(fmt.Errorf("failed to set link for object %v: %v", reflect.TypeOf(obj), err))
+			}
+		},
+
+		TimeoutFactory: &realTimeoutFactory{timeout},
+	}
+
+	server.ServeHTTP(w, req)
+}
+```
 
 
 
