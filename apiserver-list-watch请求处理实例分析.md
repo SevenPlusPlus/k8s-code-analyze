@@ -74,6 +74,38 @@ restStorageMap := map[string]rest.Storage{
 		"pods/log":         podStorage.Log,
 ```
 因此rw=podStorage.Pod，其定义位于: pkg/registry/core/pod/storage/storage.go
-而podStorage.Pod类型为*REST
+而podStorage.Pod类型为*REST， 而REST继承了*genericregistry.Store类型。
+rw.Watch(ctx, &opts)本质上调用了*genericregistry.Store的Watch方法
+
+#### type Store struct
+接着上面，继续查看type Store struct，其定义了各种Resource的公共Restful接口实现。其定义在vendor/k8s.io/apiserver/pkg/registry/generic/registry/store.go:
+
+```
+// Watch makes a matcher for the given label and field, and calls
+// WatchPredicate. If possible, you should customize PredicateFunc to produce
+// a matcher that matches by key. SelectionPredicate does this for you
+// automatically.
+func (e *Store) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	label := labels.Everything()
+	if options != nil && options.LabelSelector != nil {
+		label = options.LabelSelector
+	}
+	field := fields.Everything()
+	if options != nil && options.FieldSelector != nil {
+		field = options.FieldSelector
+	}
+	predicate := e.PredicateFunc(label, field)
+
+	resourceVersion := ""
+	if options != nil {
+		resourceVersion = options.ResourceVersion
+		predicate.IncludeUninitialized = options.IncludeUninitialized
+	}
+	return e.WatchPredicate(ctx, predicate, resourceVersion)
+}
+```
+
+
+
 
 
