@@ -355,6 +355,7 @@ func (s *WatchServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var unknown runtime.Unknown
 	internalEvent := &metav1.InternalEvent{}
 	buf := &bytes.Buffer{}
+       //此处的Watching即为前面newCacheWatcher构建的cacheWatcher对象
 	ch := s.Watching.ResultChan()
 	for {
 		select {
