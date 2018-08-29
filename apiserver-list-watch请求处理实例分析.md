@@ -46,7 +46,7 @@ func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch
 		ctx = request.WithNamespace(ctx, namespace)
 
 		opts := metainternalversion.ListOptions{}
-
+               /*此处forceWatch传入的为true*/
 		if opts.Watch || forceWatch {
 
 			watcher, err := rw.Watch(ctx, &opts)
