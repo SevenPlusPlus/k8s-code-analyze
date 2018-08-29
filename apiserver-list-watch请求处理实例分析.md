@@ -202,6 +202,8 @@ func (c *cacheWatcher) process(initEvents []*watchCacheEvent, resourceVersion ui
 
 // NOTE: sendWatchCacheEvent is assumed to not modify <event> !!!
 func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
+     //sendWatchCacheEvent会调用c.filter函数对watch的结果进行过滤
+
 	curObjPasses := event.Type != watch.Deleted && c.filter(event.Key, event.ObjLabels, event.ObjFields, event.ObjUninitialized)
 	oldObjPasses := false
 	if event.PrevObject != nil {
@@ -212,6 +214,7 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 		return
 	}
 
+     //然后将过滤后的结果包装成watchEvent
 	var watchEvent watch.Event
 	switch {
 	case curObjPasses && !oldObjPasses:
