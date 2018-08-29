@@ -230,24 +230,14 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 		watchEvent = watch.Event{Type: watch.Deleted, Object: oldObj}
 	}
 
-	// We need to ensure that if we put event X to the c.result, all
-	// previous events were already put into it before, no matter whether
-	// c.done is close or not.
-	// Thus we cannot simply select from c.done and c.result and this
-	// would give us non-determinism.
-	// At the same time, we don't want to block infinitely on putting
-	// to c.result, when c.done is already closed.
-
-	// This ensures that with c.done already close, we at most once go
-	// into the next select after this. With that, no matter which
-	// statement we choose there, we will deliver only consecutive
-	// events.
+	
 	select {
 	case <-c.done:
 		return
 	default:
 	}
 
+    //然后将过滤后的结果包装成watchEvent，发送到c.result这个channel
 	select {
 	case c.result <- watchEvent:
 	case <-c.done:
