@@ -248,23 +248,21 @@ func (c *cacheWatcher) sendWatchCacheEvent(event *watchCacheEvent) {
 最后再来看看c.result的消费者 
 回顾前面ListResource的处理流程中第二步，创建好Watcher接口对象以后，函数会调用serveWatch(watcher, scope, req, res, timeout)处理传过来的event。
 * vendor/k8s.io/apiserver/pkg/endpoints/handlers/watch.go:
+分析其流程如下:
+* 设置返回数据包的编码器
+* 构建WatchServer
+* ServeHTTP开启event流服务
 
 ```
 // serveWatch handles serving requests to the server
 func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, w http.ResponseWriter, timeout time.Duration) {
 	// negotiate for the stream serializer
 	serializer, err := negotiation.NegotiateOutputStreamSerializer(req, scope.Serializer)
-	if err != nil {
-		scope.err(err, w, req)
-		return
-	}
+	
 	framer := serializer.StreamSerializer.Framer
 	streamSerializer := serializer.StreamSerializer.Serializer
 	embedded := serializer.Serializer
-	if framer == nil {
-		scope.err(fmt.Errorf("no framer defined for %q available for embedded encoding", serializer.MediaType), w, req)
-		return
-	}
+	
 	encoder := scope.Serializer.EncoderForVersion(streamSerializer, scope.Kind.GroupVersion())
 
 	useTextFraming := serializer.EncodesAsText
@@ -280,10 +278,6 @@ func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, 
 
 	ctx := req.Context()
 	requestInfo, ok := request.RequestInfoFrom(ctx)
-	if !ok {
-		scope.err(fmt.Errorf("missing requestInfo"), w, req)
-		return
-	}
 
 	server := &WatchServer{
 		Watching: watcher,
@@ -306,6 +300,13 @@ func serveWatch(watcher watch.Interface, scope RequestScope, req *http.Request, 
 	server.ServeHTTP(w, req)
 }
 ```
+
+WatchServer定义如下：
+
+```
+
+```
+
 
 
 
