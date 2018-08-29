@@ -85,6 +85,11 @@ rw.Watch(ctx, &opts)本质上调用了*genericregistry.Store的Watch方法
 // WatchPredicate. If possible, you should customize PredicateFunc to produce
 // a matcher that matches by key. SelectionPredicate does this for you
 // automatically.
+/*
+ Watch 根据指定的label and field进行匹配，调用WatchPredicate函数。
+	   如果可能，应该自定义PredicateFunc。
+	   SelectionPredicate 会完成该功能。
+*/
 func (e *Store) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	label := labels.Everything()
 	if options != nil && options.LabelSelector != nil {
