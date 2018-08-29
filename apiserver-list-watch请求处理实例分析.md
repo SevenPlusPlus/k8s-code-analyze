@@ -113,6 +113,20 @@ func (e *Store) Watch(ctx context.Context, options *metainternalversion.ListOpti
 func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate, resourceVersion string) (watch.Interface, error) {
 	if name, ok := p.MatchesSingle(); ok {
 		if key, err := e.KeyFunc(ctx, name); err == nil {
+     /*
+     /*
+				调用e.Storage.Watch(ctx, key, resourceVersion, p)
+
+				e=podStorage.pod, /pkg/registry/core/pod/etcd/etcd.go
+				那么e.Storage就是podStorage.pod的Storage，即store.Storage
+					==>Storage:     storageInterface,
+				所以e.Storage.Watch函数定义在/pkg/storage/cacher.go
+				==>func (c *Cacher) Watch(ctx context.Context, key string, resourceVersion string, pred SelectionPredicate)
+
+				开启了cache的时候，e.Storage is: *storage.Cacher
+			*/
+
+     */
 			w, err := e.Storage.Watch(ctx, key, resourceVersion, p)
 			if err != nil {
 				return nil, err
@@ -136,6 +150,7 @@ func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate
 	return w, nil
 }
 ```
+
 
 
 
