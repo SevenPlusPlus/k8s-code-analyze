@@ -64,4 +64,9 @@ func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch
 }
 ```
 结合调用上下文分析不难得知：rw rest.Watcher其实就是一个Storage即registerResourceHandlers时传入的rest.Storage。
+就Pod这种resource来说，其对应的podStorage来源于pkg/registry/core/rest/storage_core.go中func (c LegacyRESTStorageProvider) NewLegacyRESTStorage(restOptionsGetter generic.RESTOptionsGetter) (LegacyRESTStorage, genericapiserver.APIGroupInfo, error) 中
+
+```
+
+```
 
