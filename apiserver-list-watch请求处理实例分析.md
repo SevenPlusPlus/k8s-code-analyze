@@ -113,8 +113,7 @@ func (e *Store) Watch(ctx context.Context, options *metainternalversion.ListOpti
 func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate, resourceVersion string) (watch.Interface, error) {
 	if name, ok := p.MatchesSingle(); ok {
 		if key, err := e.KeyFunc(ctx, name); err == nil {
-     /*
-     /*
+       /*
 				调用e.Storage.Watch(ctx, key, resourceVersion, p)
 
 				e=podStorage.pod, /pkg/registry/core/pod/etcd/etcd.go
@@ -126,7 +125,6 @@ func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate
 				开启了cache的时候，e.Storage is: *storage.Cacher
 			*/
 
-     */
 			w, err := e.Storage.Watch(ctx, key, resourceVersion, p)
 			if err != nil {
 				return nil, err
