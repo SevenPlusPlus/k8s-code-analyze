@@ -33,6 +33,10 @@ func restfulListResource(r rest.Lister, rw rest.Watcher, scope handlers.RequestS
 继续分析ListResource：
 * vendor/k8s.io/apiserver/pkg/endpoints/handlers/get.go
 
+ListResource核心步骤如下：
+* 调用watcher, err := rw.Watch(ctx, &opts) ，生成一个watcher。关于watcher，每种resource都不一样，需要分别去找。
+* 创建好watcher以后，函数会调用serveWatch(watcher, scope, req, res, timeout)处理传过来的event
+
 ```
 func ListResource(r rest.Lister, rw rest.Watcher, scope RequestScope, forceWatch bool, minRequestTimeout time.Duration) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
