@@ -140,7 +140,7 @@ func (e *Store) WatchPredicate(ctx context.Context, p storage.SelectionPredicate
 根据前面章节《ApiServer Storage的使用中》对registry.Store的分析，不难得出此处e.Storage.Watch其实是调用StorageWithCacher方法构建的Cacher对象的Watch方法
 
 w, err := e.Storage.Watch(ctx, key, resourceVersion, p)最终调用的是定义在vendor/k8s.io/apiserver/pkg/storage/cacher/cacher.go的func (c *Cacher) Watch。 分析其流程如下：
-* 传入了一个filterFunction，apiserver的watch是带过滤功能的，就是由这个filter实现的。
+* 传入了一个filterWithAttrsFunction，apiserver的watch是带过滤功能的，就是由这个filter实现的。
 * 调用newCacheWatcher生成一个watcher，
 * 将这个watcher插入到cacher.watchers中去， 也就是说WatchCache中存储着各个订阅者。
 
