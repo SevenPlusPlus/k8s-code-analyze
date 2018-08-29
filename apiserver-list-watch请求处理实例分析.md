@@ -148,53 +148,7 @@ w, err := e.Storage.Watch(ctx, key, resourceVersion, p)最终调用的是定义�
 // Watch implements storage.Interface.
 func (c *Cacher) Watch(ctx context.Context, key string, resourceVersion string, pred storage.SelectionPredicate) (watch.Interface, error) {
 	watchRV, err := c.versioner.ParseResourceVersion(resourceVersion)
-	if err != nil {
-		return nil, err
-	}
-
-	c.ready.wait()
-
-	// We explicitly use thread unsafe version and do locking ourself to ensure that
-	// no new events will be processed in the meantime. The watchCache will be unlocked
-	// on return from this function.
-	// Note that we cannot do it under Cacher lock, to avoid a deadlock, since the
-	// underlying watchCache is calling processEvent under its lock.
-	c.watchCache.RLock()
-	defer c.watchCache.RUnlock()
-	initEvents, err := c.watchCache.GetAllEventsSinceThreadUnsafe(watchRV)
-	if err != nil {
-		// To match the uncached watch implementation, once we have passed authn/authz/admission,
-		// and successfully parsed a resource version, other errors must fail with a watch event of type ERROR,
-		// rather than a directly returned error.
-		return newErrWatcher(err), nil
-	}
-
-	triggerValue, triggerSupported := "", false
-	// TODO: Currently we assume that in a given Cacher object, any <predicate> that is
-	// passed here is aware of exactly the same trigger (at most one).
-	// Thus, either 0 or 1 values will be returned.
-	if matchValues := pred.MatcherIndex(); len(matchValues) > 0 {
-		triggerValue, triggerSupported = matchValues[0].Value, true
-	}
-
-	// If there is triggerFunc defined, but triggerSupported is false,
-	// we can't narrow the amount of events significantly at this point.
-	//
-	// That said, currently triggerFunc is defined only for Pods and Nodes,
-	// and there is only constant number of watchers for which triggerSupported
-	// is false (excluding those issues explicitly by users).
-	// Thus, to reduce the risk of those watchers blocking all watchers of a
-	// given resource in the system, we increase the sizes of buffers for them.
-	chanSize := 10
-	if c.triggerFunc != nil && !triggerSupported {
-		// TODO: We should tune this value and ideally make it dependent on the
-		// number of objects of a given type and/or their churn.
-		chanSize = 1000
-	}
-
-	c.Lock()
-	defer c.Unlock()
-	forget := forgetWatcher(c, c.watcherIdx, triggerValue, triggerSupported)
+	...
 	watcher := newCacheWatcher(watchRV, chanSize, initEvents, filterWithAttrsFunction(key, pred), forget, c.versioner)
 
 	c.watchers.addWatcher(watcher, c.watcherIdx, triggerValue, triggerSupported)
