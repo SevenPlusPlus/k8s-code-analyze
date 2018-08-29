@@ -157,6 +157,11 @@ func (c *Cacher) Watch(ctx context.Context, key string, resourceVersion string, 
 }
 
 ```
+* newCacheWatcher
+
+```
+
+```
 
 
 
