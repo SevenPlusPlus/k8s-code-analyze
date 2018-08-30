@@ -18,4 +18,5 @@
 * [kube-scheduler组件源码分析](kube-scheduler组件源码分析.md)
     * [scheduler启动流程](scheduler.md)
     * [调度策略详解](调度策略详解.md)
+* [ControllerManager组件源码分析](controllermanager组件源码分析.md)
 
