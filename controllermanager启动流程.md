@@ -35,8 +35,47 @@ func KnownControllers() []string {
 	ret.Insert(
 		saTokenControllerName,
 	)
-
 	return ret.List()
 }
 
+func NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc {
+	controllers := map[string]InitFunc{}
+	controllers["endpoint"] = startEndpointController
+	controllers["replicationcontroller"] = startReplicationController
+	controllers["podgc"] = startPodGCController
+	controllers["resourcequota"] = startResourceQuotaController
+	controllers["namespace"] = startNamespaceController
+	controllers["serviceaccount"] = startServiceAccountController
+	controllers["garbagecollector"] = startGarbageCollectorController
+	controllers["daemonset"] = startDaemonSetController
+	controllers["job"] = startJobController
+	controllers["deployment"] = startDeploymentController
+	controllers["replicaset"] = startReplicaSetController
+	controllers["horizontalpodautoscaling"] = startHPAController
+	controllers["disruption"] = startDisruptionController
+	controllers["statefulset"] = startStatefulSetController
+	controllers["cronjob"] = startCronJobController
+	controllers["csrsigning"] = startCSRSigningController
+	controllers["csrapproving"] = startCSRApprovingController
+	controllers["csrcleaner"] = startCSRCleanerController
+	controllers["ttl"] = startTTLController
+	controllers["bootstrapsigner"] = startBootstrapSignerController
+	controllers["tokencleaner"] = startTokenCleanerController
+	controllers["nodeipam"] = startNodeIpamController
+	if loopMode == IncludeCloudLoops {
+		controllers["service"] = startServiceController
+		controllers["route"] = startRouteController
+		// TODO: volume controller into the IncludeCloudLoops only set.
+		// TODO: Separate cluster in cloud check from node lifecycle controller.
+	}
+	controllers["nodelifecycle"] = startNodeLifecycleController
+	controllers["persistentvolume-binder"] = startPersistentVolumeBinderController
+	controllers["attachdetach"] = startAttachDetachController
+	controllers["persistentvolume-expander"] = startVolumeExpandController
+	controllers["clusterrole-aggregation"] = startClusterRoleAggregrationController
+	controllers["pvc-protection"] = startPVCProtectionController
+	controllers["pv-protection"] = startPVProtectionController
+
+	return controllers
+}
 ```
