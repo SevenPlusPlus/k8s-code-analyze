@@ -17,6 +17,8 @@ ControllerManagerCommand::Run
 
 ```
 Run: func(cmd *cobra.Command, args []string) {
+ //构建一个默认的KubeControllerManagerOptions
+ s, err := options.NewKubeControllerManagerOptions()
  c, err := s.Config(KnownControllers(), ControllersDisabledByDefault.List())
  Run(c.Complete(), wait.NeverStop)
 }
