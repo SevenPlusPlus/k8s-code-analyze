@@ -100,22 +100,15 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
 	if c.InsecureServing != nil {
 		separateMetrics := c.InsecureMetricsServing != nil
 		handler := buildHandlerChain(newHealthzHandler(&c.ComponentConfig, separateMetrics), nil, nil)
-		if err := c.InsecureServing.Serve(handler, 0, stopCh); err != nil {
-			return fmt.Errorf("failed to start healthz server: %v", err)
-		}
+		c.InsecureServing.Serve(handler, 0, stopCh)
 	}
 	if c.InsecureMetricsServing != nil {
 		handler := buildHandlerChain(newMetricsHandler(&c.ComponentConfig), nil, nil)
-		if err := c.InsecureMetricsServing.Serve(handler, 0, stopCh); err != nil {
-			return fmt.Errorf("failed to start metrics server: %v", err)
-		}
+		c.InsecureMetricsServing.Serve(handler, 0, stopCh)
 	}
 	if c.SecureServing != nil {
 		handler := buildHandlerChain(newHealthzHandler(&c.ComponentConfig, false), c.Authentication.Authenticator, c.Authorization.Authorizer)
-		if err := c.SecureServing.Serve(handler, 0, stopCh); err != nil {
-			// fail early for secure handlers, removing the old error loop from above
-			return fmt.Errorf("failed to start healthz server: %v", err)
-		}
+		c.SecureServing.Serve(handler, 0, stopCh)
 	}
 }
 
