@@ -1,4 +1,7 @@
 ## scheduler启动流程
+### 调度策略注册
+
+
 ### 服务启动流程
 * cmd/kube-scheduler/scheduler.go:
 ```
