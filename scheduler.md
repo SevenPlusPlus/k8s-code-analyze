@@ -78,6 +78,8 @@ func main() {
 ```
 新建SchedulerCommand并run
 * cmd/kube-scheduler/app/server.go:
+启动SchedulerCommand流程如下：
+1. 生成scheduler配置
 
 ```
 func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error {
@@ -88,6 +90,7 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
     schedulerConfig, err := NewSchedulerConfig(c)
     // Create the scheduler.
     sched := scheduler.NewFromConfig(schedulerConfig)
+    
 }
 
 ```
