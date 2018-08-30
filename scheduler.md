@@ -1,6 +1,10 @@
 ## scheduler启动流程
 ### 调度策略注册
+* pkg/scheduler/algorithmprovider/defaults/defaults.go:
 
+```
+
+```
 
 ### 服务启动流程
 * cmd/kube-scheduler/scheduler.go:
