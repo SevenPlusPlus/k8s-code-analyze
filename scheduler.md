@@ -20,6 +20,7 @@ func init() {
     ...
 }
 
+//注册默认的Predicates，如NoVolumeZoneConflictPred、MaxEBSVolumeCountPred。。。
 func defaultPredicates() sets.String {
 	return sets.NewString(
 		// Fit is determined by volume zone requirements.
