@@ -39,6 +39,33 @@ func defaultPredicates() sets.String {
 		),
     ...
 }
+
+//注册默认的Priorities,如SelectorSpreadPriority、InterPodAffinityPriority等
+func defaultPriorities() sets.String {
+	return sets.NewString(
+		// spreads pods by minimizing the number of pods (belonging to the same service or replication controller) on the same node.
+		factory.RegisterPriorityConfigFactory(
+			"SelectorSpreadPriority",
+			factory.PriorityConfigFactory{
+				MapReduceFunction: func(args factory.PluginFactoryArgs) (algorithm.PriorityMapFunction, algorithm.PriorityReduceFunction) {
+					return priorities.NewSelectorSpreadPriority(args.ServiceLister, args.ControllerLister, args.ReplicaSetLister, args.StatefulSetLister)
+				},
+				Weight: 1,
+			},
+		),
+		// pods should be placed in the same topological domain (e.g. same node, same rack, same zone, same power domain, etc.)
+		// as some other pods, or, conversely, should not be placed in the same topological domain as some other pods.
+		factory.RegisterPriorityConfigFactory(
+			"InterPodAffinityPriority",
+			factory.PriorityConfigFactory{
+				Function: func(args factory.PluginFactoryArgs) algorithm.PriorityFunction {
+					return priorities.NewInterPodAffinityPriority(args.NodeInfo, args.NodeLister, args.PodLister, args.HardPodAffinitySymmetricWeight)
+				},
+				Weight: 1,
+			},
+		),
+   ...
+}
 ```
 
 ### 服务启动流程
