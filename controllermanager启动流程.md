@@ -59,5 +59,26 @@ func NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc 
 #### 配置返回ControllerManager的配置对象
 
 ```
+func (s KubeControllerManagerOptions) Config(allControllers []string, disabledByDefaultControllers []string) (*kubecontrollerconfig.Config, error) {
+	
+	kubeconfig, err := clientcmd.BuildConfigFromFlags(s.Master, s.Kubeconfig)
+	client, err := clientset.NewForConfig(restclient.AddUserAgent(kubeconfig, KubeControllerManagerUserAgent))
+	
+	// shallow copy, do not modify the kubeconfig.Timeout.
+	config := *kubeconfig
+	config.Timeout = s.GenericComponent.LeaderElection.RenewDeadline.Duration
+	leaderElectionClient := clientset.NewForConfigOrDie(restclient.AddUserAgent(&config, "leader-election"))
 
+	c := &kubecontrollerconfig.Config{
+		Client:               client,
+		Kubeconfig:           kubeconfig,
+		EventRecorder:        eventRecorder,
+		LeaderElectionClient: leaderElectionClient,
+	}
+	if err := s.ApplyTo(c); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
 ```
