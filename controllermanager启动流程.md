@@ -17,7 +17,7 @@ ControllerManagerCommand::Run
 
 ```
 Run: func(cmd *cobra.Command, args []string) {
- //构建一个默认的KubeControllerManagerOptions
+ //构建一个默认的KubeControllerManagerOptions，其内部包含了各种Controller的默认配置选项
  s, err := options.NewKubeControllerManagerOptions()
  c, err := s.Config(KnownControllers(), ControllersDisabledByDefault.List())
  Run(c.Complete(), wait.NeverStop)
@@ -55,4 +55,9 @@ func NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc 
 
 	return controllers
 }
+```
+#### 配置返回ControllerManager的配置对象
+
+```
+
 ```
