@@ -83,8 +83,8 @@ func main() {
 
 1. 生成scheduler配置
 2. 创建调度器scheduler
-3. 启动健康检查Healthz和监控Metrics服务
-
+3. 启动健康检查Healthz和监控Metrics HTTP服务
+4. 
 
 ```
 func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error {
