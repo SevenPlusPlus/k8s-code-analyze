@@ -3,7 +3,22 @@
 * pkg/scheduler/algorithmprovider/defaults/defaults.go:
 
 ```
+func init() {
+	// Register functions that extract metadata used by predicates and priorities computations.
+	factory.RegisterPredicateMetadataProducerFactory(
+		func(args factory.PluginFactoryArgs) algorithm.PredicateMetadataProducer {
+			return predicates.NewPredicateMetadataFactory(args.PodLister)
+		})
+	factory.RegisterPriorityMetadataProducerFactory(
+		func(args factory.PluginFactoryArgs) algorithm.PriorityMetadataProducer {
+			return priorities.NewPriorityMetadataFactory(args.ServiceLister, args.ControllerLister, args.ReplicaSetLister, args.StatefulSetLister)
+		})
 
+	registerAlgorithmProvider(defaultPredicates(), defaultPriorities())
+
+    factory.RegisterFitPredicate("PodFitsPorts", predicates.PodFitsHostPorts)
+    ...
+}
 ```
 
 ### 服务启动流程
