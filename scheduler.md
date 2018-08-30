@@ -82,6 +82,9 @@ func main() {
 启动SchedulerCommand流程如下：
 
 1. 生成scheduler配置
+2. 创建调度器scheduler
+3. 启动健康检查Healthz和监控Metrics服务
+
 
 ```
 func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error {
@@ -92,7 +95,28 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
     schedulerConfig, err := NewSchedulerConfig(c)
     // Create the scheduler.
     sched := scheduler.NewFromConfig(schedulerConfig)
-    
+
+    // Start up the healthz server.
+	if c.InsecureServing != nil {
+		separateMetrics := c.InsecureMetricsServing != nil
+		handler := buildHandlerChain(newHealthzHandler(&c.ComponentConfig, separateMetrics), nil, nil)
+		if err := c.InsecureServing.Serve(handler, 0, stopCh); err != nil {
+			return fmt.Errorf("failed to start healthz server: %v", err)
+		}
+	}
+	if c.InsecureMetricsServing != nil {
+		handler := buildHandlerChain(newMetricsHandler(&c.ComponentConfig), nil, nil)
+		if err := c.InsecureMetricsServing.Serve(handler, 0, stopCh); err != nil {
+			return fmt.Errorf("failed to start metrics server: %v", err)
+		}
+	}
+	if c.SecureServing != nil {
+		handler := buildHandlerChain(newHealthzHandler(&c.ComponentConfig, false), c.Authentication.Authenticator, c.Authorization.Authorizer)
+		if err := c.SecureServing.Serve(handler, 0, stopCh); err != nil {
+			// fail early for secure handlers, removing the old error loop from above
+			return fmt.Errorf("failed to start healthz server: %v", err)
+		}
+	}
 }
 
 ```
