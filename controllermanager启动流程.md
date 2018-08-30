@@ -21,7 +21,7 @@ Run: func(cmd *cobra.Command, args []string) {
  Run(c.Complete(), wait.NeverStop)
 }
 ```
-获取默认启用的的Controller列表
+#### 获取默认启用的的Controller列表
 KnownControllers->NewControllerInitializers
 
 ```
