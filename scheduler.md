@@ -19,6 +19,25 @@ func init() {
     factory.RegisterFitPredicate("PodFitsPorts", predicates.PodFitsHostPorts)
     ...
 }
+
+func defaultPredicates() sets.String {
+	return sets.NewString(
+		// Fit is determined by volume zone requirements.
+		factory.RegisterFitPredicateFactory(
+			predicates.NoVolumeZoneConflictPred,
+			func(args factory.PluginFactoryArgs) algorithm.FitPredicate {
+				return predicates.NewVolumeZonePredicate(args.PVInfo, args.PVCInfo, args.StorageClassInfo)
+			},
+		),
+		// Fit is determined by whether or not there would be too many AWS EBS volumes attached to the node
+		factory.RegisterFitPredicateFactory(
+			predicates.MaxEBSVolumeCountPred,
+			func(args factory.PluginFactoryArgs) algorithm.FitPredicate {
+				return predicates.NewMaxPDVolumeCountPredicate(predicates.EBSVolumeFilterType, args.PVInfo, args.PVCInfo)
+			},
+		),
+    ...
+}
 ```
 
 ### 服务启动流程
