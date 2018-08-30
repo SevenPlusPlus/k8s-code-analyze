@@ -16,6 +16,8 @@ ControllerManagerCommand::Run
 * cmd/kube-controller-manager/app/controllermanager.go:
 
 ```
-Run: func(cmd *cobra.Command, args []string) { c, err := s.Config(KnownControllers(), ControllersDisabledByDefault.List()) if err := Run(c.Complete(), wait.NeverStop); err != nil { }}
-
+Run: func(cmd *cobra.Command, args []string) {
+ c, err := s.Config(KnownControllers(), ControllersDisabledByDefault.List())
+ Run(c.Complete(), wait.NeverStop)
+}
 ```
