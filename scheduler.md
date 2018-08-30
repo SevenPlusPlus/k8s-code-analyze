@@ -110,6 +110,10 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
 		handler := buildHandlerChain(newHealthzHandler(&c.ComponentConfig, false), c.Authentication.Authenticator, c.Authorization.Authorizer)
 		c.SecureServing.Serve(handler, 0, stopCh)
 	}
+
+      // Start all informers.
+	go c.PodInformer.Informer().Run(stopCh)
+	c.InformerFactory.Start(stopCh)
 }
 
 ```
