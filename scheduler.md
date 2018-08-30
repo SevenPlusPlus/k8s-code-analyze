@@ -80,6 +80,7 @@ func main() {
 * cmd/kube-scheduler/app/server.go:
 
 启动SchedulerCommand流程如下：
+
 1. 生成scheduler配置
 
 ```
