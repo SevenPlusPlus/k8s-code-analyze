@@ -83,7 +83,7 @@ func (s KubeControllerManagerOptions) Config(allControllers []string, disabledBy
 	return c, nil
 }
 ```
-Clientset定义如下：
+其中Clientset定义如下：
 
 ```
 // Clientset contains the clients for groups. Each group has exactly one
