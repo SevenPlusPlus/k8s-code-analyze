@@ -62,6 +62,7 @@ func NewControllerInitializers(loopMode ControllerLoopMode) map[string]InitFunc 
 func (s KubeControllerManagerOptions) Config(allControllers []string, disabledByDefaultControllers []string) (*kubecontrollerconfig.Config, error) {
 	//通过master url和kubeconfig文件构造restclient.Config
 	kubeconfig, err := clientcmd.BuildConfigFromFlags(s.Master, s.Kubeconfig)
+      //根据kubeconfig创建新的ApiServer各group的rest client集合Clientset
 	client, err := clientset.NewForConfig(restclient.AddUserAgent(kubeconfig, KubeControllerManagerUserAgent))
 	
 	// shallow copy, do not modify the kubeconfig.Timeout.
