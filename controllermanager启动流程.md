@@ -84,6 +84,7 @@ func (s KubeControllerManagerOptions) Config(allControllers []string, disabledBy
 }
 ```
 其中Clientset定义如下：
+* vendor/k8s.io/client-go/kubernetes/clientset.go
 
 ```
 // Clientset contains the clients for groups. Each group has exactly one
