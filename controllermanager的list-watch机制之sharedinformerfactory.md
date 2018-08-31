@@ -156,6 +156,7 @@ type group struct {
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &group{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
+```
 
 // V1 returns a new v1.Interface.
 func (g *group) V1() v1.Interface {
