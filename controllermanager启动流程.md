@@ -188,4 +188,5 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 接下来深入分析下ControllerManager启动过程
 
 ```
+
 ```
