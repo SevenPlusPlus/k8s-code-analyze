@@ -483,53 +483,11 @@ func (e *EndpointController) processNextWorkItem() bool {
 
 ```
 func (e *EndpointController) syncService(key string) error {
-	startTime := time.Now()
-	defer func() {
-		glog.V(4).Infof("Finished syncing service %q endpoints. (%v)", key, time.Since(startTime))
-	}()
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		return err
-	}
 	service, err := e.serviceLister.Services(namespace).Get(name)
-	if err != nil {
-		// Delete the corresponding endpoint, as the service has been deleted.
-		// TODO: Please note that this will delete an endpoint when a
-		// service is deleted. However, if we're down at the time when
-		// the service is deleted, we will miss that deletion, so this
-		// doesn't completely solve the problem. See #6877.
-		err = e.client.CoreV1().Endpoints(namespace).Delete(name, nil)
-		if err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-		return nil
-	}
-
-	if service.Spec.Selector == nil {
-		// services without a selector receive no endpoints from this controller;
-		// these services will receive the endpoints that are created out-of-band via the REST API.
-		return nil
-	}
-
 	glog.V(5).Infof("About to update endpoints for service %q", key)
 	pods, err := e.podLister.Pods(service.Namespace).List(labels.Set(service.Spec.Selector).AsSelectorPreValidated())
-	if err != nil {
-		// Since we're getting stuff from a local cache, it is
-		// basically impossible to get this error.
-		return err
-	}
-
-	// If the user specified the older (deprecated) annotation, we have to respect it.
-	tolerateUnreadyEndpoints := service.Spec.PublishNotReadyAddresses
-	if v, ok := service.Annotations[TolerateUnreadyEndpointsAnnotation]; ok {
-		b, err := strconv.ParseBool(v)
-		if err == nil {
-			tolerateUnreadyEndpoints = b
-		} else {
-			utilruntime.HandleError(fmt.Errorf("Failed to parse annotation %v: %v", TolerateUnreadyEndpointsAnnotation, err))
-		}
-	}
 
 	subsets := []v1.EndpointSubset{}
 	var totalReadyEps int = 0
@@ -537,11 +495,9 @@ func (e *EndpointController) syncService(key string) error {
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) == 0 {
-			glog.V(5).Infof("Failed to find an IP for pod %s/%s", pod.Namespace, pod.Name)
 			continue
 		}
 		if !tolerateUnreadyEndpoints && pod.DeletionTimestamp != nil {
-			glog.V(5).Infof("Pod is being deleted %s/%s", pod.Namespace, pod.Name)
 			continue
 		}
 
@@ -565,10 +521,6 @@ func (e *EndpointController) syncService(key string) error {
 				portName := servicePort.Name
 				portProto := servicePort.Protocol
 				portNum, err := podutil.FindPort(pod, servicePort)
-				if err != nil {
-					glog.V(4).Infof("Failed to find port for service %s/%s: %v", service.Namespace, service.Name, err)
-					continue
-				}
 
 				var readyEps, notReadyEps int
 				epp := &v1.EndpointPort{Name: portName, Port: int32(portNum), Protocol: portProto}
@@ -582,18 +534,7 @@ func (e *EndpointController) syncService(key string) error {
 
 	// See if there's actually an update here.
 	currentEndpoints, err := e.endpointsLister.Endpoints(service.Namespace).Get(service.Name)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			currentEndpoints = &v1.Endpoints{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   service.Name,
-					Labels: service.Labels,
-				},
-			}
-		} else {
-			return err
-		}
-	}
+	
 ```
 
 
