@@ -225,5 +225,50 @@ type ControllerContext struct {
 ##### 创建ControllerContext
 
 ```
+// CreateControllerContext creates a context struct containing references to resources needed by the
+// controllers such as the cloud provider and clientBuilder. rootClientBuilder is only used for
+// the shared-informers client and token controller.
+func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clientBuilder controller.ControllerClientBuilder, stop <-chan struct{}) (ControllerContext, error) {
+	versionedClient := rootClientBuilder.ClientOrDie("shared-informers")
+	sharedInformers := informers.NewSharedInformerFactory(versionedClient, ResyncPeriod(s)())
 
+	// If apiserver is not running we should wait for some time and fail only then. This is particularly
+	// important when we start apiserver and controller manager at the same time.
+	if err := genericcontrollermanager.WaitForAPIServer(versionedClient, 10*time.Second); err != nil {
+		return ControllerContext{}, fmt.Errorf("failed to wait for apiserver being healthy: %v", err)
+	}
+
+	// Use a discovery client capable of being refreshed.
+	discoveryClient := rootClientBuilder.ClientOrDie("controller-discovery")
+	cachedClient := cacheddiscovery.NewMemCacheClient(discoveryClient.Discovery())
+	restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedClient)
+	go wait.Until(func() {
+		restMapper.Reset()
+	}, 30*time.Second, stop)
+
+	availableResources, err := GetAvailableResources(rootClientBuilder)
+	if err != nil {
+		return ControllerContext{}, err
+	}
+
+	cloud, loopMode, err := createCloudProvider(s.ComponentConfig.CloudProvider.Name, s.ComponentConfig.ExternalCloudVolumePlugin,
+		s.ComponentConfig.CloudProvider.CloudConfigFile, s.ComponentConfig.KubeCloudShared.AllowUntaggedCloud, sharedInformers)
+	if err != nil {
+		return ControllerContext{}, err
+	}
+
+	ctx := ControllerContext{
+		ClientBuilder:      clientBuilder,
+		InformerFactory:    sharedInformers,
+		ComponentConfig:    s.ComponentConfig,
+		RESTMapper:         restMapper,
+		AvailableResources: availableResources,
+		Cloud:              cloud,
+		LoopMode:           loopMode,
+		Stop:               stop,
+		InformersStarted:   make(chan struct{}),
+		ResyncPeriod:       ResyncPeriod(s),
+	}
+	return ctx, nil
+}
 ```
