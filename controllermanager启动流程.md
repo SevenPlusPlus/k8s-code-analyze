@@ -397,7 +397,7 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 	})
 	e.serviceLister = serviceInformer.Lister()
 	e.servicesSynced = serviceInformer.Informer().HasSynced
-
+	//为pod SharedInformer注册pod变更事件处理句柄
 	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    e.addPod,
 		UpdateFunc: e.updatePod,
