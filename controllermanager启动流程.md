@@ -387,7 +387,7 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 		queue:            workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "endpoint"),
 		workerLoopPeriod: time.Second,
 	}
-
+	//为service SharedInformer注册service变更事件处理句柄
 	serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: e.enqueueService,
 		UpdateFunc: func(old, cur interface{}) {
