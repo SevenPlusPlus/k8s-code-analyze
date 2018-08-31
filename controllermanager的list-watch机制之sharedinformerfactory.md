@@ -182,6 +182,5 @@ func (v *version) Pods() PodInformer {
 func (f *podInformer) Informer() cache.SharedIndexInformer {
  return f.factory.InformerFor(&corev1.Pod{}, f.defaultInformer)
 }
-
 ```
 
