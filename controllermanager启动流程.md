@@ -163,30 +163,13 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 		select {}
 	}
 
-        //不设置
+        //未启用选主时，则直接启动controllermanager，执行run方法
 	if !c.ComponentConfig.GenericComponent.LeaderElection.LeaderElect {
 		run(context.TODO())
 		panic("unreachable")
 	}
 
-	id, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-	// add a uniquifier so that two processes on the same host don't accidentally both become active
-	id = id + "_" + string(uuid.NewUUID())
-	rl, err := resourcelock.New(c.ComponentConfig.GenericComponent.LeaderElection.ResourceLock,
-		"kube-system",
-		"kube-controller-manager",
-		c.LeaderElectionClient.CoreV1(),
-		resourcelock.ResourceLockConfig{
-			Identity:      id,
-			EventRecorder: c.EventRecorder,
-		})
-	if err != nil {
-		glog.Fatalf("error creating lock: %v", err)
-	}
-
+	//启动leader选举，leader启动controllermanager，执行run方法
 	leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
 		Lock:          rl,
 		LeaseDuration: c.ComponentConfig.GenericComponent.LeaderElection.LeaseDuration.Duration,
