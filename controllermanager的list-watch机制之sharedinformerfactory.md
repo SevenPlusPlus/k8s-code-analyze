@@ -138,4 +138,8 @@ ctx.InformerFactory.Core().V1().Services(),
 ctx.InformerFactory.Core().V1().Endpoints(), 
 ctx.ClientBuilder.ClientOrDie("endpoint-controller")
 ```
+我们跟踪下podInformer其过程如下
+
+```
+```
 
