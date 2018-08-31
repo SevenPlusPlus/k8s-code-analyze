@@ -418,5 +418,10 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 2. serviceInformer注册pod变更事件处理句柄e.addPod, e.updatePod, e.deletePod, 并初始化得到podLister帮助类
 3. 从endpointsInformer初始化得到endpointsLister帮助类
 
+不难想到当某个service新的pod产生则会触发e.addPod的调用
+
+```
+
+```
 
 
