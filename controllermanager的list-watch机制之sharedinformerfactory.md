@@ -141,6 +141,8 @@ ctx.ClientBuilder.ClientOrDie("endpoint-controller")
 我们跟踪下podInformer其过程如下
 
 ```
-
+func (f *sharedInformerFactory) Core() core.Interface {
+	return core.New(f, f.namespace, f.tweakListOptions)
+}
 ```
 
