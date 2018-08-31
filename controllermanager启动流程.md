@@ -159,9 +159,7 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 run := func(ctx context.Context) {
 
 		rootClientBuilder := controller.SimpleControllerClientBuilder{
-
 			ClientConfig: c.Kubeconfig,
-
 		}
 
 		var clientBuilder controller.ControllerClientBuilder
