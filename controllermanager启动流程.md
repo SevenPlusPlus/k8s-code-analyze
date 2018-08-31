@@ -438,7 +438,7 @@ func (e *EndpointController) addPod(obj interface{}) {
 最后分析EndpointController的主流程run的实现。
 
 ##### EndpointController处理主流程 
-EndpointController主处理流程为启动若干worker routine
+EndpointController主处理流程为启动若干worker routine开始处理
 
 ```
 // Run will not return until stopCh is closed. workers determines how many
