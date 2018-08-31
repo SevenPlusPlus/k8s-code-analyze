@@ -68,14 +68,16 @@ func (s KubeControllerManagerOptions) Config(allControllers []string, disabledBy
 	// shallow copy, do not modify the kubeconfig.Timeout.
 	config := *kubeconfig
 	config.Timeout = s.GenericComponent.LeaderElection.RenewDeadline.Duration
+      //构建仅用于选主的Clientset
 	leaderElectionClient := clientset.NewForConfigOrDie(restclient.AddUserAgent(&config, "leader-election"))
-
+      //构建controllermanager的config对象
 	c := &kubecontrollerconfig.Config{
 		Client:               client,
 		Kubeconfig:           kubeconfig,
 		EventRecorder:        eventRecorder,
 		LeaderElectionClient: leaderElectionClient,
 	}
+      //将配置的options应用到controllermanager的配置对象config中
 	if err := s.ApplyTo(c); err != nil {
 		return nil, err
 	}
