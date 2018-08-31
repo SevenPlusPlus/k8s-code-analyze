@@ -164,6 +164,18 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 * 构建PodInformer
 
 ```
+type podInformer struct {
+	factory          internalinterfaces.SharedInformerFactory
+	tweakListOptions internalinterfaces.TweakListOptionsFunc
+	namespace        string
+}
 
+// Pods returns a PodInformer.
+
+func (v *version) Pods() PodInformer {
+
+	return &podInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+
+}
 ```
 
