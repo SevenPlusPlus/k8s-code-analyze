@@ -536,9 +536,33 @@ func (e *EndpointController) syncService(key string) error {
 	currentEndpoints, err := e.endpointsLister.Endpoints(service.Namespace).Get(service.Name)
 	
 ```
+新增Endpoint
 
 ```
-
+func addEndpointSubset(subsets []v1.EndpointSubset, pod *v1.Pod, epa v1.EndpointAddress,
+	epp *v1.EndpointPort, tolerateUnreadyEndpoints bool) ([]v1.EndpointSubset, int, int) {
+	var readyEps int = 0
+	var notReadyEps int = 0
+	ports := []v1.EndpointPort{}
+	if epp != nil {
+		ports = append(ports, *epp)
+	}
+	if tolerateUnreadyEndpoints || podutil.IsPodReady(pod) {
+		subsets = append(subsets, v1.EndpointSubset{
+			Addresses: []v1.EndpointAddress{epa},
+			Ports:     ports,
+		})
+		readyEps++
+	} else if shouldPodBeInEndpoints(pod) {
+		glog.V(5).Infof("Pod is out of service: %s/%s", pod.Namespace, pod.Name)
+		subsets = append(subsets, v1.EndpointSubset{
+			NotReadyAddresses: []v1.EndpointAddress{epa},
+			Ports:             ports,
+		})
+		notReadyEps++
+	}
+	return subsets, readyEps, notReadyEps
+}
 ```
 
 
