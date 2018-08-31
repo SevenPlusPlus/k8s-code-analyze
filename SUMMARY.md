@@ -21,5 +21,5 @@
 * [ControllerManager组件源码分析](controllermanager组件源码分析.md)
     * [ControllerManager启动流程](controllermanager启动流程.md)
     * [ControllerManager的List-Watch机制之sharedInformerFactory](controllermanager的list-watch机制之sharedinformerfactory.md)
-    * [ControllerManager的List-Watch机制之ControllerManager](controllermanager的list-watch机制之controllermanager.md)
+    * [ControllerManager的List-Watch机制之ReplicationManager](controllermanager的list-watch机制之controllermanager.md)
 
