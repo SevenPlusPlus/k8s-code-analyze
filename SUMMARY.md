@@ -20,4 +20,5 @@
     * [调度策略详解](调度策略详解.md)
 * [ControllerManager组件源码分析](controllermanager组件源码分析.md)
     * [ControllerManager启动流程](controllermanager启动流程.md)
+    * [ControllerManager的List-Watch机制之sharedInformerFactory](controllermanager的list-watch机制之sharedinformerfactory.md)
 
