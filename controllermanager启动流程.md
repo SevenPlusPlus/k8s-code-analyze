@@ -103,3 +103,4 @@ type Clientset struct {
        ...
 }
 ```
+#### 启动ControllerManager
