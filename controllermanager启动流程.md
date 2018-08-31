@@ -435,5 +435,12 @@ func (e *EndpointController) addPod(obj interface{}) {
 	}
 }
 ```
+最后分析EndpointController的主流程run的实现。
+
+##### EndpointController处理主流程 
+
+```
+
+```
 
 
