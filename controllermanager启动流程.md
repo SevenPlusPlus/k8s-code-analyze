@@ -108,17 +108,8 @@ type Clientset struct {
 ```
 // Run runs the KubeControllerManagerOptions.  This should never exit.
 func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
-	// To help debugging, immediately log version
-	glog.Infof("Version: %+v", version.Get())
-
-	if cfgz, err := configz.New("componentconfig"); err == nil {
-		cfgz.Set(c.ComponentConfig)
-	} else {
-		glog.Errorf("unable to register configz: %c", err)
-	}
-
-	// Start the controller manager HTTP server
-	// unsecuredMux is the handler for these controller *after* authn/authz filters have been applied
+	
+	//启动ControllerManager HTTP服务
 	var unsecuredMux *mux.PathRecorderMux
 	if c.SecureServing != nil {
 		unsecuredMux = genericcontrollermanager.NewBaseHandler(&c.ComponentConfig.Debugging)
