@@ -65,3 +65,5 @@ type Interface interface {
 }
 ```
 可以看到包含了core/v1所有资源的Informer访问接口，如NodeInformer、PodInformer等
+
+### type sharedInformerFactory struct
