@@ -127,3 +127,12 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 }
 ```
 关于go informer.Run(stopCh)， 是启动一个的informer，会在后面进行讲解。 
+
+* 通过sharedInformerFactory取得具体resource的Informer
+
+回顾创建EndpointController的实现中：
+
+```
+endpointcontroller.NewEndpointController( ctx.InformerFactory.Core().V1().Pods(), ctx.InformerFactory.Core().V1().Services(), ctx.InformerFactory.Core().V1().Endpoints(), ctx.ClientBuilder.ClientOrDie("endpoint-controller")
+```
+
