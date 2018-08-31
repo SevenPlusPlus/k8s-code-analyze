@@ -335,3 +335,10 @@ func startEndpointController(ctx ControllerContext) (http.Handler, bool, error) 
 新建EndpointController
 * pkg/controller/endpoint/endpoints_controller.go:
 
+EndpointController定义
+
+```
+
+```
+
+
