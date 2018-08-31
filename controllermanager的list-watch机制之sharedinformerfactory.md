@@ -227,7 +227,7 @@ func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internal
 	if !exists {
 		resyncPeriod = f.defaultResync
 	}
-
+	//如果不存在则调用传入的Informer构造方法构造新的Informer
 	informer = newFunc(f.client, resyncPeriod)
 	f.informers[informerType] = informer
 
