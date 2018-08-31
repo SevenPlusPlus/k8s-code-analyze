@@ -318,3 +318,9 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 ```
 controllers["endpoint"] = startEndpointController
 ```
+#### startEndpointController
+* cmd/kube-controller-manager/app/core.go:
+
+```
+
+```
