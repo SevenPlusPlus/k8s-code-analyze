@@ -176,7 +176,7 @@ func (v *version) Pods() PodInformer {
 
 }
 ```
-* 在sharedInformerFactory注册pod的sharedInformer并返回
+* 在sharedInformerFactory注册并返回pod类型的SharedIndexInformer
 
 ```
 func (f *podInformer) Informer() cache.SharedIndexInformer {
