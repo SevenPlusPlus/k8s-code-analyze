@@ -138,7 +138,7 @@ ctx.InformerFactory.Core().V1().Services(),
 ctx.InformerFactory.Core().V1().Endpoints(), 
 ctx.ClientBuilder.ClientOrDie("endpoint-controller")
 ```
-我们跟踪下podInformer创建过程如下
+##### 我们跟踪下podInformer创建过程如下
 
 ```
 func (f *sharedInformerFactory) Core() core.Interface {
