@@ -285,13 +285,12 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 		ctx.Cloud.Initialize(ctx.ClientBuilder)
 	}
 
+	//Loop启动各个Controller
 	for controllerName, initFn := range controllers {
 		if !ctx.IsControllerEnabled(controllerName) {
 			glog.Warningf("%q is disabled", controllerName)
 			continue
 		}
-
-		time.Sleep(wait.Jitter(ctx.ComponentConfig.GenericComponent.ControllerStartInterval.Duration, ControllerStartJitter))
 
 		glog.V(1).Infof("Starting %q", controllerName)
 		debugHandler, started, err := initFn(ctx)
