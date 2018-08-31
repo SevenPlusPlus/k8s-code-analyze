@@ -130,7 +130,7 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 
 * 通过sharedInformerFactory取得具体resource的Informer
 
-回顾创建EndpointController的实现,这里的ctx.InformerFactory即为sharedInformerFactory对象
+#### 回顾创建EndpointController的实现,这里的ctx.InformerFactory即为sharedInformerFactory对象
 
 ```
 endpointcontroller.NewEndpointController( ctx.InformerFactory.Core().V1().Pods(), 
@@ -194,6 +194,13 @@ func (v *version) Pods() PodInformer {
 
 }
 ```
+
+#### 继续回顾NewEndpointController方法中获取pod类型的SharedIndexInformer
+
+```
+
+```
+
 * 在sharedInformerFactory注册并返回pod类型的SharedIndexInformer
 
 ```
