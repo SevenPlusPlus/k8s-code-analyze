@@ -160,6 +160,8 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 }
 ```
 
+* 创建 core group v1, vendor/k8s.io/client-go/informers/core/v1/interface.go
+
 ```
 type version struct {
 	factory          internalinterfaces.SharedInformerFactory
