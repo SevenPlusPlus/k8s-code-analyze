@@ -371,7 +371,7 @@ type EndpointController struct {
 	// more often than services with few pods; it also would cause a
 	// service that's inserted multiple times to be processed more than
 	// necessary.
-	//需要变更的services队列
+	//发生变更待处理的services队列
 	queue workqueue.RateLimitingInterface
 
 	// workerLoopPeriod is the time between worker runs. The workers process the queue of service and pod changes.
