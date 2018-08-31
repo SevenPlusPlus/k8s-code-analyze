@@ -46,3 +46,9 @@ type Interface interface {
 	V1() v1.Interface
 }
 ```
+可以看到包含了core所有version资源的informers访问接口，继续深入了解v1.Interface
+* vendor/k8s.io/client-go/informers/core/v1/interface.go:
+
+```
+
+```
