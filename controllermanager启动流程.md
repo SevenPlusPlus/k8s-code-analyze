@@ -106,5 +106,107 @@ type Clientset struct {
 #### 启动ControllerManager
 
 ```
+// Run runs the KubeControllerManagerOptions.  This should never exit.
+func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
+	// To help debugging, immediately log version
+	glog.Infof("Version: %+v", version.Get())
 
+	if cfgz, err := configz.New("componentconfig"); err == nil {
+		cfgz.Set(c.ComponentConfig)
+	} else {
+		glog.Errorf("unable to register configz: %c", err)
+	}
+
+	// Start the controller manager HTTP server
+	// unsecuredMux is the handler for these controller *after* authn/authz filters have been applied
+	var unsecuredMux *mux.PathRecorderMux
+	if c.SecureServing != nil {
+		unsecuredMux = genericcontrollermanager.NewBaseHandler(&c.ComponentConfig.Debugging)
+		handler := genericcontrollermanager.BuildHandlerChain(unsecuredMux, &c.Authorization, &c.Authentication)
+		if err := c.SecureServing.Serve(handler, 0, stopCh); err != nil {
+			return err
+		}
+	}
+	if c.InsecureServing != nil {
+		unsecuredMux = genericcontrollermanager.NewBaseHandler(&c.ComponentConfig.Debugging)
+		handler := genericcontrollermanager.BuildHandlerChain(unsecuredMux, &c.Authorization, &c.Authentication)
+		if err := c.InsecureServing.Serve(handler, 0, stopCh); err != nil {
+			return err
+		}
+	}
+
+	run := func(ctx context.Context) {
+		rootClientBuilder := controller.SimpleControllerClientBuilder{
+			ClientConfig: c.Kubeconfig,
+		}
+		var clientBuilder controller.ControllerClientBuilder
+		if c.ComponentConfig.KubeCloudShared.UseServiceAccountCredentials {
+			if len(c.ComponentConfig.SAController.ServiceAccountKeyFile) == 0 {
+				// It'c possible another controller process is creating the tokens for us.
+				// If one isn't, we'll timeout and exit when our client builder is unable to create the tokens.
+				glog.Warningf("--use-service-account-credentials was specified without providing a --service-account-private-key-file")
+			}
+			clientBuilder = controller.SAControllerClientBuilder{
+				ClientConfig:         restclient.AnonymousClientConfig(c.Kubeconfig),
+				CoreClient:           c.Client.CoreV1(),
+				AuthenticationClient: c.Client.AuthenticationV1(),
+				Namespace:            "kube-system",
+			}
+		} else {
+			clientBuilder = rootClientBuilder
+		}
+		controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())
+		if err != nil {
+			glog.Fatalf("error building controller context: %v", err)
+		}
+		saTokenControllerInitFunc := serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
+
+		if err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != nil {
+			glog.Fatalf("error starting controllers: %v", err)
+		}
+
+		controllerContext.InformerFactory.Start(controllerContext.Stop)
+		close(controllerContext.InformersStarted)
+
+		select {}
+	}
+
+	if !c.ComponentConfig.GenericComponent.LeaderElection.LeaderElect {
+		run(context.TODO())
+		panic("unreachable")
+	}
+
+	id, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	// add a uniquifier so that two processes on the same host don't accidentally both become active
+	id = id + "_" + string(uuid.NewUUID())
+	rl, err := resourcelock.New(c.ComponentConfig.GenericComponent.LeaderElection.ResourceLock,
+		"kube-system",
+		"kube-controller-manager",
+		c.LeaderElectionClient.CoreV1(),
+		resourcelock.ResourceLockConfig{
+			Identity:      id,
+			EventRecorder: c.EventRecorder,
+		})
+	if err != nil {
+		glog.Fatalf("error creating lock: %v", err)
+	}
+
+	leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
+		Lock:          rl,
+		LeaseDuration: c.ComponentConfig.GenericComponent.LeaderElection.LeaseDuration.Duration,
+		RenewDeadline: c.ComponentConfig.GenericComponent.LeaderElection.RenewDeadline.Duration,
+		RetryPeriod:   c.ComponentConfig.GenericComponent.LeaderElection.RetryPeriod.Duration,
+		Callbacks: leaderelection.LeaderCallbacks{
+			OnStartedLeading: run,
+			OnStoppedLeading: func() {
+				glog.Fatalf("leaderelection lost")
+			},
+		},
+	})
+	panic("unreachable")
+}
 ```
