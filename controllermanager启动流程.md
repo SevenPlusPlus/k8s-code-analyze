@@ -86,6 +86,16 @@ func (s KubeControllerManagerOptions) Config(allControllers []string, disabledBy
 Clientset定义如下：
 
 ```
-
+// Clientset contains the clients for groups. Each group has exactly one
+// version included in a Clientset.
+type Clientset struct {
+	*discovery.DiscoveryClient
+	admissionregistrationV1alpha1 *admissionregistrationv1alpha1.AdmissionregistrationV1alpha1Client
+	admissionregistrationV1beta1  *admissionregistrationv1beta1.AdmissionregistrationV1beta1Client
+	appsV1beta1                   *appsv1beta1.AppsV1beta1Client
+	appsV1beta2                   *appsv1beta2.AppsV1beta2Client
+	appsV1                        *appsv1.AppsV1Client
+	authenticationV1              *authenticationv1.AuthenticationV1Client
+	authenticationV1beta1         *authenticationv1beta1.AuthenticationV1beta1Client
 }
 ```
