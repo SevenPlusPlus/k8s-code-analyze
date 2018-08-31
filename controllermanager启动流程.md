@@ -285,7 +285,7 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 		ctx.Cloud.Initialize(ctx.ClientBuilder)
 	}
 
-	//Loop启动各个Controller
+	//Loop初始化启动各个Controller
 	for controllerName, initFn := range controllers {
 		if !ctx.IsControllerEnabled(controllerName) {
 			glog.Warningf("%q is disabled", controllerName)
