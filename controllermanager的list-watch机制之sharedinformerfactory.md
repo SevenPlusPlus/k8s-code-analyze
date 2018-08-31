@@ -179,7 +179,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 }
 
 ```
-* 构建PodInformer
+* 构建PodInformer vendor/k8s.io/client-go/informers/core/v1/pod.go
 
 ```
 type podInformer struct {
