@@ -456,7 +456,14 @@ func (e *EndpointController) Run(workers int, stopCh <-chan struct{}) {
 ```
 
 ```
-
+// worker runs a worker thread that just dequeues items, processes them, and
+// marks them done. You may run as many of these in parallel as you wish; the
+// workqueue guarantees that they will not end up processing the same service
+// at the same time.
+func (e *EndpointController) worker() {
+	for e.processNextWorkItem() {
+	}
+}
 ```
 
 
