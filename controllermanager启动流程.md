@@ -157,31 +157,21 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 
 ```
 run := func(ctx context.Context) {
-	
+	//构建ControllerClientBuilder
 		var clientBuilder controller.ControllerClientBuilder
 		
-
+	//创建Controller上下文对象
 		controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())
-
-		if err != nil {
-
-			glog.Fatalf("error building controller context: %v", err)
-
-		}
-
+	//设置saTokenController初始化方法
 		saTokenControllerInitFunc := serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
-
+	//
 		if err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != nil {
-
 			glog.Fatalf("error starting controllers: %v", err)
-
 		}
 
 		controllerContext.InformerFactory.Start(controllerContext.Stop)
 
 		close(controllerContext.InformersStarted)
-
 		select {}
-
 	}
 ```
