@@ -182,6 +182,8 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 * 构建PodInformer vendor/k8s.io/client-go/informers/core/v1/pod.go
 
 ```
+type PodInformer interface { Informer() cache.SharedIndexInformer Lister() v1.PodLister}
+//实现了PodInformer接口
 type podInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
