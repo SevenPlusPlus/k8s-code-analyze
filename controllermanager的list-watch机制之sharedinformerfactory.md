@@ -234,4 +234,6 @@ func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internal
 	return informer
 }
 ```
+这里看到sharedInformerFactory获取某种资源的Informer时先检查是否已存在，如果存在则直接返回，不存在则根据外部传入的构建方法进行构建，并注册以便后面共享利用。
+
 
