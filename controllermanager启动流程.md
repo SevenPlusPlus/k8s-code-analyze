@@ -274,7 +274,8 @@ func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clien
 func StartControllers(ctx ControllerContext, startSATokenController InitFunc, controllers map[string]InitFunc, unsecuredMux *mux.PathRecorderMux) error {
 	// Always start the SA token controller first using a full-power client, since it needs to mint tokens for the rest
 	// If this fails, just return here and fail since other controllers won't be able to get credentials.
-	if _, _, err := startSATokenController(ctx); err != nil {
+	//先启动SATokenController
+	if _, _, err := startc(ctx); err != nil {
 		return err
 	}
 
