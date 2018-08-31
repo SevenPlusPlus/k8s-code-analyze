@@ -181,9 +181,11 @@ run := func(ctx context.Context) {
 ```
 type ControllerContext struct {
 	// ClientBuilder will provide a client for this controller to use
+	//ClientBuilder用于Controller创建client
 	ClientBuilder controller.ControllerClientBuilder
 
 	// InformerFactory gives access to informers for the controller.
+	//InformerFactory 用于访问各API group versions的资源的informers
 	InformerFactory informers.SharedInformerFactory
 
 	// ComponentConfig provides access to init options for a given controller
