@@ -374,6 +374,42 @@ type EndpointController struct {
 	workerLoopPeriod time.Duration
 }
 
+// NewEndpointController returns a new *EndpointController.
+func NewEndpointController(podInformer coreinformers.PodInformer, serviceInformer coreinformers.ServiceInformer,
+	endpointsInformer coreinformers.EndpointsInformer, client clientset.Interface) *EndpointController {
+	if client != nil && client.CoreV1().RESTClient().GetRateLimiter() != nil {
+		metrics.RegisterMetricAndTrackRateLimiterUsage("endpoint_controller", client.CoreV1().RESTClient().GetRateLimiter())
+	}
+	e := &EndpointController{
+		client:           client,
+		queue:            workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "endpoint"),
+		workerLoopPeriod: time.Second,
+	}
+
+	serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: e.enqueueService,
+		UpdateFunc: func(old, cur interface{}) {
+			e.enqueueService(cur)
+		},
+		DeleteFunc: e.enqueueService,
+	})
+	e.serviceLister = serviceInformer.Lister()
+	e.servicesSynced = serviceInformer.Informer().HasSynced
+
+	podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    e.addPod,
+		UpdateFunc: e.updatePod,
+		DeleteFunc: e.deletePod,
+	})
+	e.podLister = podInformer.Lister()
+	e.podsSynced = podInformer.Informer().HasSynced
+
+	e.endpointsLister = endpointsInformer.Lister()
+	e.endpointsSynced = endpointsInformer.Informer().HasSynced
+
+	return e
+}
 ```
+
 
 
