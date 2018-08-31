@@ -249,15 +249,9 @@ func NewFilteredPodInformer(client kubernetes.Interface, namespace string, resyn
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
 				return client.CoreV1().Pods(namespace).List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
 				return client.CoreV1().Pods(namespace).Watch(options)
 			},
 		},
