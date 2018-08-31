@@ -421,7 +421,19 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 不难想到当某个service新的pod产生则会触发e.addPod的调用
 
 ```
-
+// When a pod is added, figure out what services it will be a member of and
+// enqueue them. obj must have *v1.Pod type.
+func (e *EndpointController) addPod(obj interface{}) {
+	pod := obj.(*v1.Pod)
+	services, err := e.getPodServiceMemberships(pod)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("Unable to get pod %s/%s's service memberships: %v", pod.Namespace, pod.Name, err))
+		return
+	}
+	for key := range services {
+		e.queue.Add(key)
+	}
+}
 ```
 
 
