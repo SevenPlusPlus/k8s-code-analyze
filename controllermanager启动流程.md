@@ -227,7 +227,7 @@ type ControllerContext struct {
 ```
 // CreateControllerContext creates a context struct containing references to resources needed by the controllers such as the cloud provider and clientBuilder. 
 func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clientBuilder controller.ControllerClientBuilder, stop <-chan struct{}) (ControllerContext, error) {
-	//创建sharedInformerFactory实例
+	//创建sharedInformerFactory实例，各Controllers通过sharedInformers实现对资源的watch-list
 	versionedClient := rootClientBuilder.ClientOrDie("shared-informers")
 	sharedInformers := informers.NewSharedInformerFactory(versionedClient, ResyncPeriod(s)())
 
