@@ -211,9 +211,27 @@ func (f *podInformer) Informer() cache.SharedIndexInformer {
  return f.factory.InformerFor(&corev1.Pod{}, f.defaultInformer)
 }
 ```
-其内部调用了sharedInformerFactory的InformerFor方法，注册并返回了pod类型的SharedIndexInformer
+其内部调用了sharedInformerFactory的InformerFor方法，注册并返回了pod类型共享的SharedIndexInformer
 
 ```
+// InternalInformerFor returns the SharedIndexInformer for obj using an internal client.
+func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer {
+	informerType := reflect.TypeOf(obj)
+	//检查该资源类型的Informer是否存在，已存在则直接返回
+	informer, exists := f.informers[informerType]
+	if exists {
+		return informer
+	}
 
+	resyncPeriod, exists := f.customResync[informerType]
+	if !exists {
+		resyncPeriod = f.defaultResync
+	}
+
+	informer = newFunc(f.client, resyncPeriod)
+	f.informers[informerType] = informer
+
+	return informer
+}
 ```
 
