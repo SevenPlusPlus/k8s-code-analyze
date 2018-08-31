@@ -164,7 +164,7 @@ run := func(ctx context.Context) {
 		controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())
 	//设置saTokenController初始化方法
 		saTokenControllerInitFunc := serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
-	//启动内置所有Controller
+	//启动内置所有Controller, 每个controller承担不同的工作，譬如EndpointController负责维护Service的endpoint
 		if err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != nil {
 			glog.Fatalf("error starting controllers: %v", err)
 		}
