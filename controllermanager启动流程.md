@@ -126,6 +126,7 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 		}
 	}
         
+       //ControllerManager真正启动方法
 	run := func(ctx context.Context) {
 		rootClientBuilder := controller.SimpleControllerClientBuilder{
 			ClientConfig: c.Kubeconfig,
