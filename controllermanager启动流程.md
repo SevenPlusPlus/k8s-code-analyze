@@ -322,5 +322,13 @@ controllers["endpoint"] = startEndpointController
 * cmd/kube-controller-manager/app/core.go:
 
 ```
-
+func startEndpointController(ctx ControllerContext) (http.Handler, bool, error) {
+	go endpointcontroller.NewEndpointController(
+		ctx.InformerFactory.Core().V1().Pods(),
+		ctx.InformerFactory.Core().V1().Services(),
+		ctx.InformerFactory.Core().V1().Endpoints(),
+		ctx.ClientBuilder.ClientOrDie("endpoint-controller"),
+	).Run(int(ctx.ComponentConfig.EndPointController.ConcurrentEndpointSyncs), ctx.Stop)
+	return nil, true, nil
+}
 ```
