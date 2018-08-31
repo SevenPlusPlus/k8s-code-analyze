@@ -440,7 +440,30 @@ func (e *EndpointController) addPod(obj interface{}) {
 ##### EndpointController处理主流程 
 
 ```
+// Run will not return until stopCh is closed. workers determines how many
+// endpoints will be handled in parallel.
+func (e *EndpointController) Run(workers int, stopCh <-chan struct{}) {
+	defer utilruntime.HandleCrash()
+	defer e.queue.ShutDown()
 
+	glog.Infof("Starting endpoint controller")
+	defer glog.Infof("Shutting down endpoint controller")
+
+	if !controller.WaitForCacheSync("endpoint", stopCh, e.podsSynced, e.servicesSynced, e.endpointsSynced) {
+		return
+	}
+
+	for i := 0; i < workers; i++ {
+		go wait.Until(e.worker, e.workerLoopPeriod, stopCh)
+	}
+
+	go func() {
+		defer utilruntime.HandleCrash()
+		e.checkLeftoverEndpoints()
+	}()
+
+	<-stopCh
+}
 ```
 
 
