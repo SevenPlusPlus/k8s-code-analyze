@@ -479,7 +479,7 @@ func (e *EndpointController) processNextWorkItem() bool {
 	return true
 }
 ```
-处理发生变更service
+处理发生变更service, 更新该service对应的EndpointSubset
 
 ```
 func (e *EndpointController) syncService(key string) error {
