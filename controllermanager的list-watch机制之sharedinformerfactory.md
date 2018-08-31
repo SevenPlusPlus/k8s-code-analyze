@@ -1,0 +1,1 @@
+## ControllerManager的List-Watch机制之sharedInformerFactory
