@@ -160,9 +160,10 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Pods returns a PodInformer.
-func (v *version) Pods() PodInformer {
-	return &podInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
+```
+* 构建PodInformer
+
+```
+
 ```
 
