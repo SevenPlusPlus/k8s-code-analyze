@@ -126,3 +126,4 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 	}
 }
 ```
+关于go informer.Run(stopCh)， 是启动一个的informer，会在后面进行讲解。 
