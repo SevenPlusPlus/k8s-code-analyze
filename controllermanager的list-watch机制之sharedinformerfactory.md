@@ -171,9 +171,7 @@ type podInformer struct {
 }
 
 // Pods returns a PodInformer.
-
 func (v *version) Pods() PodInformer {
-
 	return &podInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 
 }
