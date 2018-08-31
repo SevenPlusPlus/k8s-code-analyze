@@ -267,3 +267,9 @@ func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clien
 	return ctx, nil
 }
 ```
+### 启动Controllers的实现
+* cmd/kube-controller-manager/app/controllermanager.go:
+
+```
+
+```
