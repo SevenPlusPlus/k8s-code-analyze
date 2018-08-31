@@ -189,6 +189,7 @@ type ControllerContext struct {
 	InformerFactory informers.SharedInformerFactory
 
 	// ComponentConfig provides access to init options for a given controller
+       //用于访问各Controller的配置选项
 	ComponentConfig componentconfig.KubeControllerManagerConfiguration
 
 	// DeferredDiscoveryRESTMapper is a RESTMapper that will defer
