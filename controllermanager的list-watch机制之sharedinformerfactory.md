@@ -5,4 +5,4 @@
 
 所以informer也分为两类，共享和非共享。这两类informer本质上都是对Reflector的封装。
 
-本文首先以对pod资源的List-Watch的主线，进行共享型informer的学习。
+本文首先以对pod资源的List-Watch的主线，对SharedInformer进行解析。
