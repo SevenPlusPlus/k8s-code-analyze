@@ -360,6 +360,7 @@ type EndpointController struct {
 
 	// endpointsLister is able to list/get endpoints and is populated by the shared informer passed to
 	// NewEndpointController.
+	//方便get/list endpoints列表的帮助类接口
 	endpointsLister corelisters.EndpointsLister
 	// endpointsSynced returns true if the endpoints shared informer has been synced at least once.
 	// Added as a member to the struct to allow injection for testing.
