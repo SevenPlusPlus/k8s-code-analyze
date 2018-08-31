@@ -8,3 +8,9 @@
 本文首先以对pod资源的List-Watch的主线，对SharedInformer进行解析。
 接上文ControllerManager启动过程，我们创建了一个SharedInformerFactory。
 ### type SharedInformerFactory interface
+SharedInformerFactory为所有已知的API group versions中的资源提供了shared informers,其具体定义为：
+* vendor/k8s.io/client-go/informers/factory.go:
+
+```
+
+```
