@@ -412,6 +412,11 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 	return e
 }
 ```
+从EndpointController构建主要过程为：
+
+1. serviceInformer注册service变更事件处理句柄e.enqueueService,并初始化serviceLister帮助类
+2. serviceInformer注册pod变更事件处理句柄e.addPod, e.updatePod, e.deletePod, 并初始化得到podLister帮助类
+3. 从endpointsInformer初始化得到endpointsLister帮助类
 
 
 
