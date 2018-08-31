@@ -133,6 +133,10 @@ func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 回顾创建EndpointController的实现中：
 
 ```
-endpointcontroller.NewEndpointController( ctx.InformerFactory.Core().V1().Pods(), ctx.InformerFactory.Core().V1().Services(), ctx.InformerFactory.Core().V1().Endpoints(), ctx.ClientBuilder.ClientOrDie("endpoint-controller")
+endpointcontroller.NewEndpointController( ctx.InformerFactory.Core().V1().Pods(), 
+ctx.InformerFactory.Core().V1().Services(), 
+ctx.InformerFactory.Core().V1().Endpoints(), 
+ctx.ClientBuilder.ClientOrDie("endpoint-controller")
+
 ```
 
