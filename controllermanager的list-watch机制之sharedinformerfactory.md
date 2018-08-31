@@ -108,3 +108,8 @@ func NewSharedInformerFactoryWithOptions(client kubernetes.Interface, defaultRes
 	return factory
 
 ```
+* 初始化启动所有资源的informers
+
+```
+
+```
