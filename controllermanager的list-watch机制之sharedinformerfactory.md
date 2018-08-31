@@ -146,6 +146,8 @@ func (f *sharedInformerFactory) Core() core.Interface {
 }
 ```
 
+* 创建core group， vendor/k8s.io/client-go/informers/core/interface.go
+
 ```
 type group struct {
 	factory          internalinterfaces.SharedInformerFactory
