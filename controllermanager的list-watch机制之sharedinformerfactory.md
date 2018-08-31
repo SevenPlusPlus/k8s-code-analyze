@@ -45,10 +45,6 @@ type Interface interface {
 ```
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// ComponentStatuses returns a ComponentStatusInformer.
-	ComponentStatuses() ComponentStatusInformer
-	// ConfigMaps returns a ConfigMapInformer.
-	ConfigMaps() ConfigMapInformer
 	// Endpoints returns a EndpointsInformer.
 	Endpoints() EndpointsInformer
 	// Events returns a EventInformer.
@@ -65,17 +61,6 @@ type Interface interface {
 	PersistentVolumeClaims() PersistentVolumeClaimInformer
 	// Pods returns a PodInformer.
 	Pods() PodInformer
-	// PodTemplates returns a PodTemplateInformer.
-	PodTemplates() PodTemplateInformer
-	// ReplicationControllers returns a ReplicationControllerInformer.
-	ReplicationControllers() ReplicationControllerInformer
-	// ResourceQuotas returns a ResourceQuotaInformer.
-	ResourceQuotas() ResourceQuotaInformer
-	// Secrets returns a SecretInformer.
-	Secrets() SecretInformer
-	// Services returns a ServiceInformer.
-	Services() ServiceInformer
-	// ServiceAccounts returns a ServiceAccountInformer.
-	ServiceAccounts() ServiceAccountInformer
+	...
 }
 ```
