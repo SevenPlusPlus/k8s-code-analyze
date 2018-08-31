@@ -110,6 +110,8 @@ func NewSharedInformerFactoryWithOptions(client kubernetes.Interface, defaultRes
 ```
 * 初始化启动所有资源的informers
 
+Start函数会把所有注册过的informers都分别启动一个groutine， run起来。
+
 ```
 // Start initializes all requested informers.
 func (f *sharedInformerFactory) Start(stopCh <-chan struct{}) {
