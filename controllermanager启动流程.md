@@ -465,7 +465,21 @@ func (e *EndpointController) worker() {
 	for e.processNextWorkItem() {
 	}
 }
+
+func (e *EndpointController) processNextWorkItem() bool {
+	eKey, quit := e.queue.Get()
+	if quit {
+		return false
+	}
+	defer e.queue.Done(eKey)
+
+	err := e.syncService(eKey.(string))
+	e.handleErr(err, eKey)
+
+	return true
+}
 ```
+
 
 
 
