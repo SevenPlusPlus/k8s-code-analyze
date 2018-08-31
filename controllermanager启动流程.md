@@ -271,5 +271,45 @@ func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clien
 * cmd/kube-controller-manager/app/controllermanager.go:
 
 ```
+func StartControllers(ctx ControllerContext, startSATokenController InitFunc, controllers map[string]InitFunc, unsecuredMux *mux.PathRecorderMux) error {
+	// Always start the SA token controller first using a full-power client, since it needs to mint tokens for the rest
+	// If this fails, just return here and fail since other controllers won't be able to get credentials.
+	if _, _, err := startSATokenController(ctx); err != nil {
+		return err
+	}
 
+	// Initialize the cloud provider with a reference to the clientBuilder only after token controller
+	// has started in case the cloud provider uses the client builder.
+	if ctx.Cloud != nil {
+		ctx.Cloud.Initialize(ctx.ClientBuilder)
+	}
+
+	for controllerName, initFn := range controllers {
+		if !ctx.IsControllerEnabled(controllerName) {
+			glog.Warningf("%q is disabled", controllerName)
+			continue
+		}
+
+		time.Sleep(wait.Jitter(ctx.ComponentConfig.GenericComponent.ControllerStartInterval.Duration, ControllerStartJitter))
+
+		glog.V(1).Infof("Starting %q", controllerName)
+		debugHandler, started, err := initFn(ctx)
+		if err != nil {
+			glog.Errorf("Error starting %q", controllerName)
+			return err
+		}
+		if !started {
+			glog.Warningf("Skipping %q", controllerName)
+			continue
+		}
+		if debugHandler != nil && unsecuredMux != nil {
+			basePath := "/debug/controllers/" + controllerName
+			unsecuredMux.UnlistedHandle(basePath, http.StripPrefix(basePath, debugHandler))
+			unsecuredMux.UnlistedHandlePrefix(basePath+"/", http.StripPrefix(basePath, debugHandler))
+		}
+		glog.Infof("Started %q", controllerName)
+	}
+
+	return nil
+}
 ```
