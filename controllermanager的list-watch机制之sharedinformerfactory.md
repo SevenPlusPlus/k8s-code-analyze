@@ -50,5 +50,39 @@ type Interface interface {
 * vendor/k8s.io/client-go/informers/core/v1/interface.go:
 
 ```
-
+// Interface provides access to all the informers in this group version.
+type Interface interface {
+	// ComponentStatuses returns a ComponentStatusInformer.
+	ComponentStatuses() ComponentStatusInformer
+	// ConfigMaps returns a ConfigMapInformer.
+	ConfigMaps() ConfigMapInformer
+	// Endpoints returns a EndpointsInformer.
+	Endpoints() EndpointsInformer
+	// Events returns a EventInformer.
+	Events() EventInformer
+	// LimitRanges returns a LimitRangeInformer.
+	LimitRanges() LimitRangeInformer
+	// Namespaces returns a NamespaceInformer.
+	Namespaces() NamespaceInformer
+	// Nodes returns a NodeInformer.
+	Nodes() NodeInformer
+	// PersistentVolumes returns a PersistentVolumeInformer.
+	PersistentVolumes() PersistentVolumeInformer
+	// PersistentVolumeClaims returns a PersistentVolumeClaimInformer.
+	PersistentVolumeClaims() PersistentVolumeClaimInformer
+	// Pods returns a PodInformer.
+	Pods() PodInformer
+	// PodTemplates returns a PodTemplateInformer.
+	PodTemplates() PodTemplateInformer
+	// ReplicationControllers returns a ReplicationControllerInformer.
+	ReplicationControllers() ReplicationControllerInformer
+	// ResourceQuotas returns a ResourceQuotaInformer.
+	ResourceQuotas() ResourceQuotaInformer
+	// Secrets returns a SecretInformer.
+	Secrets() SecretInformer
+	// Services returns a ServiceInformer.
+	Services() ServiceInformer
+	// ServiceAccounts returns a ServiceAccountInformer.
+	ServiceAccounts() ServiceAccountInformer
+}
 ```
