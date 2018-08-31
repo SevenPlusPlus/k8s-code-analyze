@@ -12,5 +12,27 @@ SharedInformerFactory为所有已知的API group versions中的资源提供了sh
 * vendor/k8s.io/client-go/informers/factory.go:
 
 ```
+// SharedInformerFactory provides shared informers for resources in all known
+// API group versions.
+type SharedInformerFactory interface {
+	internalinterfaces.SharedInformerFactory
+	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
+	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
+	Admissionregistration() admissionregistration.Interface
+	Apps() apps.Interface
+	Autoscaling() autoscaling.Interface
+	Batch() batch.Interface
+	Certificates() certificates.Interface
+	Coordination() coordination.Interface
+	Core() core.Interface
+	Events() events.Interface
+	Extensions() extensions.Interface
+	Networking() networking.Interface
+	Policy() policy.Interface
+	Rbac() rbac.Interface
+	Scheduling() scheduling.Interface
+	Settings() settings.Interface
+	Storage() storage.Interface
+}
 ```
