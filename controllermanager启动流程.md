@@ -97,5 +97,6 @@ type Clientset struct {
 	appsV1                        *appsv1.AppsV1Client
 	authenticationV1              *authenticationv1.AuthenticationV1Client
 	authenticationV1beta1         *authenticationv1beta1.AuthenticationV1beta1Client
+       ...
 }
 ```
