@@ -40,5 +40,9 @@ type SharedInformerFactory interface {
 * vendor/k8s.io/client-go/informers/core/interface.go:
 
 ```
-
+// Interface provides access to each of this group's versions.
+type Interface interface {
+	// V1 provides access to shared informers for resources in V1.
+	V1() v1.Interface
+}
 ```
