@@ -204,11 +204,16 @@ podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 	})
 ```
 
-* 在sharedInformerFactory注册并返回pod类型的SharedIndexInformer
+可以看到调用了podInformer的Informer方法返回pod类型的SharedIndexInformer
 
 ```
 func (f *podInformer) Informer() cache.SharedIndexInformer {
  return f.factory.InformerFor(&corev1.Pod{}, f.defaultInformer)
 }
+```
+其内部调用了sharedInformerFactory的InformerFor方法，注册并返回了pod类型的SharedIndexInformer
+
+```
+
 ```
 
