@@ -163,6 +163,7 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 		select {}
 	}
 
+        //不设置
 	if !c.ComponentConfig.GenericComponent.LeaderElection.LeaderElect {
 		run(context.TODO())
 		panic("unreachable")
@@ -172,7 +173,6 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-
 	// add a uniquifier so that two processes on the same host don't accidentally both become active
 	id = id + "_" + string(uuid.NewUUID())
 	rl, err := resourcelock.New(c.ComponentConfig.GenericComponent.LeaderElection.ResourceLock,
