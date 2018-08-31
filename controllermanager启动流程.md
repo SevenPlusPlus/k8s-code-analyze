@@ -454,6 +454,7 @@ func (e *EndpointController) Run(workers int, stopCh <-chan struct{}) {
 	<-stopCh
 }
 ```
+worker从待处理的service队列中取出service并处理
 
 ```
 // worker runs a worker thread that just dequeues items, processes them, and
