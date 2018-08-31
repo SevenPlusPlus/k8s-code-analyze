@@ -176,7 +176,7 @@ run := func(ctx context.Context) {
 		select {}
 	}
 ```
-ControllerContext定义如下：
+启动每个具体的Controller的时候都会传入ControllerContext，其具体定义如下：
 
 ```
 type ControllerContext struct {
