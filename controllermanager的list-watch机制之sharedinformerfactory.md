@@ -144,5 +144,10 @@ ctx.ClientBuilder.ClientOrDie("endpoint-controller")
 func (f *sharedInformerFactory) Core() core.Interface {
 	return core.New(f, f.namespace, f.tweakListOptions)
 }
+
+// New returns a new Interface.
+func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
+	return &group{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
 ```
 
