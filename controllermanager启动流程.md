@@ -231,12 +231,7 @@ func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clien
 	versionedClient := rootClientBuilder.ClientOrDie("shared-informers")
 	sharedInformers := informers.NewSharedInformerFactory(versionedClient, ResyncPeriod(s)())
 
-	// If apiserver is not running we should wait for some time and fail only then. This is particularly
-	// important when we start apiserver and controller manager at the same time.
-	if err := genericcontrollermanager.WaitForAPIServer(versionedClient, 10*time.Second); err != nil {
-		return ControllerContext{}, fmt.Errorf("failed to wait for apiserver being healthy: %v", err)
-	}
-
+	
 	// Use a discovery client capable of being refreshed.
 	discoveryClient := rootClientBuilder.ClientOrDie("controller-discovery")
 	cachedClient := cacheddiscovery.NewMemCacheClient(discoveryClient.Discovery())
@@ -245,6 +240,7 @@ func CreateControllerContext(s *config.CompletedConfig, rootClientBuilder, clien
 		restMapper.Reset()
 	}, 30*time.Second, stop)
 
+	//获取当前所有groups和versions支持的resouces
 	availableResources, err := GetAvailableResources(rootClientBuilder)
 	if err != nil {
 		return ControllerContext{}, err
