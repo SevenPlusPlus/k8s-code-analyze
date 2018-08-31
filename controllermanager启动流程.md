@@ -344,6 +344,7 @@ type EndpointController struct {
 
 	// serviceLister is able to list/get services and is populated by the shared informer passed to
 	// NewEndpointController.
+	//方便get/list services列表的帮助类接口
 	serviceLister corelisters.ServiceLister
 	// servicesSynced returns true if the service shared informer has been synced at least once.
 	// Added as a member to the struct to allow injection for testing.
@@ -351,6 +352,7 @@ type EndpointController struct {
 
 	// podLister is able to list/get pods and is populated by the shared informer passed to
 	// NewEndpointController.
+	//方便get/list pods列表的帮助类接口
 	podLister corelisters.PodLister
 	// podsSynced returns true if the pod shared informer has been synced at least once.
 	// Added as a member to the struct to allow injection for testing.
