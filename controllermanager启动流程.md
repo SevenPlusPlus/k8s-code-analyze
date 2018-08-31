@@ -188,5 +188,67 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 接下来深入分析下ControllerManager启动过程
 
 ```
+run := func(ctx context.Context) {
 
+		rootClientBuilder := controller.SimpleControllerClientBuilder{
+
+			ClientConfig: c.Kubeconfig,
+
+		}
+
+		var clientBuilder controller.ControllerClientBuilder
+
+		if c.ComponentConfig.KubeCloudShared.UseServiceAccountCredentials {
+
+			if len(c.ComponentConfig.SAController.ServiceAccountKeyFile) == 0 {
+
+				// It'c possible another controller process is creating the tokens for us.
+
+				// If one isn't, we'll timeout and exit when our client builder is unable to create the tokens.
+
+				glog.Warningf("--use-service-account-credentials was specified without providing a --service-account-private-key-file")
+
+			}
+
+			clientBuilder = controller.SAControllerClientBuilder{
+
+				ClientConfig:         restclient.AnonymousClientConfig(c.Kubeconfig),
+
+				CoreClient:           c.Client.CoreV1(),
+
+				AuthenticationClient: c.Client.AuthenticationV1(),
+
+				Namespace:            "kube-system",
+
+			}
+
+		} else {
+
+			clientBuilder = rootClientBuilder
+
+		}
+
+		controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())
+
+		if err != nil {
+
+			glog.Fatalf("error building controller context: %v", err)
+
+		}
+
+		saTokenControllerInitFunc := serviceAccountTokenControllerStarter{rootClientBuilder: rootClientBuilder}.startServiceAccountTokenController
+
+		if err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != nil {
+
+			glog.Fatalf("error starting controllers: %v", err)
+
+		}
+
+		controllerContext.InformerFactory.Start(controllerContext.Stop)
+
+		close(controllerContext.InformersStarted)
+
+		select {}
+
+	}
 ```
