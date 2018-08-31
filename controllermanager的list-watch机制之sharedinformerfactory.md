@@ -238,6 +238,10 @@ func (f *sharedInformerFactory) InformerFor(obj runtime.Object, newFunc internal
 最后看下pod类型的cache.SharedIndexInformer构造过程如下：
 
 ```
+func (f *podInformer) defaultInformer(client kubernetes.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredPodInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+}
+
 
 ```
 
