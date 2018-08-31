@@ -418,7 +418,7 @@ func NewEndpointController(podInformer coreinformers.PodInformer, serviceInforme
 2. serviceInformer注册pod变更事件处理句柄e.addPod, e.updatePod, e.deletePod, 并初始化得到podLister帮助类
 3. 从endpointsInformer初始化得到endpointsLister帮助类
 
-不难想到当某个service新的pod产生则会触发e.addPod的调用
+不难想到当某个service新的pod产生则会触发e.addPod的调用, addPod会找到这个pod对应的services，把service作为key写入到Controller内部维护的发生变更待处理的services队列
 
 ```
 // When a pod is added, figure out what services it will be a member of and
