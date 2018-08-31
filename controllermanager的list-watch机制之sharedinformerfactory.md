@@ -36,3 +36,9 @@ type SharedInformerFactory interface {
 	Storage() storage.Interface
 }
 ```
+可以看到SharedInformerFactory包含了所有group资源informers访问接口，以Core group为例继续深入了解core.Interface
+* vendor/k8s.io/client-go/informers/core/interface.go:
+
+```
+
+```
