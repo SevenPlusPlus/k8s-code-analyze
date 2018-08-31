@@ -85,6 +85,8 @@ type sharedInformerFactory struct {
 	startedInformers map[reflect.Type]bool
 }
 ```
+下面来看看type sharedInformerFactory struct 提供的功能函数 
+
 * 新建一个sharedInformerFactory方法
 
 ```
