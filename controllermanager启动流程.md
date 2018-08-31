@@ -168,7 +168,8 @@ run := func(ctx context.Context) {
 		if err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != nil {
 			glog.Fatalf("error starting controllers: %v", err)
 		}
-
+	//启动初始化所有请求的informer对象
+	//Start initializes all requested informers.
 		controllerContext.InformerFactory.Start(controllerContext.Stop)
 
 		close(controllerContext.InformersStarted)
