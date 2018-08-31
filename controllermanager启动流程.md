@@ -83,3 +83,8 @@ func (s KubeControllerManagerOptions) Config(allControllers []string, disabledBy
 	return c, nil
 }
 ```
+Clientset定义如下：
+
+```
+
+```
