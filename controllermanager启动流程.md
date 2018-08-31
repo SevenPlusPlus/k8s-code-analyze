@@ -313,4 +313,7 @@ func StartControllers(ctx ControllerContext, startSATokenController InitFunc, co
 	return nil
 }
 ```
-以
+以endpoint Controller为例分析具体Controller初始化启动过程，前面NewControllerInitializers中不难找到endpoint Controller的初始化方法
+```
+
+```
