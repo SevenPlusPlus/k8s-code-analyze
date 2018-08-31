@@ -158,6 +158,12 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 }
 ```
 
+```
+type version struct {
+	factory          internalinterfaces.SharedInformerFactory
+	namespace        string
+	tweakListOptions internalinterfaces.TweakListOptionsFunc
+}
 // V1 returns a new v1.Interface.
 func (g *group) V1() v1.Interface {
 	return v1.New(g.factory, g.namespace, g.tweakListOptions)
