@@ -335,9 +335,44 @@ func startEndpointController(ctx ControllerContext) (http.Handler, bool, error) 
 新建EndpointController
 * pkg/controller/endpoint/endpoints_controller.go:
 
-EndpointController定义
+EndpointController定义如下：
 
 ```
+// EndpointController manages selector-based service endpoints.
+type EndpointController struct {
+	client clientset.Interface
+
+	// serviceLister is able to list/get services and is populated by the shared informer passed to
+	// NewEndpointController.
+	serviceLister corelisters.ServiceLister
+	// servicesSynced returns true if the service shared informer has been synced at least once.
+	// Added as a member to the struct to allow injection for testing.
+	servicesSynced cache.InformerSynced
+
+	// podLister is able to list/get pods and is populated by the shared informer passed to
+	// NewEndpointController.
+	podLister corelisters.PodLister
+	// podsSynced returns true if the pod shared informer has been synced at least once.
+	// Added as a member to the struct to allow injection for testing.
+	podsSynced cache.InformerSynced
+
+	// endpointsLister is able to list/get endpoints and is populated by the shared informer passed to
+	// NewEndpointController.
+	endpointsLister corelisters.EndpointsLister
+	// endpointsSynced returns true if the endpoints shared informer has been synced at least once.
+	// Added as a member to the struct to allow injection for testing.
+	endpointsSynced cache.InformerSynced
+
+	// Services that need to be updated. A channel is inappropriate here,
+	// because it allows services with lots of pods to be serviced much
+	// more often than services with few pods; it also would cause a
+	// service that's inserted multiple times to be processed more than
+	// necessary.
+	queue workqueue.RateLimitingInterface
+
+	// workerLoopPeriod is the time between worker runs. The workers process the queue of service and pod changes.
+	workerLoopPeriod time.Duration
+}
 
 ```
 
