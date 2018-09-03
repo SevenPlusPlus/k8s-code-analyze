@@ -330,7 +330,7 @@ type sharedIndexInformer struct {
 	indexer    Indexer
 	controller Controller
 
-	processor             *sharedProcessor
+	processor             *sharedProcessor //记录了注册的所有Controller
 	cacheMutationDetector CacheMutationDetector
 
 	// This block is tracked to handle late initialization of the controller
