@@ -418,6 +418,6 @@ type processorListener struct {
 }
 
 ```
-
+### 一个shared informer run起来之后是如何运行的
 
 
