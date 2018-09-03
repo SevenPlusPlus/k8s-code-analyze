@@ -713,6 +713,11 @@ func (p *processorListener) run() {
 * vendor/k8s.io/client-go/tools/cache/delta_fifo.go:
 
 ```
+// DeltaFIFO is like FIFO, but allows you to process deletes.
+//
+// DeltaFIFO is a producer-consumer queue, where a Reflector is
+// intended to be the producer, and the consumer is whatever calls
+// the Pop() method.
 type DeltaFIFO struct {
 	// lock/cond protects access to 'items' and 'queue'.
 	lock sync.RWMutex
