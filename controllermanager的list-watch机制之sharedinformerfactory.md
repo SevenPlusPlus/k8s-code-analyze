@@ -525,11 +525,17 @@ func (p *processorListener) add(notification interface{}) {
 	p.addCh <- notification
 }
 ```
-* vendor/k8s.io/client-go/tools/cache/controller.go: type Controller struct
+* vendor/k8s.io/client-go/tools/cache/controller.go: type controller struct
 
-type Controller struct 是一个通用的controller框架, 体现了Reflector机制。
+type controller struct 是一个通用的controller框架, 体现了Reflector机制。
 
 ```
-
+// Controller is a generic controller framework.
+type controller struct {
+	config         Config
+	reflector      *Reflector
+	reflectorMutex sync.RWMutex
+	clock          clock.Clock
+}
 ```
 
