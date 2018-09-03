@@ -326,7 +326,34 @@ type SharedIndexInformer interface {
 	GetIndexer() Indexer
 }
 
+type sharedIndexInformer struct {
+	indexer    Indexer
+	controller Controller
 
+	processor             *sharedProcessor
+	cacheMutationDetector CacheMutationDetector
+
+	// This block is tracked to handle late initialization of the controller
+	listerWatcher ListerWatcher
+	objectType    runtime.Object
+
+	// resyncCheckPeriod is how often we want the reflector's resync timer to fire so it can call
+	// shouldResync to check if any of our listeners need a resync.
+	resyncCheckPeriod time.Duration
+	// defaultEventHandlerResyncPeriod is the default resync period for any handlers added via
+	// AddEventHandler (i.e. they don't specify one and just want to use the shared informer's default
+	// value).
+	defaultEventHandlerResyncPeriod time.Duration
+	// clock allows for testability
+	clock clock.Clock
+
+	started, stopped bool
+	startedLock      sync.Mutex
+
+	// blockDeltas gives a way to stop all event distribution so that a late event handler
+	// can safely join the shared informer.
+	blockDeltas sync.Mutex
+}
 ```
 
 
