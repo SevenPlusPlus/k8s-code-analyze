@@ -520,4 +520,8 @@ func (p *sharedProcessor) distribute(obj interface{}, sync bool) {
 		}
 	}
 }
+
+func (p *processorListener) add(notification interface{}) {
+	p.addCh <- notification
+}
 ```
