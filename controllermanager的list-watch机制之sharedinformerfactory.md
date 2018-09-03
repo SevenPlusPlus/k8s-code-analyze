@@ -437,7 +437,7 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 		FullResyncPeriod: s.resyncCheckPeriod,
 		RetryOnError:     false,
 		ShouldResync:     s.processor.shouldResync,
-
+		//这里定义了event的分发函数
 		Process: s.HandleDeltas,
 	}
 
