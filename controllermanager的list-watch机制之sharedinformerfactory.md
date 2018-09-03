@@ -553,5 +553,43 @@ type Config struct {
 
 	...
 }
+// New makes a new Controller from the given Config.
+func New(c *Config) Controller {
+	ctlr := &controller{
+		config: *c,
+		clock:  &clock.RealClock{},
+	}
+	return ctlr
+}
+
+// Run begins processing items, and will continue until a value is sent down stopCh.
+// It's an error to call Run more than once.
+// Run blocks; call via go.
+func (c *controller) Run(stopCh <-chan struct{}) {
+	defer utilruntime.HandleCrash()
+	go func() {
+		<-stopCh
+		c.config.Queue.Close()
+	}()
+	r := NewReflector(
+		c.config.ListerWatcher,
+		c.config.ObjectType,
+		c.config.Queue,
+		c.config.FullResyncPeriod,
+	)
+	r.ShouldResync = c.config.ShouldResync
+	r.clock = c.clock
+
+	c.reflectorMutex.Lock()
+	c.reflector = r
+	c.reflectorMutex.Unlock()
+
+	var wg wait.Group
+	defer wg.Wait()
+
+	wg.StartWithChannel(stopCh, r.Run)
+
+	wait.Until(c.processLoop, time.Second, stopCh)
+}
 ```
 
