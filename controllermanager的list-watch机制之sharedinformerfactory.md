@@ -563,7 +563,6 @@ func New(c *Config) Controller {
 }
 
 // Run begins processing items, and will continue until a value is sent down stopCh.
-// It's an error to call Run more than once.
 // Run blocks; call via go.
 func (c *controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
@@ -574,7 +573,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 	r := NewReflector(
 		c.config.ListerWatcher,
 		c.config.ObjectType,
-		c.config.Queue,
+		c.config.Queue, // Reflector机制的store，即前面的NewDeltaFIFO构建的type DeltaFIFO struct对象
 		c.config.FullResyncPeriod,
 	)
 	r.ShouldResync = c.config.ShouldResync
@@ -591,5 +590,6 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 
 	wait.Until(c.processLoop, time.Second, stopCh)
 }
+
 ```
 
