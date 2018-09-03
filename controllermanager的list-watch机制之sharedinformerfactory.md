@@ -386,6 +386,7 @@ func (s *sharedIndexInformer) AddEventHandlerWithResyncPeriod(handler ResourceEv
 ```
 可以看到其主要实现流程为：
 
-1. 向sharedIndexInformer的processor成员
+1. 将handler(ResourceEventHandler)包装成listerner(processorListener)
+2. 将listener添加到sharedIndexInformer的processor成员的listeners列表中
 
 
