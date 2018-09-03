@@ -551,28 +551,7 @@ type Config struct {
 	// Something that can process your objects.
 	Process ProcessFunc
 
-	// The type of your objects.
-	ObjectType runtime.Object
-
-	// Reprocess everything at least this often.
-	// Note that if it takes longer for you to clear the queue than this
-	// period, you will end up processing items in the order determined
-	// by FIFO.Replace(). Currently, this is random. If this is a
-	// problem, we can change that replacement policy to append new
-	// things to the end of the queue instead of replacing the entire
-	// queue.
-	FullResyncPeriod time.Duration
-
-	// ShouldResync, if specified, is invoked when the controller's reflector determines the next
-	// periodic sync should occur. If this returns true, it means the reflector should proceed with
-	// the resync.
-	ShouldResync ShouldResyncFunc
-
-	// If true, when Process() returns an error, re-enqueue the object.
-	// TODO: add interface to let you inject a delay/backoff or drop
-	//       the object completely if desired. Pass the object in
-	//       question to this interface as a parameter.
-	RetryOnError bool
+	...
 }
 ```
 
