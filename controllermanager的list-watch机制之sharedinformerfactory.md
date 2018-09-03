@@ -444,7 +444,7 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 	func() {
 		s.startedLock.Lock()
 		defer s.startedLock.Unlock()
-		//构建一个controller,其作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。放入之后Process: s.HandleDeltas会对资源进行处理
+		/*构建一个controller,其作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。放入之后Process: s.HandleDeltas会对资源进行处理*/
 		s.controller = New(cfg)
 		s.controller.(*controller).clock = s.clock
 		s.started = true
