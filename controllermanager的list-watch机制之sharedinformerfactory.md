@@ -295,6 +295,7 @@ sharedIndexInformer结构实现了SharedIndexInformer接口，SharedIndexInforme
 ```
 // SharedInformer has a shared data cache and is capable of distributing notifications for changes
 // to the cache to multiple listeners who registered via AddEventHandler.
+//SharedInformer有一个共享的数据缓存，并且可以分发缓存数据变化的通知给所有注册到其上的监听者
 type SharedInformer interface {
 	// AddEventHandler adds an event handler to the shared informer using the shared informer's resync
 	// period.  Events to a single handler are delivered sequentially, but there is no coordination
