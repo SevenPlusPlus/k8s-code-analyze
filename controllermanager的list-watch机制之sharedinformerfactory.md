@@ -384,5 +384,8 @@ func (s *sharedIndexInformer) AddEventHandlerWithResyncPeriod(handler ResourceEv
 	}
 }
 ```
+可以看到其主要实现流程为：
+
+1. 向sharedIndexInformer的processor成员
 
 
