@@ -348,7 +348,7 @@ type sharedProcessor struct {
 	wg               wait.Group
 }
 ```
-再次回顾NewEndpointController方法，可以看到EndpointController通过AddEventHandler向pod类型资源的sharedIndexInformer注册了监听事件处理Handler。最后前面sharedInformerFactory的start方法提到的，sharedInformerFactory负责启动了其内部的所有sharedinformers，像下面的代码这样
+再次回顾NewEndpointController方法，可以看到EndpointController通过AddEventHandler向pod类型资源的sharedIndexInformer注册了监听事件处理Handler。最后前面sharedInformerFactory的start方法提到的，sharedInformerFactory负责启动了其内部的所有sharedinformers，像下面的代码这样：
 ```
 go informer.Run(stopCh)
 ```
