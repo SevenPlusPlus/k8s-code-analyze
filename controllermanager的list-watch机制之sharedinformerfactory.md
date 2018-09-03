@@ -477,9 +477,7 @@ controller的作用就是构建一个reflector，然后将watch到的资源放�
 
 ```
 func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
-	s.blockDeltas.Lock()
-	defer s.blockDeltas.Unlock()
-
+	...
 	// from oldest to newest
 	for _, d := range obj.(Deltas) {
 		switch d.Type {
