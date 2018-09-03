@@ -710,4 +710,39 @@ func (p *processorListener) run() {
 ```
 
 最后了解一下type DeltaFIFO struct的实现
-* vendor/k8s
+* vendor/k8s.io/client-go/tools/cache/delta_fifo.go:
+
+```
+type DeltaFIFO struct {
+	// lock/cond protects access to 'items' and 'queue'.
+	lock sync.RWMutex
+	cond sync.Cond
+
+	// We depend on the property that items in the set are in
+	// the queue and vice versa, and that all Deltas in this
+	// map have at least one Delta.
+	items map[string]Deltas
+	queue []string
+
+	// populated is true if the first batch of items inserted by Replace() has been populated
+	// or Delete/Add/Update was called first.
+	populated bool
+	// initialPopulationCount is the number of items inserted by the first call of Replace()
+	initialPopulationCount int
+
+	// keyFunc is used to make the key used for queued item
+	// insertion and retrieval, and should be deterministic.
+	keyFunc KeyFunc
+
+	// knownObjects list keys that are "known", for the
+	// purpose of figuring out which items have been deleted
+	// when Replace() or Delete() is called.
+	knownObjects KeyListerGetter
+
+	// Indication the queue is closed.
+	// Used to indicate a queue is closed so a control loop can exit when a queue is empty.
+	// Currently, not used to gate any of CRED operations.
+	closed     bool
+	closedLock sync.Mutex
+}
+```
