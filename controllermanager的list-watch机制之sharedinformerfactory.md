@@ -419,5 +419,15 @@ type processorListener struct {
 
 ```
 ### 一个shared informer run起来之后是如何运行的
+在前面提到过sharedInformerFactory的start方法， 最后会调用定义在shared_informer.go的func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) 来启动一个informer。
+其流程如下：
+* NewDeltaFIFO创建了一个type DeltaFIFO struct对象
+* 构建一个controller，controller的作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。
+* 放入之后Process: s.HandleDeltas会对资源进行处理。
+* 在启动controller之前，先启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。
+
+```
+
+```
 
 
