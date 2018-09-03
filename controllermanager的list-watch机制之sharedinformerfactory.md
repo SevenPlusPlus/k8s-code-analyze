@@ -470,5 +470,8 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 s.processor.run(stopCh) 中包含了一个生产消费者模型。 这种模式也kubernetes中非常常见的。 通过两个groutine来构造一个生产消费者模型。
 
 s.controller.Run(stopCh) 会完成消息的分发，把watch到的信息分发到各个listener中。
+#### type Controller struct
+controller的作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。 放入之后Process: s.HandleDeltas会对资源进行处理，完成消息的分发。
 
+首先来看看Process: s.HandleDeltas的定义,其会在controller.run启动的processLoop()方法中对fifo队列中的资源Pop时调用。
 
