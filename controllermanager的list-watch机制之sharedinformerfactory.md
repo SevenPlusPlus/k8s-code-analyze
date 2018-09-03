@@ -392,7 +392,32 @@ func (s *sharedIndexInformer) AddEventHandlerWithResyncPeriod(handler ResourceEv
 processorListener结构定义为：
 
 ```
+type processorListener struct {
+	nextCh chan interface{}
+	addCh  chan interface{}
+
+	handler ResourceEventHandler
+
+	// pendingNotifications is an unbounded ring buffer that holds all notifications not yet distributed.
+	// There is one per listener, but a failing/stalled listener will have infinite pendingNotifications
+	// added until we OOM.
+	// TODO: This is no worse than before, since reflectors were backed by unbounded DeltaFIFOs, but
+	// we should try to do something better.
+	pendingNotifications buffer.RingGrowing
+
+	// requestedResyncPeriod is how frequently the listener wants a full resync from the shared informer
+	requestedResyncPeriod time.Duration
+	// resyncPeriod is how frequently the listener wants a full resync from the shared informer. This
+	// value may differ from requestedResyncPeriod if the shared informer adjusts it to align with the
+	// informer's overall resync check period.
+	resyncPeriod time.Duration
+	// nextResync is the earliest time the listener should get a full resync
+	nextResync time.Time
+	// resyncLock guards access to resyncPeriod and nextResync
+	resyncLock sync.Mutex
+}
 
 ```
+
 
 
