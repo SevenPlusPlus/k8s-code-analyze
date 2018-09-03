@@ -505,4 +505,8 @@ func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
 	return nil
 }
 ```
+主要是调用distribute函数来完成信息的分发，把消息发送给所有的listener。
 
+```
+
+```
