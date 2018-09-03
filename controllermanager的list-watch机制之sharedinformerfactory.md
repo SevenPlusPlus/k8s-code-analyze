@@ -709,3 +709,5 @@ func (p *processorListener) run() {
 }
 ```
 
+最后了解一下type DeltaFIFO struct的实现
+* vendor/k8s
