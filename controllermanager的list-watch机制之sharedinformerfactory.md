@@ -428,8 +428,6 @@ type processorListener struct {
 
 ```
 func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
-	defer utilruntime.HandleCrash()
-
 	fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
 
 	cfg := &Config{
