@@ -612,7 +612,7 @@ func (c *controller) processLoop() {
 
 #### 启动sharedProcessor，分发event到注册的Listeners
 
-在上面的informer启动方法中启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。
+在上面的informer启动方法中启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。这里的p.listeners正是前面的func (s *sharedIndexInformer) AddEventHandler(handler ResourceEventHandler)中一个controller向shareInformer注册时添加的一个个listener。
 
 ```
 func (p *sharedProcessor) run(stopCh <-chan struct{}) {
