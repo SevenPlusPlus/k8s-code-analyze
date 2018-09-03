@@ -610,3 +610,4 @@ func (c *controller) processLoop() {
 ```
 目前只需要知道PopProcessFunc(c.config.Process)就是上面的func (s *sharedIndexInformer) HandleDeltas(obj interface{})， 也就是说Controller完成了event的分发。
 
+
