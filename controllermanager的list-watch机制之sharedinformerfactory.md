@@ -634,4 +634,6 @@ func (p *sharedProcessor) run(stopCh <-chan struct{}) {
 	p.wg.Wait() // Wait for all .pop() and .run() to stop
 }
 ```
+接着分析一下processorListener功能
+* type processorListener struct
 
