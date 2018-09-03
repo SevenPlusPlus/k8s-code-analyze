@@ -589,7 +589,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 
 	var wg wait.Group
 	defer wg.Wait()
-
+	//启动reflector
 	wg.StartWithChannel(stopCh, r.Run)
 
 	wait.Until(c.processLoop, time.Second, stopCh)
