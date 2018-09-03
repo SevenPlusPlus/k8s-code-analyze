@@ -471,11 +471,40 @@ s.processor.run(stopCh) 中包含了一个生产消费者模型。 这种模式�
 
 s.controller.Run(stopCh) 会完成消息的分发，把watch到的信息分发到各个listener中。
 #### type Controller struct
-controller的作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。 放入之后Process: s.HandleDeltas会对资源进行处理，完成消息的分发。
+controller的作用就是构建一个reflector，然后将watch到的资源放入fifo这个cache里面。 放入之后Process成员: s.HandleDeltas会对资源进行处理，完成消息的分发。
 
-首先来看看Process: s.HandleDeltas的定义,其会在controller.run启动的processLoop()方法中对fifo队列中的资源Pop时调用。
+首先来看看Process成员: s.HandleDeltas的定义,其会在controller.run启动的processLoop()方法中对fifo队列中的资源Pop时调用。
 
 ```
+func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
+	s.blockDeltas.Lock()
+	defer s.blockDeltas.Unlock()
 
+	// from oldest to newest
+	for _, d := range obj.(Deltas) {
+		switch d.Type {
+		case Sync, Added, Updated:
+			isSync := d.Type == Sync
+			s.cacheMutationDetector.AddObject(d.Object)
+			if old, exists, err := s.indexer.Get(d.Object); err == nil && exists {
+				if err := s.indexer.Update(d.Object); err != nil {
+					return err
+				}
+				s.processor.distribute(updateNotification{oldObj: old, newObj: d.Object}, isSync)
+			} else {
+				if err := s.indexer.Add(d.Object); err != nil {
+					return err
+				}
+				s.processor.distribute(addNotification{newObj: d.Object}, isSync)
+			}
+		case Deleted:
+			if err := s.indexer.Delete(d.Object); err != nil {
+				return err
+			}
+			s.processor.distribute(deleteNotification{oldObj: d.Object}, false)
+		}
+	}
+	return nil
+}
 ```
 
