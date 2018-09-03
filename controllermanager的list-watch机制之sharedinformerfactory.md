@@ -762,18 +762,9 @@ type DeltaFIFO struct {
 
 4. 这里的Reflector机制的store是一个type DeltaFIFO struct对象，Reflector保证只会把符合expectedType类型的对象存放到store中。 其数据源在func NewPodInformer中进行了声明（将clientset的某种资源的restClient包装为ListerWatcher接口对象来实现）。
 
-5. 一个sharedIndexInformer中会生成多个type processorListener struct。
+5. 各endpointcontroller的podInformer注册调用AddEventHandler会在sharedIndexInformer中生成type processorListener struct。
 
-6. type Controller struct会把消息分发到各个listener中，listener类型是type processorListener struct。
+6. type Controller struct会把消息分发到各个listener的addCh channel中，listener类型是type processorListener struct。
 
-7. type processorListener struct 的add函数负责将notify装进pendingNotifications。 而pop函数取出pendingNotifications的第一个nofify, 输入nextCh这个channel。 最后run函数则负责取出notify，然后根据notify的类型(增加、删除、更新)触发相应的处理函数。
+7. type processorListener struct 的add函数负责将notification装进addCh channel中。 而pop函数从addCh中取出notification, 输入nextCh这个channel。 最后run函数则负责取出notification，然后根据notification的类型(增加、删除、更新)触发相应的处理函数。
 
-ReplicationManager的worker会负责处理各种event，确保Pod副本数与rc规定的相同。
-
-对于每个pod 的change都会唤起replication controller在podInformer.AddEventHandler中注册的方法。
-
-观察到pod资源的变化，会去更新其对应的rc资源。 通过影响rc来变更pod的状态。
-
-更新完一个rc资源之后，把其放入queue workqueue.RateLimitingInterface中，等待ReplicationManager的worker的处理，确保Pod副本数与rc规定的相同。
-
-从Kubernetes 1.7开始，所有需要监控资源变化情况的调用均推荐使用Informer。 Informer提供了基于事件通知的只读缓存机制，可以注册资源变化的回调函数，并可以极大减少API的调用。
