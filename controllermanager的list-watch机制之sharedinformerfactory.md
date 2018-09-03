@@ -271,7 +271,24 @@ func NewFilteredPodInformer(client kubernetes.Interface, namespace string, resyn
 接着我们继续NewSharedIndexInformer创建SharedIndexInformer接口对象的过程,
 
 ```
-
+// NewSharedIndexInformer creates a new instance for the listwatcher.
+func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
+	sharedIndexInformer := &sharedIndexInformer{
+		processor:                       &sharedProcessor{clock: realClock},
+		indexer:                         NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers),
+		listerWatcher:                   lw,
+		objectType:                      objType,
+		resyncCheckPeriod:               defaultEventHandlerResyncPeriod,
+		defaultEventHandlerResyncPeriod: defaultEventHandlerResyncPeriod,
+		cacheMutationDetector:           NewCacheMutationDetector(fmt.Sprintf("%T", objType)),
+		clock: realClock,
+	}
+	return sharedIndexInformer
+}
 ```
+
+### type sharedIndexInformer struct
+* vendor/k8s.io/client-go/tools/cache/shared_informer.go:
+
 
 
