@@ -318,6 +318,15 @@ type SharedInformer interface {
 	// thread-safe.
 	LastSyncResourceVersion() string
 }
+
+type SharedIndexInformer interface {
+	SharedInformer
+	// AddIndexers add indexers to the informer before it starts.
+	AddIndexers(indexers Indexers) error
+	GetIndexer() Indexer
+}
+
+
 ```
 
 
