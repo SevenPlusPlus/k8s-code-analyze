@@ -509,9 +509,7 @@ func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
 
 ```
 func (p *sharedProcessor) distribute(obj interface{}, sync bool) {
-	p.listenersLock.RLock()
-	defer p.listenersLock.RUnlock()
-
+	...	
 	if sync {
 		for _, listener := range p.syncingListeners {
 			listener.add(obj)
