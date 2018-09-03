@@ -525,3 +525,7 @@ func (p *processorListener) add(notification interface{}) {
 	p.addCh <- notification
 }
 ```
+* vendor/k8s.io/client-go/tools/cache/controller.go: type Controller struct
+
+type Controller struct 是一个通用的controller框架。 体现了Reflector机制。
+
