@@ -354,6 +354,15 @@ type sharedIndexInformer struct {
 	// can safely join the shared informer.
 	blockDeltas sync.Mutex
 }
+
+type sharedProcessor struct {
+	listenersStarted bool
+	listenersLock    sync.RWMutex
+	listeners        []*processorListener
+	syncingListeners []*processorListener
+	clock            clock.Clock
+	wg               wait.Group
+}
 ```
 
 
