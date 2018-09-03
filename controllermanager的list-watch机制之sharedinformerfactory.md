@@ -602,13 +602,7 @@ func (c *controller) processLoop() {
 	for {
 		obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))
 		if err != nil {
-			if err == FIFOClosedError {
-				return
-			}
-			if c.config.RetryOnError {
-				// This is the safe way to re-enqueue.
-				c.config.Queue.AddIfNotPresent(obj)
-			}
+			...
 		}
 	}
 }
