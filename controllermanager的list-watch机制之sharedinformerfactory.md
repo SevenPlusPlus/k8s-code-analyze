@@ -615,5 +615,22 @@ func (c *controller) processLoop() {
 在上面的informer启动方法中启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。
 
 ```
-
+func (p *sharedProcessor) run(stopCh <-chan struct{}) {
+	func() {
+		p.listenersLock.RLock()
+		defer p.listenersLock.RUnlock()
+		for _, listener := range p.listeners {
+			p.wg.Start(listener.run)
+			p.wg.Start(listener.pop)
+		}
+		p.listenersStarted = true
+	}()
+	<-stopCh
+	p.listenersLock.RLock()
+	defer p.listenersLock.RUnlock()
+	for _, listener := range p.listeners {
+		close(listener.addCh) // Tell .pop() to stop. .pop() will tell .run() to stop
+	}
+	p.wg.Wait() // Wait for all .pop() and .run() to stop
+}
 ```
