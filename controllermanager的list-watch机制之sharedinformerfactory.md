@@ -295,6 +295,28 @@ sharedIndexInformer结构实现了SharedIndexInformer接口，SharedIndexInforme
 ```
 // SharedInformer has a shared data cache and is capable of distributing notifications for changes
 // to the cache to multiple listeners who registered via AddEventHandler.
+type SharedInformer interface {
+	// AddEventHandler adds an event handler to the shared informer using the shared informer's resync
+	// period.  Events to a single handler are delivered sequentially, but there is no coordination
+	// between different handlers.
+	AddEventHandler(handler ResourceEventHandler)
+	// AddEventHandlerWithResyncPeriod adds an event handler to the shared informer using the
+	// specified resync period.  Events to a single handler are delivered sequentially, but there is
+	// no coordination between different handlers.
+	AddEventHandlerWithResyncPeriod(handler ResourceEventHandler, resyncPeriod time.Duration)
+	// GetStore returns the Store.
+	GetStore() Store
+	// GetController gives back a synthetic interface that "votes" to start the informer
+	GetController() Controller
+	// Run starts the shared informer, which will be stopped when stopCh is closed.
+	Run(stopCh <-chan struct{})
+	// HasSynced returns true if the shared informer's store has synced.
+	HasSynced() bool
+	// LastSyncResourceVersion is the resource version observed when last synced with the underlying
+	// store. The value returned is not synchronized with access to the underlying store and is not
+	// thread-safe.
+	LastSyncResourceVersion() string
+}
 ```
 
 
