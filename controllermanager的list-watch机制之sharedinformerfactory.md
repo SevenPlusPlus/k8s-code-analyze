@@ -356,7 +356,59 @@ go informer.Run(stopCh)
 * podInformer.AddEventHandler
 
 ```
+func (s *sharedIndexInformer) AddEventHandler(handler ResourceEventHandler) {
+	s.AddEventHandlerWithResyncPeriod(handler, s.defaultEventHandlerResyncPeriod)
+}
 
+func (s *sharedIndexInformer) AddEventHandlerWithResyncPeriod(handler ResourceEventHandler, resyncPeriod time.Duration) {
+	s.startedLock.Lock()
+	defer s.startedLock.Unlock()
+
+	if s.stopped {
+		glog.V(2).Infof("Handler %v was not added to shared informer because it has stopped already", handler)
+		return
+	}
+
+	if resyncPeriod > 0 {
+		if resyncPeriod < minimumResyncPeriod {
+			glog.Warningf("resyncPeriod %d is too small. Changing it to the minimum allowed value of %d", resyncPeriod, minimumResyncPeriod)
+			resyncPeriod = minimumResyncPeriod
+		}
+
+		if resyncPeriod < s.resyncCheckPeriod {
+			if s.started {
+				glog.Warningf("resyncPeriod %d is smaller than resyncCheckPeriod %d and the informer has already started. Changing it to %d", resyncPeriod, s.resyncCheckPeriod, s.resyncCheckPeriod)
+				resyncPeriod = s.resyncCheckPeriod
+			} else {
+				// if the event handler's resyncPeriod is smaller than the current resyncCheckPeriod, update
+				// resyncCheckPeriod to match resyncPeriod and adjust the resync periods of all the listeners
+				// accordingly
+				s.resyncCheckPeriod = resyncPeriod
+				s.processor.resyncCheckPeriodChanged(resyncPeriod)
+			}
+		}
+	}
+
+	listener := newProcessListener(handler, resyncPeriod, determineResyncPeriod(resyncPeriod, s.resyncCheckPeriod), s.clock.Now(), initialBufferSize)
+
+	if !s.started {
+		s.processor.addListener(listener)
+		return
+	}
+
+	// in order to safely join, we have to
+	// 1. stop sending add/update/delete notifications
+	// 2. do a list against the store
+	// 3. send synthetic "Add" events to the new handler
+	// 4. unblock
+	s.blockDeltas.Lock()
+	defer s.blockDeltas.Unlock()
+
+	s.processor.addListener(listener)
+	for _, item := range s.indexer.List() {
+		listener.add(addNotification{newObj: item})
+	}
+}
 ```
 
 
