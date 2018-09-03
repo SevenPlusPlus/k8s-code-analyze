@@ -266,6 +266,6 @@ func NewFilteredPodInformer(client kubernetes.Interface, namespace string, resyn
 	)
 }
 ```
-可以看到这里面定义了ListFunc和WatchFunc，声明了Reflector机制的List-Watch的实现。
+可以看到这里面定义了cache.ListWatch类型的ListFunc和WatchFunc方法类型字段，声明了Reflector机制的List-Watch的实现。
 
 
