@@ -712,6 +712,8 @@ func (p *processorListener) run() {
 最后了解一下type DeltaFIFO struct的实现
 * vendor/k8s.io/client-go/tools/cache/delta_fifo.go:
 
+Reflector机制的store是一个type DeltaFIFO struct对象，Reflector保证只会把符合expectedType类型的对象存放到store中。
+
 ```
 // DeltaFIFO is like FIFO, but allows you to process deletes.
 //
