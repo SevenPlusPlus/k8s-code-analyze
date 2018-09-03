@@ -679,7 +679,7 @@ func (p *processorListener) pop() {
 		run函数则负责取出notification，
 		然后根据notification的类型(增加、删除、更新)触发相应的处理函数，
 		这个函数是各个controller注册的。
-	*/
+*/
 func (p *processorListener) run() {
 	stopCh := make(chan struct{})
 	wait.Until(func() {
