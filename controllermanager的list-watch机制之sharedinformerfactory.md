@@ -352,4 +352,6 @@ type sharedProcessor struct {
 ```
 go informer.Run(stopCh)
 ```
+接着来看看type sharedIndexInformer struct的AddEventHandler函数
+* podInformer.AddEventHandler
 
