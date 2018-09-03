@@ -467,5 +467,8 @@ func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
 	s.controller.Run(stopCh)
 }
 ```
+s.processor.run(stopCh) 中包含了一个生产消费者模型。 这种模式也kubernetes中非常常见的。 通过两个groutine来构造一个生产消费者模型。
+
+s.controller.Run(stopCh) 会完成消息的分发，把watch到的信息分发到各个listener中。
 
 
