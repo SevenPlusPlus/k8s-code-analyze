@@ -637,3 +637,12 @@ func (p *sharedProcessor) run(stopCh <-chan struct{}) {
 接着分析一下processorListener功能
 * type processorListener struct
 
+来看看processorListener的功能函数：
+
+* pop负责取出p.addCh的第一个notification, 输入nextCh这个channel，是生产者。 这里就和前面的controller通过HandleDeltas->distribute分发event对应上了。
+* run函数则负责取出notification，然后根据notification的类型(增加、删除、更新)触发相应的处理函数，这个函数是各个controller注册的。
+
+
+```
+
+```
