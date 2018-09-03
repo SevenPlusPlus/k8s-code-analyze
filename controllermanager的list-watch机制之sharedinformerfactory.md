@@ -475,3 +475,7 @@ controller的作用就是构建一个reflector，然后将watch到的资源放�
 
 首先来看看Process: s.HandleDeltas的定义,其会在controller.run启动的processLoop()方法中对fifo队列中的资源Pop时调用。
 
+```
+
+```
+
