@@ -200,7 +200,7 @@ func (v *version) Pods() PodInformer {
 }
 ```
 
-#### 继续回顾NewEndpointController方法中获取pod类型的SharedIndexInformer
+#### 继续回顾NewEndpointController方法中通过PodInformer获取pod类型的SharedIndexInformer的调用
 
 ```
 podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
