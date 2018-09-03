@@ -610,4 +610,10 @@ func (c *controller) processLoop() {
 ```
 目前只需要知道PopProcessFunc(c.config.Process)就是上面的func (s *sharedIndexInformer) HandleDeltas(obj interface{})， 也就是说Controller完成了event的分发。
 
+#### 启动sharedProcessor，分发event到注册的Listeners
 
+在上面的informer启动方法中启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。
+
+```
+
+```
