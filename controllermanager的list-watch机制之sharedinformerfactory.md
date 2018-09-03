@@ -675,10 +675,6 @@ func (p *processorListener) pop() {
 }
 
 func (p *processorListener) run() {
-	// this call blocks until the channel is closed.  When a panic happens during the notification
-	// we will catch it, **the offending item will be skipped!**, and after a short delay (one second)
-	// the next notification will be attempted.  This is usually better than the alternative of never
-	// delivering again.
 	stopCh := make(chan struct{})
 	wait.Until(func() {
 		// this gives us a few quick retries before a long pause and then a few more quick retries
