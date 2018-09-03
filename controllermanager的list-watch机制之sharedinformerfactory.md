@@ -769,4 +769,4 @@ type DeltaFIFO struct {
 7. type processorListener struct 的add函数负责将notification装进addCh channel中。 而pop函数从addCh中取出notification, 输入nextCh这个channel。 最后run函数则负责取出notification，然后根据notification的类型(增加、删除、更新)触发相应的处理函数。
 
 ### 参考资料
-[aaaa](https://github.com/Kevin-fqh/learning-k8s-source-code/blob/master/controller-manager/(02)ControllerManager%E7%9A%84List-Watch%E6%9C%BA%E5%88%B6-2.md)
+[aaaa](https://github.com/Kevin-fqh/learning-k8s-source-code/blob/master/controller-manager/\(02\)ControllerManager%E7%9A%84List-Watch%E6%9C%BA%E5%88%B6-2.md)
