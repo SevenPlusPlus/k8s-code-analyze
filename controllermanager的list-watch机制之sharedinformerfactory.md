@@ -427,7 +427,46 @@ type processorListener struct {
 * 在启动controller之前，先启动了s.processor.run(stopCh)，启动在前面已经向sharedIndexInformer注册了的各个listener。
 
 ```
+func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
+	defer utilruntime.HandleCrash()
 
+	fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
+
+	cfg := &Config{
+		Queue:            fifo,
+		ListerWatcher:    s.listerWatcher,
+		ObjectType:       s.objectType,
+		FullResyncPeriod: s.resyncCheckPeriod,
+		RetryOnError:     false,
+		ShouldResync:     s.processor.shouldResync,
+
+		Process: s.HandleDeltas,
+	}
+
+	func() {
+		s.startedLock.Lock()
+		defer s.startedLock.Unlock()
+
+		s.controller = New(cfg)
+		s.controller.(*controller).clock = s.clock
+		s.started = true
+	}()
+
+	// Separate stop channel because Processor should be stopped strictly after controller
+	processorStopCh := make(chan struct{})
+	var wg wait.Group
+	defer wg.Wait()              // Wait for Processor to stop
+	defer close(processorStopCh) // Tell Processor to stop
+	wg.StartWithChannel(processorStopCh, s.cacheMutationDetector.Run)
+	wg.StartWithChannel(processorStopCh, s.processor.run)
+
+	defer func() {
+		s.startedLock.Lock()
+		defer s.startedLock.Unlock()
+		s.stopped = true // Don't want any new listeners
+	}()
+	s.controller.Run(stopCh)
+}
 ```
 
 
