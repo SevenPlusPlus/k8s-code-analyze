@@ -600,6 +600,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 }
 func (c *controller) processLoop() {
 	for {
+		//这里的PopProcessFunc(c.config.Process)即为前面定义的s.HandleDeltas
 		obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))
 		if err != nil {
 			...
