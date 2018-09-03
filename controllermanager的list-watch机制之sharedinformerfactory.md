@@ -293,7 +293,8 @@ func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEve
 sharedIndexInformer结构实现了SharedIndexInformer接口，SharedIndexInformer接口继承了SharedInformer,如下代码所示：
 
 ```
-
+// SharedInformer has a shared data cache and is capable of distributing notifications for changes
+// to the cache to multiple listeners who registered via AddEventHandler.
 ```
 
 
