@@ -290,5 +290,9 @@ func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEve
 ### type sharedIndexInformer struct
 * vendor/k8s.io/client-go/tools/cache/shared_informer.go:
 
+sharedIndexInformer结构实现了SharedIndexInformer接口，SharedIndexInformer接口继承了SharedInformer
+
+```
+```
 
 
