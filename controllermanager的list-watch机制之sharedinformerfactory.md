@@ -570,6 +570,10 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 		<-stopCh
 		c.config.Queue.Close()
 	}()
+	/*
+		首先构建了一个reflector,这里体现了List-Watch
+		从这里看出informer只是包装了reflector
+	*/
 	r := NewReflector(
 		c.config.ListerWatcher,
 		c.config.ObjectType,
