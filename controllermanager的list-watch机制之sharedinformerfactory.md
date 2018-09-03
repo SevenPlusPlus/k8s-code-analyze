@@ -593,7 +593,7 @@ func (c *controller) Run(stopCh <-chan struct{}) {
 	wg.StartWithChannel(stopCh, r.Run)
 
 	/*
-	启动processLoop消费event,其对应的生产者是上面的Reflector机制，
+	启动processLoop消费event,其对应的生产者是上面的Reflector机制,
 	reflector往fifo里面添加数据，而processLoop就不停地去消费这里这些数据。
 	*/
 	wait.Until(c.processLoop, time.Second, stopCh)
