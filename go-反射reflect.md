@@ -255,7 +255,7 @@ ReflectCallFunc: func(main.User)
 * 也就是说反射可以将“反射类型对象”再重新转换为“接口类型变量”
 * struct 或者 struct 的嵌套都是一样的判断处理方式
 
-#####通过reflect.Value设置实际变量的值
+##### 通过reflect.Value设置实际变量的值
 reflect.Value是通过reflect.ValueOf(X)获得的，只有当X是指针的时候，才可以通过reflec.Value修改实际变量X的值，即：要修改反射类型的对象就一定要保证其值是“addressable”的。
 
 示例如下：
@@ -433,7 +433,7 @@ fieldValue := type_.FieldByName("hello")
 ```
 这里取出来的 fieldValue 类型是 reflect.Value，它是一个具体的值，而不是一个可复用的反射对象了，每次反射都需要malloc这个reflect.Value结构体，并且还涉及到GC。 
 
-####总结
+#### 总结
 
 * 反射可以大大提高程序的灵活性，使得interface{}有更大的发挥余地
  * 反射必须结合interface才玩得转
