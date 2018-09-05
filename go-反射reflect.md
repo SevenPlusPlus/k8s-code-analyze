@@ -29,6 +29,7 @@ w = r.(io.Writer)
 接口变量w的pair与r的pair相同，都是:(tty, *os.File)，即使w是空接口类型，pair也是不变的。  
 
 interface及其pair的存在，是Golang中实现反射的前提，理解了pair，就更容易理解反射。反射就是用来检测存储在接口变量内部(值value；类型concrete type) pair对的一种机制。 
+
 ###Golang的反射reflect
 ---
 **reflect的基本功能TypeOf和ValueOf**
