@@ -233,84 +233,210 @@ type configFactory struct {
 }
 ```
 
-configFactory构建过程如下，可以看到构建结构的同时，对各资源Informer添加了变更事件处理Callback
+configFactory构建过程如下，可以看到构建结构的同时，对各资源Informer添加了特定变更事件处理Callback，通过对特定资源变更事件的处理来触发调度过程或者更新内部调度数据辅助调度算法的决策。
 
 ```
 // NewConfigFactory initializes the default implementation of a Configurator To encourage eventual privatization of the struct type, we only
 // return the interface.
 func NewConfigFactory(
-	schedulerName string,
-	client clientset.Interface,
-	nodeInformer coreinformers.NodeInformer,
-	podInformer coreinformers.PodInformer,
-	pvInformer coreinformers.PersistentVolumeInformer,
-	pvcInformer coreinformers.PersistentVolumeClaimInformer,
-	replicationControllerInformer coreinformers.ReplicationControllerInformer,
-	replicaSetInformer extensionsinformers.ReplicaSetInformer,
-	statefulSetInformer appsinformers.StatefulSetInformer,
-	serviceInformer coreinformers.ServiceInformer,
-	pdbInformer policyinformers.PodDisruptionBudgetInformer,
-	storageClassInformer storageinformers.StorageClassInformer,
-	hardPodAffinitySymmetricWeight int32,
-	enableEquivalenceClassCache bool,
-	disablePreemption bool,
+    schedulerName string,
+    client clientset.Interface,
+    nodeInformer coreinformers.NodeInformer,
+    podInformer coreinformers.PodInformer,
+    pvInformer coreinformers.PersistentVolumeInformer,
+    pvcInformer coreinformers.PersistentVolumeClaimInformer,
+    replicationControllerInformer coreinformers.ReplicationControllerInformer,
+    replicaSetInformer extensionsinformers.ReplicaSetInformer,
+    statefulSetInformer appsinformers.StatefulSetInformer,
+    serviceInformer coreinformers.ServiceInformer,
+    pdbInformer policyinformers.PodDisruptionBudgetInformer,
+    storageClassInformer storageinformers.StorageClassInformer,
+    hardPodAffinitySymmetricWeight int32,
+    enableEquivalenceClassCache bool,
+    disablePreemption bool,
 ) scheduler.Configurator {
-	stopEverything := make(chan struct{})
-	schedulerCache := schedulercache.New(30*time.Second, stopEverything)
+    stopEverything := make(chan struct{})
+    schedulerCache := schedulercache.New(30*time.Second, stopEverything)
 
-	// storageClassInformer is only enabled through VolumeScheduling feature gate
-	var storageClassLister storagelisters.StorageClassLister
-	if storageClassInformer != nil {
-		storageClassLister = storageClassInformer.Lister()
-	}
+    // storageClassInformer is only enabled through VolumeScheduling feature gate
+    var storageClassLister storagelisters.StorageClassLister
+    if storageClassInformer != nil {
+        storageClassLister = storageClassInformer.Lister()
+    }
 
-	c := &configFactory{
-		client:                         client,
-		podLister:                      schedulerCache,
-		podQueue:                       core.NewSchedulingQueue(),
-		pVLister:                       pvInformer.Lister(),
-		pVCLister:                      pvcInformer.Lister(),
-		serviceLister:                  serviceInformer.Lister(),
-		controllerLister:               replicationControllerInformer.Lister(),
-		replicaSetLister:               replicaSetInformer.Lister(),
-		statefulSetLister:              statefulSetInformer.Lister(),
-		pdbLister:                      pdbInformer.Lister(),
-		storageClassLister:             storageClassLister,
-		schedulerCache:                 schedulerCache,
-		StopEverything:                 stopEverything,
-		schedulerName:                  schedulerName,
-		hardPodAffinitySymmetricWeight: hardPodAffinitySymmetricWeight,
-		enableEquivalenceClassCache:    enableEquivalenceClassCache,
-		disablePreemption:              disablePreemption,
-	}
+    c := &configFactory{
+        client:                         client,
+        podLister:                      schedulerCache,
+        podQueue:                       core.NewSchedulingQueue(),
+        pVLister:                       pvInformer.Lister(),
+        pVCLister:                      pvcInformer.Lister(),
+        serviceLister:                  serviceInformer.Lister(),
+        controllerLister:               replicationControllerInformer.Lister(),
+        replicaSetLister:               replicaSetInformer.Lister(),
+        statefulSetLister:              statefulSetInformer.Lister(),
+        pdbLister:                      pdbInformer.Lister(),
+        storageClassLister:             storageClassLister,
+        schedulerCache:                 schedulerCache,
+        StopEverything:                 stopEverything,
+        schedulerName:                  schedulerName,
+        hardPodAffinitySymmetricWeight: hardPodAffinitySymmetricWeight,
+        enableEquivalenceClassCache:    enableEquivalenceClassCache,
+        disablePreemption:              disablePreemption,
+    }
 
-	c.scheduledPodsHasSynced = podInformer.Informer().HasSynced
-	// scheduled pod cache
-	podInformer.Informer().AddEventHandler(
-		cache.FilteringResourceEventHandler{
-			FilterFunc: func(obj interface{}) bool {
-				switch t := obj.(type) {
-				case *v1.Pod:
-					return assignedNonTerminatedPod(t)
-				case cache.DeletedFinalStateUnknown:
-					if pod, ok := t.Obj.(*v1.Pod); ok {
-						return assignedNonTerminatedPod(pod)
-					}
-					runtime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, c))
-					return false
-				default:
-					runtime.HandleError(fmt.Errorf("unable to handle object in %T: %T", c, obj))
-					return false
-				}
-			},
-			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc:    c.addPodToCache,
-				UpdateFunc: c.updatePodInCache,
-				DeleteFunc: c.deletePodFromCache,
-			},
-		},
-	)
-	// unscheduled pod queue
+    c.scheduledPodsHasSynced = podInformer.Informer().HasSynced
+    // scheduled pod cache
+    podInformer.Informer().AddEventHandler(
+        cache.FilteringResourceEventHandler{
+            FilterFunc: func(obj interface{}) bool {
+                switch t := obj.(type) {
+                case *v1.Pod:
+                    return assignedNonTerminatedPod(t)
+                case cache.DeletedFinalStateUnknown:
+                    if pod, ok := t.Obj.(*v1.Pod); ok {
+                        return assignedNonTerminatedPod(pod)
+                    }
+                    runtime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, c))
+                    return false
+                default:
+                    runtime.HandleError(fmt.Errorf("unable to handle object in %T: %T", c, obj))
+                    return false
+                }
+            },
+            Handler: cache.ResourceEventHandlerFuncs{
+                AddFunc:    c.addPodToCache,
+                UpdateFunc: c.updatePodInCache,
+                DeleteFunc: c.deletePodFromCache,
+            },
+        },
+    )
+    // unscheduled pod queue
+    podInformer.Informer().AddEventHandler(
+        cache.FilteringResourceEventHandler{
+            FilterFunc: func(obj interface{}) bool {
+                switch t := obj.(type) {
+                case *v1.Pod:
+                    return unassignedNonTerminatedPod(t) && responsibleForPod(t, schedulerName)
+                case cache.DeletedFinalStateUnknown:
+                    if pod, ok := t.Obj.(*v1.Pod); ok {
+                        return unassignedNonTerminatedPod(pod) && responsibleForPod(pod, schedulerName)
+                    }
+                    runtime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, c))
+                    return false
+                default:
+                    runtime.HandleError(fmt.Errorf("unable to handle object in %T: %T", c, obj))
+                    return false
+                }
+            },
+            Handler: cache.ResourceEventHandlerFuncs{
+                AddFunc:    c.addPodToSchedulingQueue,
+                UpdateFunc: c.updatePodInSchedulingQueue,
+                DeleteFunc: c.deletePodFromSchedulingQueue,
+            },
+        },
+    )
+    // ScheduledPodLister is something we provide to plug-in functions that
+    // they may need to call.
+    c.scheduledPodLister = assignedPodLister{podInformer.Lister()}
+
+    nodeInformer.Informer().AddEventHandler(
+        cache.ResourceEventHandlerFuncs{
+            AddFunc:    c.addNodeToCache,
+            UpdateFunc: c.updateNodeInCache,
+            DeleteFunc: c.deleteNodeFromCache,
+        },
+    )
+    c.nodeLister = nodeInformer.Lister()
+
+    pdbInformer.Informer().AddEventHandler(
+        cache.ResourceEventHandlerFuncs{
+            AddFunc:    c.addPDBToCache,
+            UpdateFunc: c.updatePDBInCache,
+            DeleteFunc: c.deletePDBFromCache,
+        },
+    )
+    c.pdbLister = pdbInformer.Lister()
+
+    // On add and delete of PVs, it will affect equivalence cache items
+    // related to persistent volume
+    pvInformer.Informer().AddEventHandler(
+        cache.ResourceEventHandlerFuncs{
+            // MaxPDVolumeCountPredicate: since it relies on the counts of PV.
+            AddFunc:    c.onPvAdd,
+            UpdateFunc: c.onPvUpdate,
+            DeleteFunc: c.onPvDelete,
+        },
+    )
+    c.pVLister = pvInformer.Lister()
+
+    // This is for MaxPDVolumeCountPredicate: add/delete PVC will affect counts of PV when it is bound.
+    pvcInformer.Informer().AddEventHandler(
+        cache.ResourceEventHandlerFuncs{
+            AddFunc:    c.onPvcAdd,
+            UpdateFunc: c.onPvcUpdate,
+            DeleteFunc: c.onPvcDelete,
+        },
+    )
+    c.pVCLister = pvcInformer.Lister()
+
+    // This is for ServiceAffinity: affected by the selector of the service is updated.
+    // Also, if new service is added, equivalence cache will also become invalid since
+    // existing pods may be "captured" by this service and change this predicate result.
+    serviceInformer.Informer().AddEventHandler(
+        cache.ResourceEventHandlerFuncs{
+            AddFunc:    c.onServiceAdd,
+            UpdateFunc: c.onServiceUpdate,
+            DeleteFunc: c.onServiceDelete,
+        },
+    )
+    c.serviceLister = serviceInformer.Lister()
+
+    // Existing equivalence cache should not be affected by add/delete RC/Deployment etc,
+    // it only make sense when pod is scheduled or deleted
+
+    if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
+        // Setup volume binder
+        c.volumeBinder = volumebinder.NewVolumeBinder(client, pvcInformer, pvInformer, storageClassInformer)
+
+        storageClassInformer.Informer().AddEventHandler(
+            cache.ResourceEventHandlerFuncs{
+                AddFunc:    c.onStorageClassAdd,
+                DeleteFunc: c.onStorageClassDelete,
+            },
+        )
+    }
+
+    // Setup cache comparer
+    comparer := &cacheComparer{
+        podLister:  podInformer.Lister(),
+        nodeLister: nodeInformer.Lister(),
+        pdbLister:  pdbInformer.Lister(),
+        cache:      c.schedulerCache,
+        podQueue:   c.podQueue,
+    }
+
+    ch := make(chan os.Signal, 1)
+    signal.Notify(ch, compareSignal)
+
+    go func() {
+        for {
+            select {
+            case <-c.StopEverything:
+                return
+            case <-ch:
+                comparer.Compare()
+            }
+        }
+    }()
+
+    return c
+}
+```
+
+我们以podInformer对unscheduled pod queue的操作维护过程为例来解析，其首先通过FilterFunc来过滤pod.Spec.NodeName为空的pod对象，然后根据变更事件调用相应Callback对调度队列进行增删改。
+
+```
+// unscheduled pod queue
 	podInformer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
 			FilterFunc: func(obj interface{}) bool {
@@ -335,101 +461,33 @@ func NewConfigFactory(
 			},
 		},
 	)
-	// ScheduledPodLister is something we provide to plug-in functions that
-	// they may need to call.
-	c.scheduledPodLister = assignedPodLister{podInformer.Lister()}
+```
 
-	nodeInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc:    c.addNodeToCache,
-			UpdateFunc: c.updateNodeInCache,
-			DeleteFunc: c.deleteNodeFromCache,
-		},
-	)
-	c.nodeLister = nodeInformer.Lister()
+尚未调度并未结束pod过滤方法实现为
 
-	pdbInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc:    c.addPDBToCache,
-			UpdateFunc: c.updatePDBInCache,
-			DeleteFunc: c.deletePDBFromCache,
-		},
-	)
-	c.pdbLister = pdbInformer.Lister()
+```
+// assignedNonTerminatedPod selects pods that are assigned and non-terminal (scheduled and running).
+func assignedNonTerminatedPod(pod *v1.Pod) bool {
+	if len(pod.Spec.NodeName) == 0 {
+		return false
+	}
+	if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
+		return false
+	}
+	return true
+}
+```
 
-	// On add and delete of PVs, it will affect equivalence cache items
-	// related to persistent volume
-	pvInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			// MaxPDVolumeCountPredicate: since it relies on the counts of PV.
-			AddFunc:    c.onPvAdd,
-			UpdateFunc: c.onPvUpdate,
-			DeleteFunc: c.onPvDelete,
-		},
-	)
-	c.pVLister = pvInformer.Lister()
+添加未调度pod到调度缓存中
 
-	// This is for MaxPDVolumeCountPredicate: add/delete PVC will affect counts of PV when it is bound.
-	pvcInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc:    c.onPvcAdd,
-			UpdateFunc: c.onPvcUpdate,
-			DeleteFunc: c.onPvcDelete,
-		},
-	)
-	c.pVCLister = pvcInformer.Lister()
-
-	// This is for ServiceAffinity: affected by the selector of the service is updated.
-	// Also, if new service is added, equivalence cache will also become invalid since
-	// existing pods may be "captured" by this service and change this predicate result.
-	serviceInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc:    c.onServiceAdd,
-			UpdateFunc: c.onServiceUpdate,
-			DeleteFunc: c.onServiceDelete,
-		},
-	)
-	c.serviceLister = serviceInformer.Lister()
-
-	// Existing equivalence cache should not be affected by add/delete RC/Deployment etc,
-	// it only make sense when pod is scheduled or deleted
-
-	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
-		// Setup volume binder
-		c.volumeBinder = volumebinder.NewVolumeBinder(client, pvcInformer, pvInformer, storageClassInformer)
-
-		storageClassInformer.Informer().AddEventHandler(
-			cache.ResourceEventHandlerFuncs{
-				AddFunc:    c.onStorageClassAdd,
-				DeleteFunc: c.onStorageClassDelete,
-			},
-		)
+```
+func (c *configFactory) addPodToCache(obj interface{}) {
+	pod, ok := obj.(*v1.Pod)
+	if err := c.schedulerCache.AddPod(pod); err != nil {
+		glog.Errorf("scheduler cache AddPod failed: %v", err)
 	}
 
-	// Setup cache comparer
-	comparer := &cacheComparer{
-		podLister:  podInformer.Lister(),
-		nodeLister: nodeInformer.Lister(),
-		pdbLister:  pdbInformer.Lister(),
-		cache:      c.schedulerCache,
-		podQueue:   c.podQueue,
-	}
-
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, compareSignal)
-
-	go func() {
-		for {
-			select {
-			case <-c.StopEverything:
-				return
-			case <-ch:
-				comparer.Compare()
-			}
-		}
-	}()
-
-	return c
+	c.podQueue.AssignedPodAdded(pod)
 }
 ```
 
