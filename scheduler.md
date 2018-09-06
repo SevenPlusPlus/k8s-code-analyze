@@ -466,15 +466,15 @@ func NewConfigFactory(
 尚未调度并未结束pod过滤方法实现为
 
 ```
-// assignedNonTerminatedPod selects pods that are assigned and non-terminal (scheduled and running).
-func assignedNonTerminatedPod(pod *v1.Pod) bool {
-    if len(pod.Spec.NodeName) == 0 {
-        return false
-    }
-    if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
-        return false
-    }
-    return true
+// unassignedNonTerminatedPod selects pods that are unassigned and non-terminal.
+func unassignedNonTerminatedPod(pod *v1.Pod) bool {
+	if len(pod.Spec.NodeName) != 0 {
+		return false
+	}
+	if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
+		return false
+	}
+	return true
 }
 ```
 
@@ -482,9 +482,9 @@ func assignedNonTerminatedPod(pod *v1.Pod) bool {
 
 ```
 func (c *configFactory) addPodToSchedulingQueue(obj interface{}) {
-	if err := c.podQueue.Add(obj.(*v1.Pod)); err != nil {
-		runtime.HandleError(fmt.Errorf("unable to queue %T: %v", obj, err))
-	}
+    if err := c.podQueue.Add(obj.(*v1.Pod)); err != nil {
+        runtime.HandleError(fmt.Errorf("unable to queue %T: %v", obj, err))
+    }
 }
 ```
 
