@@ -488,5 +488,13 @@ func (c *configFactory) addPodToSchedulingQueue(obj interface{}) {
 }
 ```
 
+跟踪分析各个Informer的回调处理句柄不难发现他们主要操作维护了configFactory的两个重要的数据字段，待调度pod队列c.podQueue和调度器信息缓存c.schedulerCache, 而其类型分别为core.SchedulingQueue和schedulercache.Cache，下面对这两个字段类型重点分析下。
+
+##### core.SchedulingQueue
+
+* pkg/scheduler/core/scheduling\_queue.go:
+
+
+
 
 
