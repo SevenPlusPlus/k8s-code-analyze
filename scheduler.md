@@ -524,30 +524,32 @@ SchedulingQueue有两种实现，若开启pod优先级调度则采用PriorityQue
 // is called unschedulableQ.
 // 其内部维护了两个队列，一个为等待调度的队列activeQ，另一个为尝试过确定为不可调度的队列unschedulableQ
 type PriorityQueue struct {
-	lock sync.RWMutex
-	cond sync.Cond
+    lock sync.RWMutex
+    cond sync.Cond
 
-	// activeQ is heap structure that scheduler actively looks at to find pods to
-	// schedule. Head of heap is the highest priority pod.
-	activeQ *Heap
-	// unschedulableQ holds pods that have been tried and determined unschedulable.
-	unschedulableQ *UnschedulablePodsMap
-	// nominatedPods is a map keyed by a node name and the value is a list of
-	// pods which are nominated to run on the node. These are pods which can be in
-	// the activeQ or unschedulableQ.
-	nominatedPods map[string][]*v1.Pod
-	// receivedMoveRequest is set to true whenever we receive a request to move a
-	// pod from the unschedulableQ to the activeQ, and is set to false, when we pop
-	// a pod from the activeQ. It indicates if we received a move request when a
-	// pod was in flight (we were trying to schedule it). In such a case, we put
-	// the pod back into the activeQ if it is determined unschedulable.
-	receivedMoveRequest bool
+    // activeQ is heap structure that scheduler actively looks at to find pods to
+    // schedule. Head of heap is the highest priority pod.
+    activeQ *Heap
+    // unschedulableQ holds pods that have been tried and determined unschedulable.
+    unschedulableQ *UnschedulablePodsMap
+    // nominatedPods is a map keyed by a node name and the value is a list of
+    // pods which are nominated to run on the node. These are pods which can be in
+    // the activeQ or unschedulableQ.
+    nominatedPods map[string][]*v1.Pod
+    // receivedMoveRequest is set to true whenever we receive a request to move a
+    // pod from the unschedulableQ to the activeQ, and is set to false, when we pop
+    // a pod from the activeQ. It indicates if we received a move request when a
+    // pod was in flight (we were trying to schedule it). In such a case, we put
+    // the pod back into the activeQ if it is determined unschedulable.
+    receivedMoveRequest bool
 }
 ```
 
 ##### schedulercache.Cache
 
 * pkg/scheduler/cache/interface.go:
+
+Cache收集pod的信息并且提供节点级的聚合信息，主要用于调度器高效的查询
 
 ```
 // Cache collects pods' information and provides node-level aggregated information.
@@ -585,79 +587,161 @@ type PriorityQueue struct {
 // - Both "Expired" and "Deleted" are valid end states. In case of some problems, e.g. network issue,
 //   a pod might have changed its state (e.g. added and deleted) without delivering notification to the cache.
 type Cache interface {
-	// AssumePod assumes a pod scheduled and aggregates the pod's information into its node.
-	// The implementation also decides the policy to expire pod before being confirmed (receiving Add event).
-	// After expiration, its information would be subtracted.
-	AssumePod(pod *v1.Pod) error
+    // AssumePod assumes a pod scheduled and aggregates the pod's information into its node.
+    // The implementation also decides the policy to expire pod before being confirmed (receiving Add event).
+    // After expiration, its information would be subtracted.
+    AssumePod(pod *v1.Pod) error
 
-	// FinishBinding signals that cache for assumed pod can be expired
-	FinishBinding(pod *v1.Pod) error
+    // FinishBinding signals that cache for assumed pod can be expired
+    FinishBinding(pod *v1.Pod) error
 
-	// ForgetPod removes an assumed pod from cache.
-	ForgetPod(pod *v1.Pod) error
+    // ForgetPod removes an assumed pod from cache.
+    ForgetPod(pod *v1.Pod) error
 
-	// AddPod either confirms a pod if it's assumed, or adds it back if it's expired.
-	// If added back, the pod's information would be added again.
-	AddPod(pod *v1.Pod) error
+    // AddPod either confirms a pod if it's assumed, or adds it back if it's expired.
+    // If added back, the pod's information would be added again.
+    AddPod(pod *v1.Pod) error
 
-	// UpdatePod removes oldPod's information and adds newPod's information.
-	UpdatePod(oldPod, newPod *v1.Pod) error
+    // UpdatePod removes oldPod's information and adds newPod's information.
+    UpdatePod(oldPod, newPod *v1.Pod) error
 
-	// RemovePod removes a pod. The pod's information would be subtracted from assigned node.
-	RemovePod(pod *v1.Pod) error
+    // RemovePod removes a pod. The pod's information would be subtracted from assigned node.
+    RemovePod(pod *v1.Pod) error
 
-	// GetPod returns the pod from the cache with the same namespace and the
-	// same name of the specified pod.
-	GetPod(pod *v1.Pod) (*v1.Pod, error)
+    // GetPod returns the pod from the cache with the same namespace and the
+    // same name of the specified pod.
+    GetPod(pod *v1.Pod) (*v1.Pod, error)
 
-	// IsAssumedPod returns true if the pod is assumed and not expired.
-	IsAssumedPod(pod *v1.Pod) (bool, error)
+    // IsAssumedPod returns true if the pod is assumed and not expired.
+    IsAssumedPod(pod *v1.Pod) (bool, error)
 
-	// AddNode adds overall information about node.
-	AddNode(node *v1.Node) error
+    // AddNode adds overall information about node.
+    AddNode(node *v1.Node) error
 
-	// UpdateNode updates overall information about node.
-	UpdateNode(oldNode, newNode *v1.Node) error
+    // UpdateNode updates overall information about node.
+    UpdateNode(oldNode, newNode *v1.Node) error
 
-	// RemoveNode removes overall information about node.
-	RemoveNode(node *v1.Node) error
+    // RemoveNode removes overall information about node.
+    RemoveNode(node *v1.Node) error
 
-	// AddPDB adds a PodDisruptionBudget object to the cache.
-	AddPDB(pdb *policy.PodDisruptionBudget) error
+    // AddPDB adds a PodDisruptionBudget object to the cache.
+    AddPDB(pdb *policy.PodDisruptionBudget) error
 
-	// UpdatePDB updates a PodDisruptionBudget object in the cache.
-	UpdatePDB(oldPDB, newPDB *policy.PodDisruptionBudget) error
+    // UpdatePDB updates a PodDisruptionBudget object in the cache.
+    UpdatePDB(oldPDB, newPDB *policy.PodDisruptionBudget) error
 
-	// RemovePDB removes a PodDisruptionBudget object from the cache.
-	RemovePDB(pdb *policy.PodDisruptionBudget) error
+    // RemovePDB removes a PodDisruptionBudget object from the cache.
+    RemovePDB(pdb *policy.PodDisruptionBudget) error
 
-	// List lists all cached PDBs matching the selector.
-	ListPDBs(selector labels.Selector) ([]*policy.PodDisruptionBudget, error)
+    // List lists all cached PDBs matching the selector.
+    ListPDBs(selector labels.Selector) ([]*policy.PodDisruptionBudget, error)
 
-	// UpdateNodeNameToInfoMap updates the passed infoMap to the current contents of Cache.
-	// The node info contains aggregated information of pods scheduled (including assumed to be)
-	// on this node.
-	UpdateNodeNameToInfoMap(infoMap map[string]*NodeInfo) error
+    // UpdateNodeNameToInfoMap updates the passed infoMap to the current contents of Cache.
+    // The node info contains aggregated information of pods scheduled (including assumed to be)
+    // on this node.
+    UpdateNodeNameToInfoMap(infoMap map[string]*NodeInfo) error
 
-	// List lists all cached pods (including assumed ones).
-	List(labels.Selector) ([]*v1.Pod, error)
+    // List lists all cached pods (including assumed ones).
+    List(labels.Selector) ([]*v1.Pod, error)
 
-	// FilteredList returns all cached pods that pass the filter.
-	FilteredList(filter PodFilter, selector labels.Selector) ([]*v1.Pod, error)
+    // FilteredList returns all cached pods that pass the filter.
+    FilteredList(filter PodFilter, selector labels.Selector) ([]*v1.Pod, error)
 
-	// Snapshot takes a snapshot on current cache
-	Snapshot() *Snapshot
+    // Snapshot takes a snapshot on current cache
+    Snapshot() *Snapshot
 
-	// IsUpToDate returns true if the given NodeInfo matches the current data in the cache.
-	IsUpToDate(n *NodeInfo) bool
+    // IsUpToDate returns true if the given NodeInfo matches the current data in the cache.
+    IsUpToDate(n *NodeInfo) bool
 }
 
 // Snapshot is a snapshot of cache state
 type Snapshot struct {
-	AssumedPods map[string]bool
-	Nodes       map[string]*NodeInfo
-	Pdbs        map[string]*policy.PodDisruptionBudget
+    AssumedPods map[string]bool
+    Nodes       map[string]*NodeInfo
+    Pdbs        map[string]*policy.PodDisruptionBudget
 }
+```
+
+##### schedulerCache为Cache接口的默认实现
+
+* pkg/scheduler/cache/cache.go:
+
+```
+type schedulerCache struct {
+	stop   <-chan struct{}
+	ttl    time.Duration
+	period time.Duration
+
+	// This mutex guards all fields within this cache struct.
+	mu sync.RWMutex
+	// a set of assumed pod keys.
+	// The key could further be used to get an entry in podStates.
+	assumedPods map[string]bool
+	// a map from pod key to podState.
+	podStates map[string]*podState
+	nodes     map[string]*NodeInfo
+	pdbs      map[string]*policy.PodDisruptionBudget
+	// A map from image name to its imageState.
+	imageStates map[string]*imageState
+}
+
+type podState struct {
+	pod *v1.Pod
+	// Used by assumedPod to determinate expiration.
+	deadline *time.Time
+	// Used to block cache from expiring assumedPod if binding still runs
+	bindingFinished bool
+}
+
+type imageState struct {
+	// Size of the image
+	size int64
+	// A set of node names for nodes having this image present
+	nodes sets.String
+}
+
+// NodeInfo is node level aggregated information.
+type NodeInfo struct {
+	// Overall node information.
+	node *v1.Node
+
+	pods             []*v1.Pod
+	podsWithAffinity []*v1.Pod
+	usedPorts        util.HostPortInfo
+
+	// Total requested resource of all pods on this node.
+	// It includes assumed pods which scheduler sends binding to apiserver but
+	// didn't get it as scheduled yet.
+	requestedResource *Resource
+	nonzeroRequest    *Resource
+	// We store allocatedResources (which is Node.Status.Allocatable.*) explicitly
+	// as int64, to avoid conversions and accessing map.
+	allocatableResource *Resource
+
+	// Cached taints of the node for faster lookup.
+	taints    []v1.Taint
+	taintsErr error
+
+	// imageStates holds the entry of an image if and only if this image is on the node. The entry can be used for
+	// checking an image's existence and advanced usage (e.g., image locality scheduling policy) based on the image
+	// state information.
+	imageStates map[string]*ImageStateSummary
+
+	// TransientInfo holds the information pertaining to a scheduling cycle. This will be destructed at the end of
+	// scheduling cycle.
+	// TODO: @ravig. Remove this once we have a clear approach for message passing across predicates and priorities.
+	TransientInfo *transientSchedulerInfo
+
+	// Cached conditions of node for faster lookup.
+	memoryPressureCondition v1.ConditionStatus
+	diskPressureCondition   v1.ConditionStatus
+	pidPressureCondition    v1.ConditionStatus
+
+	// Whenever NodeInfo changes, generation is bumped.
+	// This is used to avoid cloning it if the object didn't change.
+	generation int64
+}
+
 ```
 
 
