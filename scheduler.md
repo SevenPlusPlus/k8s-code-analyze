@@ -668,80 +668,79 @@ type Snapshot struct {
 
 ```
 type schedulerCache struct {
-	stop   <-chan struct{}
-	ttl    time.Duration
-	period time.Duration
+    stop   <-chan struct{}
+    ttl    time.Duration
+    period time.Duration
 
-	// This mutex guards all fields within this cache struct.
-	mu sync.RWMutex
-	// a set of assumed pod keys.
-	// The key could further be used to get an entry in podStates.
-	assumedPods map[string]bool
-	// a map from pod key to podState.
-	podStates map[string]*podState
-	nodes     map[string]*NodeInfo
-	pdbs      map[string]*policy.PodDisruptionBudget
-	// A map from image name to its imageState.
-	imageStates map[string]*imageState
+    // This mutex guards all fields within this cache struct.
+    mu sync.RWMutex
+    // a set of assumed pod keys.
+    // The key could further be used to get an entry in podStates.
+    assumedPods map[string]bool
+    // a map from pod key to podState.
+    podStates map[string]*podState
+    nodes     map[string]*NodeInfo
+    pdbs      map[string]*policy.PodDisruptionBudget
+    // A map from image name to its imageState.
+    imageStates map[string]*imageState
 }
 
 type podState struct {
-	pod *v1.Pod
-	// Used by assumedPod to determinate expiration.
-	deadline *time.Time
-	// Used to block cache from expiring assumedPod if binding still runs
-	bindingFinished bool
+    pod *v1.Pod
+    // Used by assumedPod to determinate expiration.
+    deadline *time.Time
+    // Used to block cache from expiring assumedPod if binding still runs
+    bindingFinished bool
 }
 
 type imageState struct {
-	// Size of the image
-	size int64
-	// A set of node names for nodes having this image present
-	nodes sets.String
+    // Size of the image
+    size int64
+    // A set of node names for nodes having this image present
+    nodes sets.String
 }
 
 // NodeInfo is node level aggregated information.
 type NodeInfo struct {
-	// Overall node information.
-	node *v1.Node
+    // Overall node information.
+    node *v1.Node
 
-	pods             []*v1.Pod
-	podsWithAffinity []*v1.Pod
-	usedPorts        util.HostPortInfo
+    pods             []*v1.Pod
+    podsWithAffinity []*v1.Pod
+    usedPorts        util.HostPortInfo
 
-	// Total requested resource of all pods on this node.
-	// It includes assumed pods which scheduler sends binding to apiserver but
-	// didn't get it as scheduled yet.
-	requestedResource *Resource
-	nonzeroRequest    *Resource
-	// We store allocatedResources (which is Node.Status.Allocatable.*) explicitly
-	// as int64, to avoid conversions and accessing map.
-	allocatableResource *Resource
+    // Total requested resource of all pods on this node.
+    // It includes assumed pods which scheduler sends binding to apiserver but
+    // didn't get it as scheduled yet.
+    requestedResource *Resource
+    nonzeroRequest    *Resource
+    // We store allocatedResources (which is Node.Status.Allocatable.*) explicitly
+    // as int64, to avoid conversions and accessing map.
+    allocatableResource *Resource
 
-	// Cached taints of the node for faster lookup.
-	taints    []v1.Taint
-	taintsErr error
+    // Cached taints of the node for faster lookup.
+    taints    []v1.Taint
+    taintsErr error
 
-	// imageStates holds the entry of an image if and only if this image is on the node. The entry can be used for
-	// checking an image's existence and advanced usage (e.g., image locality scheduling policy) based on the image
-	// state information.
-	imageStates map[string]*ImageStateSummary
+    // imageStates holds the entry of an image if and only if this image is on the node. The entry can be used for
+    // checking an image's existence and advanced usage (e.g., image locality scheduling policy) based on the image
+    // state information.
+    imageStates map[string]*ImageStateSummary
 
-	// TransientInfo holds the information pertaining to a scheduling cycle. This will be destructed at the end of
-	// scheduling cycle.
-	// TODO: @ravig. Remove this once we have a clear approach for message passing across predicates and priorities.
-	TransientInfo *transientSchedulerInfo
+    // TransientInfo holds the information pertaining to a scheduling cycle. This will be destructed at the end of
+    // scheduling cycle.
+    // TODO: @ravig. Remove this once we have a clear approach for message passing across predicates and priorities.
+    TransientInfo *transientSchedulerInfo
 
-	// Cached conditions of node for faster lookup.
-	memoryPressureCondition v1.ConditionStatus
-	diskPressureCondition   v1.ConditionStatus
-	pidPressureCondition    v1.ConditionStatus
+    // Cached conditions of node for faster lookup.
+    memoryPressureCondition v1.ConditionStatus
+    diskPressureCondition   v1.ConditionStatus
+    pidPressureCondition    v1.ConditionStatus
 
-	// Whenever NodeInfo changes, generation is bumped.
-	// This is used to avoid cloning it if the object didn't change.
-	generation int64
+    // Whenever NodeInfo changes, generation is bumped.
+    // This is used to avoid cloning it if the object didn't change.
+    generation int64
 }
-
 ```
 
 
