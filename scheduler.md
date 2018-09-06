@@ -437,30 +437,30 @@ func NewConfigFactory(
 
 ```
 // unscheduled pod queue
-	podInformer.Informer().AddEventHandler(
-		cache.FilteringResourceEventHandler{
-			FilterFunc: func(obj interface{}) bool {
-				switch t := obj.(type) {
-				case *v1.Pod:
-					return unassignedNonTerminatedPod(t) && responsibleForPod(t, schedulerName)
-				case cache.DeletedFinalStateUnknown:
-					if pod, ok := t.Obj.(*v1.Pod); ok {
-						return unassignedNonTerminatedPod(pod) && responsibleForPod(pod, schedulerName)
-					}
-					runtime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, c))
-					return false
-				default:
-					runtime.HandleError(fmt.Errorf("unable to handle object in %T: %T", c, obj))
-					return false
-				}
-			},
-			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc:    c.addPodToSchedulingQueue,
-				UpdateFunc: c.updatePodInSchedulingQueue,
-				DeleteFunc: c.deletePodFromSchedulingQueue,
-			},
-		},
-	)
+    podInformer.Informer().AddEventHandler(
+        cache.FilteringResourceEventHandler{
+            FilterFunc: func(obj interface{}) bool {
+                switch t := obj.(type) {
+                case *v1.Pod:
+                    return unassignedNonTerminatedPod(t) && responsibleForPod(t, schedulerName)
+                case cache.DeletedFinalStateUnknown:
+                    if pod, ok := t.Obj.(*v1.Pod); ok {
+                        return unassignedNonTerminatedPod(pod) && responsibleForPod(pod, schedulerName)
+                    }
+                    runtime.HandleError(fmt.Errorf("unable to convert object %T to *v1.Pod in %T", obj, c))
+                    return false
+                default:
+                    runtime.HandleError(fmt.Errorf("unable to handle object in %T: %T", c, obj))
+                    return false
+                }
+            },
+            Handler: cache.ResourceEventHandlerFuncs{
+                AddFunc:    c.addPodToSchedulingQueue,
+                UpdateFunc: c.updatePodInSchedulingQueue,
+                DeleteFunc: c.deletePodFromSchedulingQueue,
+            },
+        },
+    )
 ```
 
 尚未调度并未结束pod过滤方法实现为
@@ -468,26 +468,26 @@ func NewConfigFactory(
 ```
 // assignedNonTerminatedPod selects pods that are assigned and non-terminal (scheduled and running).
 func assignedNonTerminatedPod(pod *v1.Pod) bool {
-	if len(pod.Spec.NodeName) == 0 {
-		return false
-	}
-	if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
-		return false
-	}
-	return true
+    if len(pod.Spec.NodeName) == 0 {
+        return false
+    }
+    if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
+        return false
+    }
+    return true
 }
 ```
 
-添加未调度pod到调度缓存中
+添加未调度pod到待调度podQueue中
 
 ```
 func (c *configFactory) addPodToCache(obj interface{}) {
-	pod, ok := obj.(*v1.Pod)
-	if err := c.schedulerCache.AddPod(pod); err != nil {
-		glog.Errorf("scheduler cache AddPod failed: %v", err)
-	}
+    pod, ok := obj.(*v1.Pod)
+    if err := c.schedulerCache.AddPod(pod); err != nil {
+        glog.Errorf("scheduler cache AddPod failed: %v", err)
+    }
 
-	c.podQueue.AssignedPodAdded(pod)
+    c.podQueue.AssignedPodAdded(pod)
 }
 ```
 
