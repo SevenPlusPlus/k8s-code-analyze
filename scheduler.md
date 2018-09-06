@@ -433,7 +433,7 @@ func NewConfigFactory(
 }
 ```
 
-我们以podInformer对unscheduled pod queue的操作维护过程为例来解析，其首先通过FilterFunc来过滤pod.Spec.NodeName为空的pod对象，然后根据变更事件调用相应Callback对调度队列进行增删改。
+我们以podInformer对unscheduled pod queue的操作维护过程为例来解析，其首先通过FilterFunc来过滤pod.Spec.NodeName为空的pod对象，然后根据变更事件调用相应Callback对待调度pod队列进行增删改。
 
 ```
 // unscheduled pod queue
