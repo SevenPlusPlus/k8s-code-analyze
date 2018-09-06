@@ -154,50 +154,50 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
 
 #### 生成调度器配置
 
-
+生成调度器配置首先新建一个configFactory，其内部包含了很多调度器所需的资源类型的ListerAndWatcher，然后有两种模式创建调度器配置，一种是根据用户设置的调度配置（Predicats + Priorities组合），另外一种是采用系统默认提供的调度算法配置。
 
 ```
 // NewSchedulerConfig creates the scheduler configuration. This is exposed for use by tests.
 func NewSchedulerConfig(s schedulerserverconfig.CompletedConfig) (*scheduler.Config, error) {
-	var storageClassInformer storageinformers.StorageClassInformer
-	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
-		storageClassInformer = s.InformerFactory.Storage().V1().StorageClasses()
-	}
+    var storageClassInformer storageinformers.StorageClassInformer
+    if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
+        storageClassInformer = s.InformerFactory.Storage().V1().StorageClasses()
+    }
 
-	// Set up the configurator which can create schedulers from configs.
-	configurator := factory.NewConfigFactory(
-		s.ComponentConfig.SchedulerName,
-		s.Client,
-		s.InformerFactory.Core().V1().Nodes(),
-		s.PodInformer,
-		s.InformerFactory.Core().V1().PersistentVolumes(),
-		s.InformerFactory.Core().V1().PersistentVolumeClaims(),
-		s.InformerFactory.Core().V1().ReplicationControllers(),
-		s.InformerFactory.Extensions().V1beta1().ReplicaSets(),
-		s.InformerFactory.Apps().V1beta1().StatefulSets(),
-		s.InformerFactory.Core().V1().Services(),
-		s.InformerFactory.Policy().V1beta1().PodDisruptionBudgets(),
-		storageClassInformer,
-		s.ComponentConfig.HardPodAffinitySymmetricWeight,
-		utilfeature.DefaultFeatureGate.Enabled(features.EnableEquivalenceClassCache),
-		s.ComponentConfig.DisablePreemption,
-	)
+    // Set up the configurator which can create schedulers from configs.
+    configurator := factory.NewConfigFactory(
+        s.ComponentConfig.SchedulerName,
+        s.Client,
+        s.InformerFactory.Core().V1().Nodes(),
+        s.PodInformer,
+        s.InformerFactory.Core().V1().PersistentVolumes(),
+        s.InformerFactory.Core().V1().PersistentVolumeClaims(),
+        s.InformerFactory.Core().V1().ReplicationControllers(),
+        s.InformerFactory.Extensions().V1beta1().ReplicaSets(),
+        s.InformerFactory.Apps().V1beta1().StatefulSets(),
+        s.InformerFactory.Core().V1().Services(),
+        s.InformerFactory.Policy().V1beta1().PodDisruptionBudgets(),
+        storageClassInformer,
+        s.ComponentConfig.HardPodAffinitySymmetricWeight,
+        utilfeature.DefaultFeatureGate.Enabled(features.EnableEquivalenceClassCache),
+        s.ComponentConfig.DisablePreemption,
+    )
 
-	source := s.ComponentConfig.AlgorithmSource
-	var config *scheduler.Config
-	switch {
-	case source.Provider != nil:
-		// Create the config from a named algorithm provider.
-		sc, err := configurator.CreateFromProvider(*source.Provider)
-		if err != nil {
-			return nil, fmt.Errorf("couldn't create scheduler using provider %q: %v", *source.Provider, err)
-		}
-		config = sc
-	case source.Policy != nil:
-		// Create the config from a user specified policy source.
-		...
-	}
-	...
+    source := s.ComponentConfig.AlgorithmSource
+    var config *scheduler.Config
+    switch {
+    case source.Provider != nil:
+        // Create the config from a named algorithm provider.
+        sc, err := configurator.CreateFromProvider(*source.Provider)
+        if err != nil {
+            return nil, fmt.Errorf("couldn't create scheduler using provider %q: %v", *source.Provider, err)
+        }
+        config = sc
+    case source.Policy != nil:
+        // Create the config from a user specified policy source.
+        ...
+    }
+    ...
 }
 ```
 
