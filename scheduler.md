@@ -666,6 +666,8 @@ type Snapshot struct {
 
 * pkg/scheduler/cache/cache.go:
 
+从schedulerCache的描述中就可以看到其内部含pod状态信息、节点级的调度信息，这些信息会在不同的调度算法中查询使用。
+
 ```
 type schedulerCache struct {
     stop   <-chan struct{}
