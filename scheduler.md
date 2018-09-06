@@ -499,19 +499,19 @@ func (c *configFactory) addPodToSchedulingQueue(obj interface{}) {
 // The interface follows a pattern similar to cache.FIFO and cache.Heap and
 // makes it easy to use those data structures as a SchedulingQueue.
 type SchedulingQueue interface {
-	Add(pod *v1.Pod) error
-	AddIfNotPresent(pod *v1.Pod) error
-	AddUnschedulableIfNotPresent(pod *v1.Pod) error
-	Pop() (*v1.Pod, error)
-	Update(oldPod, newPod *v1.Pod) error
-	Delete(pod *v1.Pod) error
-	MoveAllToActiveQueue()
-	AssignedPodAdded(pod *v1.Pod)
-	AssignedPodUpdated(pod *v1.Pod)
-	WaitingPodsForNode(nodeName string) []*v1.Pod
-	WaitingPods() []*v1.Pod
+    Add(pod *v1.Pod) error
+    AddIfNotPresent(pod *v1.Pod) error
+    AddUnschedulableIfNotPresent(pod *v1.Pod) error
+    Pop() (*v1.Pod, error)
+    Update(oldPod, newPod *v1.Pod) error
+    Delete(pod *v1.Pod) error
+    MoveAllToActiveQueue()
+    AssignedPodAdded(pod *v1.Pod)
+    AssignedPodUpdated(pod *v1.Pod)
+    WaitingPodsForNode(nodeName string) []*v1.Pod
+    WaitingPods() []*v1.Pod
 }
 ```
 
-SchedulingQueue有两种实现，若开启pod优先级调度则采用PriorityQueue实现否则采用FIFO实现
+SchedulingQueue有两种实现，若开启pod优先级调度则采用PriorityQueue实现否则采用简单的FIFO实现，比较分析两种实现可以看到接口中一些操作只对优先级队列有效。
 
