@@ -73,6 +73,7 @@ func defaultPriorities() sets.String {
 ### 服务启动流程
 
 * cmd/kube-scheduler/scheduler.go:
+
   ```
   func main() {
    command := app.NewSchedulerCommand()
@@ -81,6 +82,7 @@ func defaultPriorities() sets.String {
   ```
 
   新建SchedulerCommand并run
+
 * cmd/kube-scheduler/app/server.go:
 
 启动SchedulerCommand流程如下：
@@ -124,29 +126,78 @@ func Run(c schedulerserverconfig.CompletedConfig, stopCh <-chan struct{}) error 
     controller.WaitForCacheSync("scheduler", stopCh, c.PodInformer.Informer().HasSynced)
     // 启动调度器的函数句柄，Prepare a reusable run function.
     run := func(ctx context.Context) {
-    	sched.Run()
-	<-ctx.Done()
+        sched.Run()
+    <-ctx.Done()
     }
 // If leader election is enabled, run via LeaderElector until done and exit.
     if c.LeaderElection != nil {
-		c.LeaderElection.Callbacks = leaderelection.LeaderCallbacks{
-			OnStartedLeading: run,
-			OnStoppedLeading: func() {
-				utilruntime.HandleError(fmt.Errorf("lost master"))
-			},
-		}
-		leaderElector, err := leaderelection.NewLeaderElector(*c.LeaderElection)
-		if err != nil {
-			return fmt.Errorf("couldn't create leader elector: %v", err)
-		}
+        c.LeaderElection.Callbacks = leaderelection.LeaderCallbacks{
+            OnStartedLeading: run,
+            OnStoppedLeading: func() {
+                utilruntime.HandleError(fmt.Errorf("lost master"))
+            },
+        }
+        leaderElector, err := leaderelection.NewLeaderElector(*c.LeaderElection)
+        if err != nil {
+            return fmt.Errorf("couldn't create leader elector: %v", err)
+        }
 
-		leaderElector.Run(ctx)
+        leaderElector.Run(ctx)
 
-		return fmt.Errorf("lost lease")
+        return fmt.Errorf("lost lease")
     }
 
     // Leader election is disabled, so run inline until done.
     run(ctx)
+}
+```
+
+#### 生成调度器配置
+
+
+
+```
+// NewSchedulerConfig creates the scheduler configuration. This is exposed for use by tests.
+func NewSchedulerConfig(s schedulerserverconfig.CompletedConfig) (*scheduler.Config, error) {
+	var storageClassInformer storageinformers.StorageClassInformer
+	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
+		storageClassInformer = s.InformerFactory.Storage().V1().StorageClasses()
+	}
+
+	// Set up the configurator which can create schedulers from configs.
+	configurator := factory.NewConfigFactory(
+		s.ComponentConfig.SchedulerName,
+		s.Client,
+		s.InformerFactory.Core().V1().Nodes(),
+		s.PodInformer,
+		s.InformerFactory.Core().V1().PersistentVolumes(),
+		s.InformerFactory.Core().V1().PersistentVolumeClaims(),
+		s.InformerFactory.Core().V1().ReplicationControllers(),
+		s.InformerFactory.Extensions().V1beta1().ReplicaSets(),
+		s.InformerFactory.Apps().V1beta1().StatefulSets(),
+		s.InformerFactory.Core().V1().Services(),
+		s.InformerFactory.Policy().V1beta1().PodDisruptionBudgets(),
+		storageClassInformer,
+		s.ComponentConfig.HardPodAffinitySymmetricWeight,
+		utilfeature.DefaultFeatureGate.Enabled(features.EnableEquivalenceClassCache),
+		s.ComponentConfig.DisablePreemption,
+	)
+
+	source := s.ComponentConfig.AlgorithmSource
+	var config *scheduler.Config
+	switch {
+	case source.Provider != nil:
+		// Create the config from a named algorithm provider.
+		sc, err := configurator.CreateFromProvider(*source.Provider)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't create scheduler using provider %q: %v", *source.Provider, err)
+		}
+		config = sc
+	case source.Policy != nil:
+		// Create the config from a user specified policy source.
+		...
+	}
+	...
 }
 ```
 
