@@ -285,7 +285,7 @@ func NewConfigFactory(
     }
 
     c.scheduledPodsHasSynced = podInformer.Informer().HasSynced
-    // scheduled pod cache
+    //已调度pod队列缓存的处理 scheduled pod cache
     podInformer.Informer().AddEventHandler(
         cache.FilteringResourceEventHandler{
             FilterFunc: func(obj interface{}) bool {
@@ -310,7 +310,7 @@ func NewConfigFactory(
             },
         },
     )
-    // unscheduled pod queue
+    //待调度pod队列缓存处理 unscheduled pod queue
     podInformer.Informer().AddEventHandler(
         cache.FilteringResourceEventHandler{
             FilterFunc: func(obj interface{}) bool {
@@ -468,13 +468,13 @@ func NewConfigFactory(
 ```
 // unassignedNonTerminatedPod selects pods that are unassigned and non-terminal.
 func unassignedNonTerminatedPod(pod *v1.Pod) bool {
-	if len(pod.Spec.NodeName) != 0 {
-		return false
-	}
-	if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
-		return false
-	}
-	return true
+    if len(pod.Spec.NodeName) != 0 {
+        return false
+    }
+    if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed {
+        return false
+    }
+    return true
 }
 ```
 
