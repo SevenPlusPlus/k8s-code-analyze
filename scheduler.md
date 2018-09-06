@@ -481,13 +481,10 @@ func assignedNonTerminatedPod(pod *v1.Pod) bool {
 添加未调度pod到待调度podQueue中
 
 ```
-func (c *configFactory) addPodToCache(obj interface{}) {
-    pod, ok := obj.(*v1.Pod)
-    if err := c.schedulerCache.AddPod(pod); err != nil {
-        glog.Errorf("scheduler cache AddPod failed: %v", err)
-    }
-
-    c.podQueue.AssignedPodAdded(pod)
+func (c *configFactory) addPodToSchedulingQueue(obj interface{}) {
+	if err := c.podQueue.Add(obj.(*v1.Pod)); err != nil {
+		runtime.HandleError(fmt.Errorf("unable to queue %T: %v", obj, err))
+	}
 }
 ```
 
