@@ -201,5 +201,39 @@ func NewSchedulerConfig(s schedulerserverconfig.CompletedConfig) (*scheduler.Con
 }
 ```
 
+接着看下configFactory的具体描述，及其构建过程
+
+* pkg/scheduler/factory/factory.go:
+
+```
+// configFactory is the default implementation of the scheduler.Configurator interface.
+type configFactory struct {
+	client clientset.Interface
+	// queue for pods that need scheduling
+	podQueue core.SchedulingQueue
+	// a means to list all known scheduled pods.
+	scheduledPodLister corelisters.PodLister
+	// a means to list all known scheduled pods and pods assumed to have been scheduled.
+	podLister algorithm.PodLister
+	// a means to list all nodes
+	nodeLister corelisters.NodeLister
+	// a means to list all PersistentVolumes
+	pVLister corelisters.PersistentVolumeLister
+	// a means to list all PersistentVolumeClaims
+	pVCLister corelisters.PersistentVolumeClaimLister
+	...
+	
+	schedulerCache schedulercache.Cache
+
+	// SchedulerName of a scheduler is used to select which pods will be
+	// processed by this scheduler, based on pods's "spec.schedulerName".
+	schedulerName string
+
+	...
+}
+```
+
+
+
 
 
