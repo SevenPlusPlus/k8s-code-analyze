@@ -209,7 +209,7 @@ func NewSchedulerConfig(s schedulerserverconfig.CompletedConfig) (*scheduler.Con
 // configFactory is the default implementation of the scheduler.Configurator interface.
 type configFactory struct {
     client clientset.Interface
-    // queue for pods that need scheduling
+    // 待调度pod队列，queue for pods that need scheduling
     podQueue core.SchedulingQueue
     // a means to list all known scheduled pods.
     scheduledPodLister corelisters.PodLister
