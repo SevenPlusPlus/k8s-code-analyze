@@ -494,7 +494,24 @@ func (c *configFactory) addPodToSchedulingQueue(obj interface{}) {
 
 * pkg/scheduler/core/scheduling\_queue.go:
 
+```
+// SchedulingQueue is an interface for a queue to store pods waiting to be scheduled.
+// The interface follows a pattern similar to cache.FIFO and cache.Heap and
+// makes it easy to use those data structures as a SchedulingQueue.
+type SchedulingQueue interface {
+	Add(pod *v1.Pod) error
+	AddIfNotPresent(pod *v1.Pod) error
+	AddUnschedulableIfNotPresent(pod *v1.Pod) error
+	Pop() (*v1.Pod, error)
+	Update(oldPod, newPod *v1.Pod) error
+	Delete(pod *v1.Pod) error
+	MoveAllToActiveQueue()
+	AssignedPodAdded(pod *v1.Pod)
+	AssignedPodUpdated(pod *v1.Pod)
+	WaitingPodsForNode(nodeName string) []*v1.Pod
+	WaitingPods() []*v1.Pod
+}
+```
 
-
-
+SchedulingQueue有两种实现，若开启pod优先级调度则采用PriorityQueue实现否则采用FIFO实现
 
