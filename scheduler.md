@@ -825,5 +825,374 @@ func NewFromConfig(config *Config) *Scheduler {
 ```
 可以看出此处的调度器其实是对调度器配置的包装，真正的调度器genericScheduler前面已经创建了，接下来就是启动所有Informer，对ApiServer进行ListAndWatch直到同步完成，最后一步就是选主完成后在主节点上执行sched.Run开启Pod的调度过程。
 ### Scheduler启动调度过程scheduler.Run
+```
+// Run begins watching and scheduling. It waits for cache to be synced, then starts a goroutine and returns immediately.
+func (sched *Scheduler) Run() {
+	if !sched.config.WaitForCacheSync() {
+		return
+	}
 
+	if utilfeature.DefaultFeatureGate.Enabled(features.VolumeScheduling) {
+		go sched.config.VolumeBinder.Run(sched.bindVolumesWorker, sched.config.StopEverything)
+	}
+
+	go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything)
+}
+```
+可以看到其主要实现就是启动goroutine，循环反复执行Scheduler.scheduleOne方法，直到收到shut down scheduler的信号
+
+Scheduler.scheduleOne开始真正的调度逻辑，每次负责一个Pod的调度，其主要流程如下:
+* 取出一个待调度的Pod
+* 执行调度算法为Pod选择出一个合适的Node
+* sched.assume(assumedPod, suggestedHost),更新SchedulerCache中Pod的状态(AssumePod)，假设该Pod已经被scheduled
+* sched.bind(assumedPod, &v1.Binding）异步绑定Pod到Node上去
+```
+// scheduleOne does the entire scheduling workflow for a single pod.  It is serialized on the scheduling algorithm's host fitting.
+func (sched *Scheduler) scheduleOne() {
+        //取出一个待调度Pod
+	pod := sched.config.NextPod()
+
+	glog.V(3).Infof("Attempting to schedule pod: %v/%v", pod.Namespace, pod.Name)
+
+	// Synchronously attempt to find a fit for the pod.
+        //调度算法选出一个合适的Node
+	suggestedHost, err := sched.schedule(pod)
+	
+	// Tell the cache to assume that a pod now is running on a given node, even though it hasn't been bound yet.
+	// This allows us to keep scheduling without waiting on binding to occur.
+	assumedPod := pod.DeepCopy()
+
+	// Assume volumes first before assuming the pod.
+	err = sched.assumeAndBindVolumes(assumedPod, suggestedHost)
+
+	// assume modifies `assumedPod` by setting NodeName=suggestedHost
+	err = sched.assume(assumedPod, suggestedHost)
+	
+ 	// bind the pod to its host asynchronously (we can do this b/c of the assumption step above).
+	go func() {
+		err := sched.bind(assumedPod, &v1.Binding{
+			ObjectMeta: metav1.ObjectMeta{Namespace: assumedPod.Namespace, Name: assumedPod.Name, UID: assumedPod.UID},
+			Target: v1.ObjectReference{
+				Kind: "Node",
+				Name: suggestedHost,
+			},
+		})
+	}()
+}
+```
+这里取出待调度Pod的实现即为前面configFactory中的podQueue队列pop而来
+```
+func (c *configFactory) getNextPod() *v1.Pod {
+	pod, err := c.podQueue.Pop()
+	if err == nil {
+		return pod
+	}
+	return nil
+}
+```
+接下来应用调度算法为该Pod选出一个合适的Node
+```
+// schedule implements the scheduling algorithm and returns the suggested host.
+func (sched *Scheduler) schedule(pod *v1.Pod) (string, error) {
+	host, err := sched.config.Algorithm.Schedule(pod, sched.config.NodeLister)
+	return host, err
+}
+```
+回溯前面调度器配置生成过程，不难得知这里的sched.config即为scheduler.Config，而sched.config.Algorithm即为前面创建的genericScheduler，而其参数sched.Config.NodeLister即为configFactory通过nodeInformer得到的NodeLister，那么我们继续深入分析genericScheduler为Pod选合适Node的过程。
+```
+// Schedule tries to schedule the given pod to one of the nodes in the node list.
+// If it succeeds, it will return the name of the node.
+// If it fails, it will return a FitError error with reasons.
+func (g *genericScheduler) Schedule(pod *v1.Pod, nodeLister algorithm.NodeLister) (string, error) {
+	//首先检查Pod所需的PVC是否都已存在
+	if err := podPassesBasicChecks(pod, g.pvcLister); 
+	//从缓存中获得当前节点列表
+	nodes, err := nodeLister.List()	
+	if len(nodes) == 0 {
+		return "", ErrNoNodesAvailable
+	}
+
+	// Used for all fit and priority funcs.
+
+	//根据当前Cache中的节点信息更新传入的节点信息，此时节点信息包含所有已调度在该节点上的Pod聚合信息（包括已假设调度在其上的Pod）
+	err = g.cache.UpdateNodeNameToInfoMap(g.cachedNodeInfoMap)
+
+        //执行Predicate预选过程
+	filteredNodes, failedPredicateMap, err := g.findNodesThatFit(pod, nodes)
+
+	if len(filteredNodes) == 0 {
+		return "", &FitError{
+			Pod:              pod,
+			NumAllNodes:      len(nodes),
+			FailedPredicates: failedPredicateMap,
+		}
+	}
+	
+
+	trace.Step("Prioritizing")
+	// When only one node after predicate, just use it.
+	if len(filteredNodes) == 1 {
+		metrics.SchedulingAlgorithmPriorityEvaluationDuration.Observe(metrics.SinceInMicroseconds(startPriorityEvalTime))
+		return filteredNodes[0].Name, nil
+	}
+	//执行Priorities优选过程
+	metaPrioritiesInterface := g.priorityMetaProducer(pod, g.cachedNodeInfoMap)
+	priorityList, err := PrioritizeNodes(pod, g.cachedNodeInfoMap, metaPrioritiesInterface, g.prioritizers, filteredNodes, g.extenders)
+
+	//从优选结果中选一个得分最高的节点返回，如果有多个得分最高的节点则随机选取一个
+	trace.Step("Selecting host")
+	return g.selectHost(priorityList)
+}
+```
+##### Predicate预选过程
+checkNode会调用podFitsOnNode完成配置的所有Predicates Policies对该Node的检查。
+podFitsOnNode循环执行所有配置的Predicates Polic对应的predicateFunc。只有全部策略都通过，该node才符合要求。
+```
+// Filters the nodes to find the ones that fit based on the given predicate functions
+// Each node is passed through the predicate functions to determine if it is a fit
+func (g *genericScheduler) findNodesThatFit(pod *v1.Pod, nodes []*v1.Node) ([]*v1.Node, FailedPredicateMap, error) {
+	var filtered []*v1.Node
+	failedPredicateMap := FailedPredicateMap{}
+
+	if len(g.predicates) == 0 {
+		filtered = nodes
+	} else {
+		// Create filtered list with enough space to avoid growing it
+		// and allow assigning.
+		filtered = make([]*v1.Node, len(nodes))
+		errs := errors.MessageCountMap{}
+		var predicateResultLock sync.Mutex
+		var filteredLen int32
+
+		// We can use the same metadata producer for all nodes.
+		meta := g.predicateMetaProducer(pod, g.cachedNodeInfoMap)
+
+		checkNode := func(i int) {
+			var nodeCache *equivalence.NodeCache
+			nodeName := nodes[i].Name
+			fits, failedPredicates, err := podFitsOnNode(
+				pod,
+				meta,
+				g.cachedNodeInfoMap[nodeName],
+				g.predicates,
+				g.cache,
+				nodeCache,
+				g.schedulingQueue,
+				g.alwaysCheckAllPredicates,
+				equivClass,
+			)
+			if fits {
+				filtered[atomic.AddInt32(&filteredLen, 1)-1] = nodes[i]
+			} else {
+				predicateResultLock.Lock()
+				failedPredicateMap[nodeName] = failedPredicates
+				predicateResultLock.Unlock()
+			}
+		}
+		workqueue.Parallelize(16, len(nodes), checkNode)
+		filtered = filtered[:filteredLen]
+		if len(errs) > 0 {
+			return []*v1.Node{}, FailedPredicateMap{}, errors.CreateAggregateFromMessageCountMap(errs)
+		}
+	}
+	
+	//如果有扩展实现的调度实现，则继续根据扩展策略的Filter实现对前面的预选结果继续过滤
+	if len(filtered) > 0 && len(g.extenders) != 0 {
+		for _, extender := range g.extenders {
+			if !extender.IsInterested(pod) {
+				continue
+			}
+			filteredList, failedMap, err := extender.Filter(pod, filtered, g.cachedNodeInfoMap)
+
+			for failedNodeName, failedMsg := range failedMap {
+				if _, found := failedPredicateMap[failedNodeName]; !found {
+					failedPredicateMap[failedNodeName] = []algorithm.PredicateFailureReason{}
+				}
+				failedPredicateMap[failedNodeName] = append(failedPredicateMap[failedNodeName], predicates.NewFailureReason(failedMsg))
+			}
+			filtered = filteredList
+			if len(filtered) == 0 {
+				break
+			}
+		}
+	}
+	return filtered, failedPredicateMap, nil
+}
+```
+##### Priorities优选过程
+先使用PriorityFunction计算节点的分数，在向priorityFunctionMap注册PriorityFunction时，会指定该PriorityFunction对应的weight，然后再累加每个PriorityFunction和weight相乘的积，这就样就得到了这个节点的分数。
+
+```
+// PrioritizeNodes prioritizes the nodes by running the individual priority functions in parallel.
+// Each priority function is expected to set a score of 0-10
+// 0 is the lowest priority score (least preferred node) and 10 is the highest
+// Each priority function can also have its own weight
+// The node scores returned by the priority function are multiplied by the weights to get weighted scores
+// All scores are finally combined (added) to get the total weighted scores of all nodes
+func PrioritizeNodes(
+	pod *v1.Pod,
+	nodeNameToInfo map[string]*schedulercache.NodeInfo,
+	meta interface{},
+	priorityConfigs []algorithm.PriorityConfig,
+	nodes []*v1.Node,
+	extenders []algorithm.SchedulerExtender,
+) (schedulerapi.HostPriorityList, error) {
+	// If no priority configs are provided, then the EqualPriority function is applied
+	// This is required to generate the priority list in the required format
+	if len(priorityConfigs) == 0 && len(extenders) == 0 {
+		result := make(schedulerapi.HostPriorityList, 0, len(nodes))
+		for i := range nodes {
+			hostPriority, err := EqualPriorityMap(pod, meta, nodeNameToInfo[nodes[i].Name])
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, hostPriority)
+		}
+		return result, nil
+	}
+
+	var (
+		mu   = sync.Mutex{}
+		wg   = sync.WaitGroup{}
+		errs []error
+	)
+	appendError := func(err error) {
+		mu.Lock()
+		defer mu.Unlock()
+		errs = append(errs, err)
+	}
+
+	results := make([]schedulerapi.HostPriorityList, len(priorityConfigs), len(priorityConfigs))
+
+	/*
+	根据所有配置到Priorities Policies对所有预选后的Nodes进行优选打分
+	每个Priorities policy对每个node打分范围为0-10分，分越高表示越合适
+	*/
+	for i, priorityConfig := range priorityConfigs {
+		if priorityConfig.Function != nil {
+			// DEPRECATED
+			wg.Add(1)
+			go func(index int, config algorithm.PriorityConfig) {
+				defer wg.Done()
+				var err error
+				results[index], err = config.Function(pod, nodeNameToInfo, nodes)
+				if err != nil {
+					appendError(err)
+				}
+			}(i, priorityConfig)
+		} else {
+			results[i] = make(schedulerapi.HostPriorityList, len(nodes))
+		}
+	}
+	processNode := func(index int) {
+		nodeInfo := nodeNameToInfo[nodes[index].Name]
+		var err error
+		for i := range priorityConfigs {
+			if priorityConfigs[i].Function != nil {
+				continue
+			}
+			results[i][index], err = priorityConfigs[i].Map(pod, meta, nodeInfo)
+			if err != nil {
+				appendError(err)
+				return
+			}
+		}
+	}
+	workqueue.Parallelize(16, len(nodes), processNode)
+	for i, priorityConfig := range priorityConfigs {
+		if priorityConfig.Reduce == nil {
+			continue
+		}
+		wg.Add(1)
+		go func(index int, config algorithm.PriorityConfig) {
+			defer wg.Done()
+			if err := config.Reduce(pod, meta, nodeNameToInfo, results[index]); err != nil {
+				appendError(err)
+			}
+			if glog.V(10) {
+				for _, hostPriority := range results[index] {
+					glog.Infof("%v -> %v: %v, Score: (%d)", pod.Name, hostPriority.Host, config.Name, hostPriority.Score)
+				}
+			}
+		}(i, priorityConfig)
+	}
+	// Wait for all computations to be finished.
+	wg.Wait()
+	if len(errs) != 0 {
+		return schedulerapi.HostPriorityList{}, errors.NewAggregate(errs)
+	}
+
+	// Summarize all scores.
+	result := make(schedulerapi.HostPriorityList, 0, len(nodes))
+
+	for i := range nodes {
+		result = append(result, schedulerapi.HostPriority{Host: nodes[i].Name, Score: 0})
+		for j := range priorityConfigs {
+			result[i].Score += results[j][i].Score * priorityConfigs[j].Weight
+		}
+	}
+
+	//如果配置了Extender，则再执行Extender的优选打分方法Extender.Prioritize
+	if len(extenders) != 0 && nodes != nil {
+		combinedScores := make(map[string]int, len(nodeNameToInfo))
+		for _, extender := range extenders {
+			if !extender.IsInterested(pod) {
+				continue
+			}
+			wg.Add(1)
+			go func(ext algorithm.SchedulerExtender) {
+				defer wg.Done()
+				prioritizedList, weight, err := ext.Prioritize(pod, nodes)
+				if err != nil {
+					// Prioritization errors from extender can be ignored, let k8s/other extenders determine the priorities
+					return
+				}
+				mu.Lock()
+				for i := range *prioritizedList {
+					host, score := (*prioritizedList)[i].Host, (*prioritizedList)[i].Score
+					combinedScores[host] += score * weight
+				}
+				mu.Unlock()
+			}(extender)
+		}
+		// wait for all go routines to finish
+		wg.Wait()
+		for i := range result {
+			result[i].Score += combinedScores[result[i].Host]
+		}
+	}
+
+	if glog.V(10) {
+		for i := range result {
+			glog.V(10).Infof("Host %s => Score %d", result[i].Host, result[i].Score)
+		}
+	}
+	return result, nil
+}
+```
+##### selectHost选出最终结果节点
+
+```
+// selectHost takes a prioritized list of nodes and then picks one
+// in a round-robin manner from the nodes that had the highest score.
+func (g *genericScheduler) selectHost(priorityList schedulerapi.HostPriorityList) (string, error) {
+	if len(priorityList) == 0 {
+		return "", fmt.Errorf("empty priorityList")
+	}
+
+	maxScores := findMaxScores(priorityList)
+	ix := int(g.lastNodeIndex % uint64(len(maxScores)))
+	g.lastNodeIndex++
+
+	return priorityList[maxScores[ix]].Host, nil
+}
+```
+
+### 总结
+---
+* kube-scheduler通过连接ApiServer的client用来watch pod、node等一系列调度所需的资源并且调用api server bind接口完成node和pod的Bind操作。
+* kube-scheduler中维护了一个优先级队列类型的PodQueue cache，新创建的Pod都会被ConfigFactory watch到，被添加到该PodQueue中，每次调度都从该PodQueue中getNextPod作为即将调度的Pod。
+* 获取到待调度的Pod后，就执行AlgorithmProvider配置Algorithm的Schedule方法进行调度，整个调度过程分两个关键步骤：Predicates和Priorities，最终选出一个最适合的Node返回。
+* 更新SchedulerCache中Pod的状态(AssumePod)，标志该Pod为scheduled。
+* 向apiserver发送&api.Binding对象，表示绑定成功。
 
