@@ -745,5 +745,76 @@ type NodeInfo struct {
 }
 ```
 
+回过头继续分析生成调度器配置的第二步应用调度器指定的调度算法配置创建调度配置
+
+##### CreateFromProvider
+
+```
+//根据调度名获取调度算法配置
+// Creates a scheduler from the name of a registered algorithm provider.
+func (c *configFactory) CreateFromProvider(providerName string) (*scheduler.Config, error) {
+	glog.V(2).Infof("Creating scheduler from algorithm provider '%v'", providerName)
+	/*
+	// AlgorithmProviderConfig is used to store the configuration of algorithm providers.
+	type AlgorithmProviderConfig struct {
+		FitPredicateKeys     sets.String
+		PriorityFunctionKeys sets.String
+	}
+	*/
+	provider, err := GetAlgorithmProvider(providerName)
+	
+	return c.CreateFromKeys(provider.FitPredicateKeys, provider.PriorityFunctionKeys, []algorithm.SchedulerExtender{})
+}
+
+// Creates a scheduler from a set of registered fit predicate keys and priority keys.
+func (c *configFactory) CreateFromKeys(predicateKeys, priorityKeys sets.String, extenders []algorithm.SchedulerExtender) (*scheduler.Config, error) {
+	glog.V(2).Infof("Creating scheduler with fit predicates '%v' and priority functions '%v'", predicateKeys, priorityKeys)
+
+	predicateFuncs, err := c.GetPredicates(predicateKeys)
+	priorityConfigs, err := c.GetPriorityFunctionConfigs(priorityKeys)
+
+	priorityMetaProducer, err := c.GetPriorityMetadataProducer()
+	predicateMetaProducer, err := c.GetPredicateMetadataProducer()
+	//创建GenericScheduler
+	algo := core.NewGenericScheduler(
+		c.schedulerCache,
+		c.equivalencePodCache,
+		c.podQueue,
+		predicateFuncs,
+		predicateMetaProducer,
+		priorityConfigs,
+		priorityMetaProducer,
+		extenders,
+		c.volumeBinder,
+		c.pVCLister,
+		c.alwaysCheckAllPredicates,
+		c.disablePreemption,
+	)
+
+	podBackoff := util.CreateDefaultPodBackoff()
+	return &scheduler.Config{
+		SchedulerCache: c.schedulerCache,
+		Ecache:         c.equivalencePodCache,
+		// The scheduler only needs to consider schedulable nodes.
+		NodeLister:          &nodeLister{c.nodeLister},
+		Algorithm:           algo,
+		GetBinder:           c.getBinderFunc(extenders),
+		PodConditionUpdater: &podConditionUpdater{c.client},
+		PodPreemptor:        &podPreemptor{c.client},
+		WaitForCacheSync: func() bool {
+			return cache.WaitForCacheSync(c.StopEverything, c.scheduledPodsHasSynced)
+		},
+		NextPod: func() *v1.Pod {
+			return c.getNextPod()
+		},
+		Error:          c.MakeDefaultErrorFunc(podBackoff, c.podQueue),
+		StopEverything: c.StopEverything,
+		VolumeBinder:   c.volumeBinder,
+	}, nil
+}
+```
+
+
+
 
 
