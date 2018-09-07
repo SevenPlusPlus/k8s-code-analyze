@@ -813,5 +813,17 @@ func (c *configFactory) CreateFromKeys(predicateKeys, priorityKeys sets.String, 
     }, nil
 }
 ```
-回顾前面SchedulerCommand执行过程
+回顾前面SchedulerCommand执行过程,生成调度器配置后，根据调度器配置创建调度器
+```
+// NewFromConfig returns a new scheduler using the provided Config.
+func NewFromConfig(config *Config) *Scheduler {
+	metrics.Register()
+	return &Scheduler{
+		config: config,
+	}
+}
+```
+可以看出此处的调度器其实是对调度器配置的包装，真正的调度器genericScheduler前面已经创建了，接下来就是启动所有Informer，对ApiServer进行ListAndWatch直到同步完成，最后一步就是选主完成后在主节点上执行sched.Run开启Pod的调度过程。
+### Scheduler启动调度过程scheduler.Run
+
 
