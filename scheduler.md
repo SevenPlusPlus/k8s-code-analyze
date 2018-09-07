@@ -775,7 +775,7 @@ func (c *configFactory) CreateFromKeys(predicateKeys, priorityKeys sets.String, 
 
     priorityMetaProducer, err := c.GetPriorityMetadataProducer()
     predicateMetaProducer, err := c.GetPredicateMetadataProducer()
-    //创建GenericScheduler
+    //创建真正的调度器GenericScheduler
     algo := core.NewGenericScheduler(
         c.schedulerCache,
         c.equivalencePodCache,
