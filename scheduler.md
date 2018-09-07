@@ -914,7 +914,7 @@ func (g *genericScheduler) Schedule(pod *v1.Pod, nodeLister algorithm.NodeLister
 
 	// Used for all fit and priority funcs.
 
-	//根据当前Cache中的节点信息更新传入的节点信息，此时节点信息包含所有已调度在该节点上的Pod聚合信息（包括已假设调度在其上的Pod）
+	//根据当前本地Cache中的节点信息更新传入的节点信息，此时节点信息包含所有已调度在该节点上的Pod聚合信息（包括已假设调度在其上的Pod）
 	err = g.cache.UpdateNodeNameToInfoMap(g.cachedNodeInfoMap)
 
         //执行Predicate预选过程
