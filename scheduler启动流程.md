@@ -844,8 +844,8 @@ func (sched *Scheduler) Run() {
 Scheduler.scheduleOne开始真正的调度逻辑，每次负责一个Pod的调度，其主要流程如下:
 * 取出一个待调度的Pod
 * 执行调度算法为Pod选择出一个合适的Node
-* sched.assume(assumedPod, suggestedHost),更新SchedulerCache中Pod的状态(AssumePod)，假设该Pod已经被scheduled
-* sched.bind(assumedPod, &v1.Binding）异步绑定Pod到Node上去
+* sched.assume(assumedPod, suggestedHost),假设该Pod已经被成功调度，更新SchedulerCache中Pod的状态(AssumePod)，同时对本地缓存中node资源占用进行更新，以便下次调度时以此最新缓存作为参考
+* sched.bind(assumedPod, &v1.Binding）异步将Pod的Binding信息（Pod和Node的绑定，从而让ApiServer知道Pod已经调度完成）写入ApiServer中，从而一次调度完成。
 ```
 // scheduleOne does the entire scheduling workflow for a single pod.  It is serialized on the scheduling algorithm's host fitting.
 func (sched *Scheduler) scheduleOne() {
