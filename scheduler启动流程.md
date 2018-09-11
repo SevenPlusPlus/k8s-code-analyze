@@ -1018,6 +1018,71 @@ func (g *genericScheduler) findNodesThatFit(pod *v1.Pod, nodes []*v1.Node) ([]*v
 	}
 	return filtered, failedPredicateMap, nil
 }
+
+//循环执行所有配置的Predicates Polic对应的predicateFunc
+// podFitsOnNode checks whether a node given by NodeInfo satisfies the given predicate functions.
+// For given pod, podFitsOnNode will check if any equivalent pod exists and try to reuse its cached
+// predicate results as possible.
+func podFitsOnNode(
+	pod *v1.Pod,
+	meta algorithm.PredicateMetadata,
+	info *schedulercache.NodeInfo,
+	predicateFuncs map[string]algorithm.FitPredicate,
+	cache schedulercache.Cache,
+	nodeCache *equivalence.NodeCache,
+	queue SchedulingQueue,
+	alwaysCheckAllPredicates bool,
+	equivClass *equivalence.Class,
+) (bool, []algorithm.PredicateFailureReason, error) {
+	var (
+		eCacheAvailable  bool
+		failedPredicates []algorithm.PredicateFailureReason
+	)
+
+	podsAdded := false
+	for i := 0; i < 2; i++ {
+		metaToUse := meta
+		nodeInfoToUse := info
+		if i == 0 {
+			podsAdded, metaToUse, nodeInfoToUse = addNominatedPods(util.GetPodPriority(pod), meta, info, queue)
+		} else if !podsAdded || len(failedPredicates) != 0 {
+			break
+		}
+		// Bypass eCache if node has any nominated pods.
+		// TODO(bsalamat): consider using eCache and adding proper eCache invalidations
+		// when pods are nominated or their nominations change.
+		eCacheAvailable = equivClass != nil && nodeCache != nil && !podsAdded
+		for _, predicateKey := range predicates.Ordering() {
+			var (
+				fit     bool
+				reasons []algorithm.PredicateFailureReason
+				err     error
+			)
+			//TODO (yastij) : compute average predicate restrictiveness to export it as Prometheus metric
+			if predicate, exist := predicateFuncs[predicateKey]; exist {
+				if eCacheAvailable {
+					fit, reasons, err = nodeCache.RunPredicate(predicate, predicateKey, pod, metaToUse, nodeInfoToUse, equivClass, cache)
+				} else {
+					fit, reasons, err = predicate(pod, metaToUse, nodeInfoToUse)
+				}
+				if err != nil {
+					return false, []algorithm.PredicateFailureReason{}, err
+				}
+
+				if !fit {
+					// eCache is available and valid, and predicates result is unfit, record the fail reasons
+					failedPredicates = append(failedPredicates, reasons...)
+					// if alwaysCheckAllPredicates is false, short circuit all predicates when one predicate fails.
+					if !alwaysCheckAllPredicates {
+						glog.V(5).Infoln("since alwaysCheckAllPredicates has not been set, the predicate" +
+							"evaluation is short circuited and there are chances" +
+							"of other predicates failing as well.")
+						break
+					}
+				}
+			}
+		}
+	}
 ```
 ##### Priorities优选过程
 先使用PriorityFunction计算节点的分数，在向priorityFunctionMap注册PriorityFunction时，会指定该PriorityFunction对应的weight，然后再累加每个PriorityFunction和weight相乘的积，这就样就得到了这个节点的分数。
