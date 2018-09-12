@@ -11,7 +11,7 @@
 * [kube-apiserver组件源码分析](kube-apiserver组件源码分析.md)
   * [ApiServer启动流程](apiserver启动流程.md)
   * [API注册流程](api注册流程.md)
-  * [ApiServer Storage的使用](apiserver.md)
+  * [ApiServer Storage的使用](apiserver-storage的使用.md)
   * [ApiServer Storage实现解析](apiserver-storage机制解析.md)
   * [ApiServer List-Watch请求处理实例分析](apiserver-list-watch请求处理实例分析.md)
   * [ApiServer相关源码包说明](kube-apiserver相关源码包说明.md)
