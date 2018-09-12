@@ -22,4 +22,5 @@
   * [ControllerManager启动流程](controllermanager启动流程.md)
   * [ControllerManager的List-Watch机制之sharedInformerFactory](controllermanager的list-watch机制之sharedinformerfactory.md)
   * [Controller实现概要](controller实现概要.md)
-
+* [Kubelet组件源码分析](kubelet组件源码分析.md)
+  * [kubelet启动流程](kubelet启动流程.md)
