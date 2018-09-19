@@ -1542,7 +1542,7 @@ func (kl *Kubelet) syncPod(o syncPodOptions) error {
 	return nil
 }
 ```
-回溯前面创建初始化kubelet的过程不难发现kubelet.containerRuntime其实现为NewKubeGenericRuntimeManager创建的kubeGenericRuntimeManager对象，那么kubelet.containerRuntime.SyncPod的实现即为kubeGenericRuntimeManager的SyncPod方法实现，而此处SyncPod是创建Pod的核心逻辑。
+回溯前面创建初始化kubelet的过程不难发现kubelet.containerRuntime其实现为NewKubeGenericRuntimeManager创建的kubeGenericRuntimeManager对象，那么kubelet.containerRuntime.SyncPod的实现即为kubeGenericRuntimeManager的SyncPod方法实现，而此处SyncPod是创建Pod的核心逻辑。(pkg/kubelet/kuberuntime/kuberuntime_manager.go)
 
 ```
 // SyncPod syncs the running pod into the desired pod by executing following steps:
