@@ -1784,3 +1784,6 @@ func (m *kubeGenericRuntimeManager) startContainer(podSandboxID string, podSandb
 
 这样Pod大体的启动流程就描述完了，但是对于kubelet中其它的中间服务,如: volumeManager,diskSpaceManager,secretManager,configMapManager等等就需要更深层的了解了。
 
+
+### 参考资料
+[kubelet源码分析](https://www.opsdev.cn/post/kubelet.html)
